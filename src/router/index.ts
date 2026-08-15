@@ -45,6 +45,43 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/FineCleaningSchedule.vue'),
     meta: { requiresAuth: true }
   },
+  // 在制品管理路由
+  {
+    path: '/wip/initial-data',
+    name: 'WipInitialData',
+    component: () => import('@/views/WipInitialData.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wip/detail',
+    name: 'WipDetail',
+    component: () => import('@/views/WipDetail.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wip/summary',
+    name: 'WipSummary',
+    component: () => import('@/views/WipSummary.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wip/monthly-report',
+    name: 'WipMonthlyReport',
+    component: () => import('@/views/WipMonthlyReport.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wip/annual-report',
+    name: 'WipAnnualReport',
+    component: () => import('@/views/WipAnnualReport.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wip/material-stat',
+    name: 'WipMaterialStat',
+    component: () => import('@/views/WipMaterialStat.vue'),
+    meta: { requiresAuth: true }
+  },
   // 用户管理路由
   {
     path: '/users',

@@ -5,9 +5,9 @@
       <a-row :gutter="16" align="middle">
         <a-col :xs="24" :sm="12" :md="6">
           <a-form-item label="选择日期" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
-            <a-date-picker
-              v-model:value="selectedDate"
-              placeholder="请选择日期"
+            <a-range-picker
+              v-model:value="selectedDateRange"
+              placeholder="请选择日期区间"
               format="YYYY-MM-DD"
               @change="handleDateChange"
               style="width: 100%"
@@ -19,6 +19,7 @@
             <a-radio-group v-model:value="viewType" @change="handleViewTypeChange">
               <a-radio-button value="daily">日明细</a-radio-button>
               <a-radio-button value="weekly">周汇总</a-radio-button>
+              <a-radio-button value="monthly">月汇总</a-radio-button>
             </a-radio-group>
           </a-form-item>
         </a-col>
@@ -73,10 +74,6 @@
           <UploadOutlined />
           导入
         </a-button>
-        <a-button type="primary" @click="handleSyncWMS" :loading="syncLoading">
-          <SyncOutlined />
-          手动同步
-        </a-button>
         <a-button @click="handleExport">
           <ExportOutlined />
           导出
@@ -88,10 +85,10 @@
     <a-card :bordered="false" class="table-card">
       <template #title>
         <a-space>
-          <span>{{ viewType === 'daily' ? '日明细视图' : '周汇总视图' }}</span>
-          <a-tag v-if="selectedDate" color="blue">
-            {{ viewType === 'daily' ? selectedDate.format('YYYY-MM-DD') : getWeekRange() }}
-          </a-tag>
+          <span>{{ viewTitle }}</span>
+          <span v-if="selectedDateRange && selectedDateRange.length === 2">
+            {{ getDateRangeLabel() }}
+          </span>
         </a-space>
       </template>
       <template #extra>
@@ -109,7 +106,7 @@
             :value="totalStats.deliveryTonnage"
             :precision="2"
             suffix="吨"
-            :value-style="{ fontSize: '16px', color: '#1890ff' }"
+            :value-style="{ fontSize: '16px' }"
           />
           <a-divider type="vertical" />
           <span>完成率：</span>
@@ -117,7 +114,7 @@
             :value="totalStats.completionRate"
             :precision="2"
             suffix="%"
-            :value-style="{ fontSize: '16px', color: '#52c41a' }"
+            :value-style="{ fontSize: '16px' }"
           />
         </a-space>
       </template>
@@ -129,13 +126,10 @@
         :pagination="pagination"
         :scroll="{ x: 1600 }"
         @change="handleTableChange"
-        :row-class-name="getRowClassName"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'productSeries'">
-            <a-tag :color="getSeriesColor(record.productSeries)">
-              {{ record.productSeries }}
-            </a-tag>
+            <span>{{ record.productSeries }}</span>
           </template>
           <template v-else-if="column.key === 'planTonnage'">
             <span>{{ formatNumber(record.planTonnage) }}</span>
@@ -144,15 +138,10 @@
             <span>{{ formatNumber(record.deliveryTonnage) }}</span>
           </template>
           <template v-else-if="column.key === 'completionRate'">
-            <a-progress
-              :percent="record.completionRate"
-              :stroke-color="getProgressColor(record.completionRate)"
-              :format="(percent: number) => `${percent.toFixed(2)}%`"
-              size="small"
-            />
+            <span>{{ record.completionRate.toFixed(2) }}%</span>
           </template>
-          <template v-else-if="column.key === 'planDate' && viewType === 'weekly'">
-            <span>{{ getWeekRange() }}</span>
+          <template v-else-if="column.key === 'planDate' && viewType !== 'daily'">
+            <span>{{ getDateRangeLabel() }}</span>
           </template>
         </template>
       </a-table>
@@ -167,20 +156,6 @@
       @cancel="handleImportCancel"
     >
       <a-form :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="计划类型" required>
-          <a-radio-group v-model:value="importType">
-            <a-radio value="daily">日计划</a-radio>
-            <a-radio value="weekly">周计划</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="选择日期" required>
-          <a-date-picker
-            v-model:value="importDate"
-            :placeholder="importType === 'daily' ? '请选择日期' : '请选择周起始日期'"
-            format="YYYY-MM-DD"
-            style="width: 100%"
-          />
-        </a-form-item>
         <a-form-item label="选择文件" required>
           <a-upload
             :file-list="fileList"
@@ -210,8 +185,7 @@ import {
   ReloadOutlined,
   DownloadOutlined,
   UploadOutlined,
-  ExportOutlined,
-  SyncOutlined
+  ExportOutlined
 } from '@ant-design/icons-vue'
 
 interface FeedingScheduleData {
@@ -230,12 +204,11 @@ interface FeedingScheduleData {
   completionRate: number
 }
 
-const selectedDate = ref<Dayjs>(dayjs())
-const viewType = ref<'daily' | 'weekly'>('daily')
+const selectedDateRange = ref<[Dayjs, Dayjs]>([dayjs().startOf('month'), dayjs()])
+const viewType = ref<'daily' | 'weekly' | 'monthly'>('daily')
 const productSeries = ref<string>('')
 const partNo = ref<string>('')
 const loading = ref(false)
-const syncLoading = ref(false)
 const dataSource = ref<FeedingScheduleData[]>([])
 
 const pagination = reactive({
@@ -413,15 +386,115 @@ const weeklyColumns = [
   }
 ]
 
+// 月汇总视图列定义
+const monthlyColumns = [
+  {
+    title: '月份',
+    dataIndex: 'planDate',
+    key: 'planDate',
+    width: 120,
+    fixed: 'left'
+  },
+  {
+    title: '产品系列',
+    dataIndex: 'productSeries',
+    key: 'productSeries',
+    width: 120
+  },
+  {
+    title: '毛坯件号',
+    dataIndex: 'partNo',
+    key: 'partNo',
+    width: 150
+  },
+  {
+    title: '毛坯名称',
+    dataIndex: 'blankName',
+    key: 'blankName',
+    width: 180
+  },
+  {
+    title: '规格型号',
+    dataIndex: 'specification',
+    key: 'specification',
+    width: 120
+  },
+  {
+    title: '牌号材质',
+    dataIndex: 'materialGrade',
+    key: 'materialGrade',
+    width: 120
+  },
+  {
+    title: '铸件重量（kg）',
+    dataIndex: 'weight',
+    key: 'weight',
+    width: 140,
+    align: 'right'
+  },
+  {
+    title: '月计划数量',
+    dataIndex: 'planQuantity',
+    key: 'planQuantity',
+    width: 120,
+    align: 'right'
+  },
+  {
+    title: '月计划吨位',
+    dataIndex: 'planTonnage',
+    key: 'planTonnage',
+    width: 120,
+    align: 'right'
+  },
+  {
+    title: '月累计交付数量',
+    dataIndex: 'deliveryQuantity',
+    key: 'deliveryQuantity',
+    width: 140,
+    align: 'right'
+  },
+  {
+    title: '月累计交付吨位',
+    dataIndex: 'deliveryTonnage',
+    key: 'deliveryTonnage',
+    width: 140,
+    align: 'right'
+  },
+  {
+    title: '月整体完成率',
+    dataIndex: 'completionRate',
+    key: 'completionRate',
+    width: 180,
+    align: 'center'
+  }
+]
+
 // 当前视图列
 const currentColumns = computed(() => {
-  return viewType.value === 'daily' ? dailyColumns : weeklyColumns
+  switch (viewType.value) {
+    case 'daily':
+      return dailyColumns
+    case 'weekly':
+      return weeklyColumns
+    case 'monthly':
+      return monthlyColumns
+  }
+})
+
+// 当前视图标题
+const viewTitle = computed(() => {
+  switch (viewType.value) {
+    case 'daily':
+      return '日明细视图'
+    case 'weekly':
+      return '周汇总视图'
+    case 'monthly':
+      return '月汇总视图'
+  }
 })
 
 // 导入相关
 const importModalVisible = ref(false)
-const importType = ref<'daily' | 'weekly'>('daily')
-const importDate = ref<Dayjs>()
 const fileList = ref<any[]>([])
 
 // 总计统计
@@ -443,43 +516,19 @@ const totalStats = computed(() => {
   }
 })
 
-// 获取周范围
-const getWeekRange = () => {
-  if (!selectedDate.value) return ''
-  const start = selectedDate.value.startOf('week')
-  const end = selectedDate.value.endOf('week')
-  return `${start.format('MM-DD')} ~ ${end.format('MM-DD')}`
-}
-
-// 获取进度条颜色
-const getProgressColor = (percent: number) => {
-  if (percent >= 100) return '#52c41a'
-  if (percent >= 80) return '#1890ff'
-  if (percent >= 60) return '#faad14'
-  return '#ff4d4f'
-}
-
-// 获取系列颜色
-const getSeriesColor = (series: string) => {
-  const colorMap: Record<string, string> = {
-    'A系列': 'blue',
-    'B系列': 'green',
-    'C系列': 'orange'
+// 获取当前视图的日期范围标签
+const getDateRangeLabel = () => {
+  if (!selectedDateRange.value || selectedDateRange.value.length !== 2) return ''
+  const [start, end] = selectedDateRange.value
+  if (viewType.value === 'monthly') {
+    return start.format('YYYY-MM')
   }
-  return colorMap[series] || 'default'
+  return `${start.format('YYYY-MM-DD')} ~ ${end.format('YYYY-MM-DD')}`
 }
 
 // 格式化数字
 const formatNumber = (num: number) => {
   return num.toFixed(2)
-}
-
-// 获取行样式
-const getRowClassName = (record: FeedingScheduleData) => {
-  if (record.completionRate >= 100) return 'row-completed'
-  if (record.completionRate >= 80) return 'row-good'
-  if (record.completionRate >= 60) return 'row-warning'
-  return 'row-danger'
 }
 
 // 日期变化
@@ -504,7 +553,7 @@ const handleSearch = () => {
 
 // 重置
 const handleReset = () => {
-  selectedDate.value = dayjs()
+  selectedDateRange.value = [dayjs().startOf('month'), dayjs()]
   viewType.value = 'daily'
   productSeries.value = ''
   partNo.value = ''
@@ -525,52 +574,35 @@ const generateMockData = () => {
   const materialList = ['QT450-10', 'HT250', 'QT500-7', 'HT300']
   const specificationList = ['φ200×300', 'φ150×250', 'φ180×280', 'φ220×350']
   
-  if (viewType.value === 'daily') {
-    // 日明细数据
-    for (let i = 1; i <= 20; i++) {
-      const planQuantity = Math.floor(Math.random() * 100) + 50
-      const deliveryQuantity = Math.floor(Math.random() * planQuantity)
-      const weight = Math.floor(Math.random() * 50) + 10
-      
-      mockData.push({
-        key: String(i),
-        planDate: selectedDate.value.format('YYYY-MM-DD'),
-        productSeries: seriesList[Math.floor(Math.random() * seriesList.length)],
-        partNo: `FD-${String(i).padStart(4, '0')}`,
-        blankName: `投料件-${i}`,
-        specification: specificationList[Math.floor(Math.random() * specificationList.length)],
-        materialGrade: materialList[Math.floor(Math.random() * materialList.length)],
-        weight: weight,
-        planQuantity: planQuantity,
-        planTonnage: (planQuantity * weight) / 1000,
-        deliveryQuantity: deliveryQuantity,
-        deliveryTonnage: (deliveryQuantity * weight) / 1000,
-        completionRate: planQuantity > 0 ? (deliveryQuantity / planQuantity) * 100 : 0
-      })
-    }
-  } else {
-    // 周汇总数据
-    for (let i = 1; i <= 15; i++) {
-      const planQuantity = Math.floor(Math.random() * 500) + 200
-      const deliveryQuantity = Math.floor(Math.random() * planQuantity)
-      const weight = Math.floor(Math.random() * 50) + 10
-      
-      mockData.push({
-        key: String(i),
-        planDate: selectedDate.value.format('YYYY-MM-DD'),
-        productSeries: seriesList[Math.floor(Math.random() * seriesList.length)],
-        partNo: `FD-${String(i).padStart(4, '0')}`,
-        blankName: `投料件-${i}`,
-        specification: specificationList[Math.floor(Math.random() * specificationList.length)],
-        materialGrade: materialList[Math.floor(Math.random() * materialList.length)],
-        weight: weight,
-        planQuantity: planQuantity,
-        planTonnage: (planQuantity * weight) / 1000,
-        deliveryQuantity: deliveryQuantity,
-        deliveryTonnage: (deliveryQuantity * weight) / 1000,
-        completionRate: planQuantity > 0 ? (deliveryQuantity / planQuantity) * 100 : 0
-      })
-    }
+  const startDate = selectedDateRange.value[0]
+  const planDate = viewType.value === 'monthly'
+    ? startDate.format('YYYY-MM')
+    : startDate.format('YYYY-MM-DD')
+  
+  const rowCount = viewType.value === 'daily' ? 20 : (viewType.value === 'weekly' ? 15 : 10)
+  const quantityBase = viewType.value === 'daily' ? 100 : (viewType.value === 'weekly' ? 500 : 2000)
+  
+  // 日明细 / 周汇总 / 月汇总数据
+  for (let i = 1; i <= rowCount; i++) {
+    const planQuantity = Math.floor(Math.random() * quantityBase) + Math.floor(quantityBase / 2)
+    const deliveryQuantity = Math.floor(Math.random() * planQuantity)
+    const weight = Math.floor(Math.random() * 50) + 10
+    
+    mockData.push({
+      key: String(i),
+      planDate: planDate,
+      productSeries: seriesList[Math.floor(Math.random() * seriesList.length)],
+      partNo: `FD-${String(i).padStart(4, '0')}`,
+      blankName: `投料件-${i}`,
+      specification: specificationList[Math.floor(Math.random() * specificationList.length)],
+      materialGrade: materialList[Math.floor(Math.random() * materialList.length)],
+      weight: weight,
+      planQuantity: planQuantity,
+      planTonnage: (planQuantity * weight) / 1000,
+      deliveryQuantity: deliveryQuantity,
+      deliveryTonnage: (deliveryQuantity * weight) / 1000,
+      completionRate: planQuantity > 0 ? (deliveryQuantity / planQuantity) * 100 : 0
+    })
   }
   
   // 筛选
@@ -598,16 +630,11 @@ const handleDownloadTemplate = () => {
 // 导入
 const handleImport = () => {
   importModalVisible.value = true
-  importDate.value = dayjs()
   fileList.value = []
 }
 
 // 导入确认
 const handleImportConfirm = () => {
-  if (!importDate.value) {
-    message.error('请选择日期')
-    return
-  }
   if (fileList.value.length === 0) {
     message.error('请选择要导入的文件')
     return
@@ -626,17 +653,6 @@ const handleImportConfirm = () => {
 const handleImportCancel = () => {
   importModalVisible.value = false
   fileList.value = []
-}
-
-// 手动同步WMS
-const handleSyncWMS = () => {
-  syncLoading.value = true
-  // 模拟WMS同步
-  setTimeout(() => {
-    syncLoading.value = false
-    message.success('WMS数据同步成功')
-    handleSearch()
-  }, 2000)
 }
 
 // 文件上传前
@@ -687,20 +703,4 @@ onMounted(() => {
   margin-top: 4px;
 }
 
-/* 完成状态行样式 */
-:deep(.row-completed) {
-  background-color: #f6ffed;
-}
-
-:deep(.row-good) {
-  background-color: #e6f7ff;
-}
-
-:deep(.row-warning) {
-  background-color: #fffbe6;
-}
-
-:deep(.row-danger) {
-  background-color: #fff1f0;
-}
 </style>

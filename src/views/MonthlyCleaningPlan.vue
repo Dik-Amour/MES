@@ -77,7 +77,7 @@
       <template #title>
         <a-space>
           <span>月度清理计划明细</span>
-          <a-tag v-if="selectedMonth" color="blue">{{ selectedMonth.format('YYYY-MM') }}</a-tag>
+          <span v-if="selectedMonth">{{ selectedMonth.format('YYYY-MM') }}</span>
         </a-space>
       </template>
       <template #extra>
@@ -95,7 +95,7 @@
             :value="totalStats.completionRate"
             :precision="2"
             suffix="%"
-            :value-style="{ fontSize: '16px', color: '#52c41a' }"
+            :value-style="{ fontSize: '16px' }"
           />
         </a-space>
       </template>
@@ -107,13 +107,10 @@
         :pagination="pagination"
         :scroll="{ x: 1400 }"
         @change="handleTableChange"
-        :row-class-name="getRowClassName"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'productSeries'">
-            <a-tag :color="getSeriesColor(record.productSeries)">
-              {{ record.productSeries }}
-            </a-tag>
+            <span>{{ record.productSeries }}</span>
           </template>
           <template v-else-if="column.key === 'planTonnage'">
             <span>{{ formatNumber(record.planTonnage) }}</span>
@@ -122,12 +119,7 @@
             <span>{{ formatNumber(record.deliveryTonnage) }}</span>
           </template>
           <template v-else-if="column.key === 'completionRate'">
-            <a-progress
-              :percent="record.completionRate"
-              :stroke-color="getProgressColor(record.completionRate)"
-              :format="(percent: number) => `${percent.toFixed(2)}%`"
-              size="small"
-            />
+            <span>{{ record.completionRate.toFixed(2) }}%</span>
           </template>
           <template v-else-if="column.key === 'weight'">
           </template>
@@ -340,35 +332,9 @@ const totalStats = computed(() => {
   }
 })
 
-// 获取系列颜色
-const getSeriesColor = (series: string) => {
-  const colorMap: Record<string, string> = {
-    'A系列': 'blue',
-    'B系列': 'green',
-    'C系列': 'orange'
-  }
-  return colorMap[series] || 'default'
-}
-
-// 获取进度条颜色
-const getProgressColor = (percent: number) => {
-  if (percent >= 100) return '#52c41a'
-  if (percent >= 80) return '#1890ff'
-  if (percent >= 60) return '#faad14'
-  return '#ff4d4f'
-}
-
 // 格式化数字
 const formatNumber = (num: number) => {
   return num.toFixed(2)
-}
-
-// 获取行样式
-const getRowClassName = (record: MonthlyPlanData) => {
-  if (record.completionRate >= 100) return 'row-completed'
-  if (record.completionRate >= 80) return 'row-good'
-  if (record.completionRate >= 60) return 'row-warning'
-  return 'row-danger'
 }
 
 // 月份变化
@@ -579,20 +545,4 @@ onMounted(() => {
   margin-top: 4px;
 }
 
-/* 完成状态行样式 */
-:deep(.row-completed) {
-  background-color: #f6ffed;
-}
-
-:deep(.row-good) {
-  background-color: #e6f7ff;
-}
-
-:deep(.row-warning) {
-  background-color: #fffbe6;
-}
-
-:deep(.row-danger) {
-  background-color: #fff1f0;
-}
 </style>

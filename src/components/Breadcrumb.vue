@@ -22,7 +22,8 @@ import {
   UserOutlined,
   SafetyOutlined,
   KeyOutlined,
-  CalendarOutlined
+  CalendarOutlined,
+  InboxOutlined
 } from '@ant-design/icons-vue'
 
 interface BreadcrumbItem {
@@ -48,7 +49,15 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/cleaning/feeding': { title: '投料排产', path: '/cleaning/feeding', icon: CalendarOutlined },
     '/cleaning/molding': { title: '打箱排产', path: '/cleaning/molding', icon: CalendarOutlined },
     '/cleaning/heat-treatment': { title: '热处理排产', path: '/cleaning/heat-treatment', icon: CalendarOutlined },
-    '/cleaning/fine-cleaning': { title: '细清排产', path: '/cleaning/fine-cleaning', icon: CalendarOutlined }
+    '/cleaning/fine-cleaning': { title: '细清排产', path: '/cleaning/fine-cleaning', icon: CalendarOutlined },
+    // 在制品管理路径
+    '/wip': { title: '在制品管理', path: '/wip/initial-data', icon: InboxOutlined },
+    '/wip/initial-data': { title: '在制品初始数据', path: '/wip/initial-data', icon: InboxOutlined },
+    '/wip/detail': { title: '在制品明细', path: '/wip/detail', icon: InboxOutlined },
+    '/wip/summary': { title: '在制品汇总', path: '/wip/summary', icon: InboxOutlined },
+    '/wip/monthly-report': { title: '生产月度统计', path: '/wip/monthly-report', icon: InboxOutlined },
+    '/wip/annual-report': { title: '生产年度统计', path: '/wip/annual-report', icon: InboxOutlined },
+    '/wip/material-stat': { title: '毛坯材质生产统计', path: '/wip/material-stat', icon: InboxOutlined }
   }
 
   const matched = route.matched.filter(item => item.path !== '/')
@@ -60,6 +69,11 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   // 添加清理计划父级菜单
   if (route.path.startsWith('/cleaning')) {
     items.push(pathMap['/cleaning'])
+  }
+
+  // 添加在制品管理父级菜单
+  if (route.path.startsWith('/wip')) {
+    items.push(pathMap['/wip'])
   }
 
   // 添加匹配的路由

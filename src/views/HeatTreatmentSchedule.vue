@@ -5,9 +5,9 @@
       <a-row :gutter="16" align="middle">
         <a-col :xs="24" :sm="12" :md="6">
           <a-form-item label="选择日期" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
-            <a-date-picker
-              v-model:value="selectedDate"
-              placeholder="请选择日期"
+            <a-range-picker
+              v-model:value="selectedDateRange"
+              placeholder="请选择日期区间"
               format="YYYY-MM-DD"
               @change="handleDateChange"
               style="width: 100%"
@@ -19,6 +19,7 @@
             <a-radio-group v-model:value="viewType" @change="handleViewTypeChange">
               <a-radio-button value="daily">日明细</a-radio-button>
               <a-radio-button value="weekly">周统计</a-radio-button>
+              <a-radio-button value="monthly">月汇总</a-radio-button>
             </a-radio-group>
           </a-form-item>
         </a-col>
@@ -65,10 +66,6 @@
     <!-- 功能操作区 -->
     <a-card :bordered="false" class="action-card">
       <a-space :size="8" wrap>
-        <a-button type="primary" @click="handleGeneratePlan" :loading="generateLoading">
-          <PlayCircleOutlined />
-          一键生成当日计划
-        </a-button>
         <a-button @click="handleExport">
           <ExportOutlined />
           导出
@@ -80,10 +77,10 @@
     <a-card :bordered="false" class="table-card">
       <template #title>
         <a-space>
-          <span>{{ viewType === 'daily' ? '日明细视图' : '周统计视图' }}</span>
-          <a-tag v-if="selectedDate" color="blue">
-            {{ viewType === 'daily' ? selectedDate.format('YYYY-MM-DD') : getWeekRange() }}
-          </a-tag>
+          <span>{{ viewTitle }}</span>
+          <span v-if="selectedDateRange && selectedDateRange.length === 2">
+            {{ getDateRangeLabel() }}
+          </span>
         </a-space>
       </template>
       <template #extra>
@@ -97,7 +94,7 @@
           <span>实际热处理总量：</span>
           <a-statistic
             :value="totalStats.actualQuantity"
-            :value-style="{ fontSize: '16px', color: '#1890ff' }"
+            :value-style="{ fontSize: '16px' }"
           />
           <a-divider type="vertical" />
           <span>完成率：</span>
@@ -105,7 +102,7 @@
             :value="totalStats.completionRate"
             :precision="2"
             suffix="%"
-            :value-style="{ fontSize: '16px', color: '#52c41a' }"
+            :value-style="{ fontSize: '16px' }"
           />
         </a-space>
       </template>
@@ -117,24 +114,16 @@
         :pagination="pagination"
         :scroll="{ x: 1400 }"
         @change="handleTableChange"
-        :row-class-name="getRowClassName"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'productSeries'">
-            <a-tag :color="getSeriesColor(record.productSeries)">
-              {{ record.productSeries }}
-            </a-tag>
+            <span>{{ record.productSeries }}</span>
           </template>
           <template v-else-if="column.key === 'completionRate'">
-            <a-progress
-              :percent="record.completionRate"
-              :stroke-color="getProgressColor(record.completionRate)"
-              :format="(percent: number) => `${percent.toFixed(2)}%`"
-              size="small"
-            />
+            <span>{{ record.completionRate.toFixed(2) }}%</span>
           </template>
-          <template v-else-if="column.key === 'planDate' && viewType === 'weekly'">
-            <span>{{ getWeekRange() }}</span>
+          <template v-else-if="column.key === 'planDate' && viewType !== 'daily'">
+            <span>{{ getDateRangeLabel() }}</span>
           </template>
         </template>
       </a-table>
@@ -165,8 +154,7 @@ import dayjs from 'dayjs'
 import {
   SearchOutlined,
   ReloadOutlined,
-  ExportOutlined,
-  PlayCircleOutlined
+  ExportOutlined
 } from '@ant-design/icons-vue'
 
 interface HeatTreatmentScheduleData {
@@ -182,12 +170,11 @@ interface HeatTreatmentScheduleData {
   completionRate: number
 }
 
-const selectedDate = ref<Dayjs>(dayjs())
-const viewType = ref<'daily' | 'weekly'>('daily')
+const selectedDateRange = ref<[Dayjs, Dayjs]>([dayjs().startOf('month'), dayjs()])
+const viewType = ref<'daily' | 'weekly' | 'monthly'>('daily')
 const productSeries = ref<string>('')
 const partNo = ref<string>('')
 const loading = ref(false)
-const generateLoading = ref(false)
 const dataSource = ref<HeatTreatmentScheduleData[]>([])
 
 const pagination = reactive({
@@ -326,9 +313,90 @@ const weeklyColumns = [
   }
 ]
 
+// 月汇总视图列定义
+const monthlyColumns = [
+  {
+    title: '月份',
+    dataIndex: 'planDate',
+    key: 'planDate',
+    width: 120,
+    fixed: 'left'
+  },
+  {
+    title: '产品系列',
+    dataIndex: 'productSeries',
+    key: 'productSeries',
+    width: 120
+  },
+  {
+    title: '毛坯件号',
+    dataIndex: 'partNo',
+    key: 'partNo',
+    width: 150
+  },
+  {
+    title: '毛坯名称',
+    dataIndex: 'blankName',
+    key: 'blankName',
+    width: 180
+  },
+  {
+    title: '规格型号',
+    dataIndex: 'specification',
+    key: 'specification',
+    width: 120
+  },
+  {
+    title: '牌号材质',
+    dataIndex: 'materialGrade',
+    key: 'materialGrade',
+    width: 120
+  },
+  {
+    title: '本月计划总量',
+    dataIndex: 'planQuantity',
+    key: 'planQuantity',
+    width: 140,
+    align: 'right'
+  },
+  {
+    title: '本月实际热处理总量',
+    dataIndex: 'actualQuantity',
+    key: 'actualQuantity',
+    width: 180,
+    align: 'right'
+  },
+  {
+    title: '月热处理完成率',
+    dataIndex: 'completionRate',
+    key: 'completionRate',
+    width: 180,
+    align: 'center'
+  }
+]
+
 // 当前视图列
 const currentColumns = computed(() => {
-  return viewType.value === 'daily' ? dailyColumns : weeklyColumns
+  switch (viewType.value) {
+    case 'daily':
+      return dailyColumns
+    case 'weekly':
+      return weeklyColumns
+    case 'monthly':
+      return monthlyColumns
+  }
+})
+
+// 当前视图标题
+const viewTitle = computed(() => {
+  switch (viewType.value) {
+    case 'daily':
+      return '日明细视图'
+    case 'weekly':
+      return '周统计视图'
+    case 'monthly':
+      return '月汇总视图'
+  }
 })
 
 // 总计统计
@@ -348,38 +416,14 @@ const totalStats = computed(() => {
   }
 })
 
-// 获取周范围
-const getWeekRange = () => {
-  if (!selectedDate.value) return ''
-  const start = selectedDate.value.startOf('week')
-  const end = selectedDate.value.endOf('week')
-  return `${start.format('MM-DD')} ~ ${end.format('MM-DD')}`
-}
-
-// 获取进度条颜色
-const getProgressColor = (percent: number) => {
-  if (percent >= 100) return '#52c41a'
-  if (percent >= 80) return '#1890ff'
-  if (percent >= 60) return '#faad14'
-  return '#ff4d4f'
-}
-
-// 获取系列颜色
-const getSeriesColor = (series: string) => {
-  const colorMap: Record<string, string> = {
-    'A系列': 'blue',
-    'B系列': 'green',
-    'C系列': 'orange'
+// 获取当前视图的日期范围标签
+const getDateRangeLabel = () => {
+  if (!selectedDateRange.value || selectedDateRange.value.length !== 2) return ''
+  const [start, end] = selectedDateRange.value
+  if (viewType.value === 'monthly') {
+    return start.format('YYYY-MM')
   }
-  return colorMap[series] || 'default'
-}
-
-// 获取行样式
-const getRowClassName = (record: HeatTreatmentScheduleData) => {
-  if (record.completionRate >= 100) return 'row-completed'
-  if (record.completionRate >= 80) return 'row-good'
-  if (record.completionRate >= 60) return 'row-warning'
-  return 'row-danger'
+  return `${start.format('YYYY-MM-DD')} ~ ${end.format('YYYY-MM-DD')}`
 }
 
 // 日期变化
@@ -403,7 +447,7 @@ const handleSearch = () => {
 
 // 重置
 const handleReset = () => {
-  selectedDate.value = dayjs()
+  selectedDateRange.value = [dayjs().startOf('month'), dayjs()]
   viewType.value = 'daily'
   productSeries.value = ''
   partNo.value = ''
@@ -415,17 +459,6 @@ const handleTableChange = (pag: any) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
   handleSearch()
-}
-
-// 一键生成当日计划
-const handleGeneratePlan = () => {
-  generateLoading.value = true
-  // 模拟计划生成过程
-  setTimeout(() => {
-    generateLoading.value = false
-    message.success('当日热处理计划生成成功')
-    handleSearch()
-  }, 2000)
 }
 
 // 导出
@@ -440,44 +473,31 @@ const generateMockData = () => {
   const materialList = ['QT450-10', 'HT250', 'QT500-7', 'HT300']
   const specificationList = ['φ200×300', 'φ150×250', 'φ180×280', 'φ220×350']
   
-  if (viewType.value === 'daily') {
-    // 日明细数据
-    for (let i = 1; i <= 20; i++) {
-      const planQuantity = Math.floor(Math.random() * 40) + 15
-      const actualQuantity = Math.floor(Math.random() * planQuantity)
-      
-      mockData.push({
-        key: String(i),
-        planDate: selectedDate.value.format('YYYY-MM-DD'),
-        productSeries: seriesList[Math.floor(Math.random() * seriesList.length)],
-        partNo: `HT-${String(i).padStart(4, '0')}`,
-        blankName: `热处理件-${i}`,
-        specification: specificationList[Math.floor(Math.random() * specificationList.length)],
-        materialGrade: materialList[Math.floor(Math.random() * materialList.length)],
-        planQuantity: planQuantity,
-        actualQuantity: actualQuantity,
-        completionRate: planQuantity > 0 ? (actualQuantity / planQuantity) * 100 : 0
-      })
-    }
-  } else {
-    // 周统计数据
-    for (let i = 1; i <= 15; i++) {
-      const planQuantity = Math.floor(Math.random() * 250) + 80
-      const actualQuantity = Math.floor(Math.random() * planQuantity)
-      
-      mockData.push({
-        key: String(i),
-        planDate: selectedDate.value.format('YYYY-MM-DD'),
-        productSeries: seriesList[Math.floor(Math.random() * seriesList.length)],
-        partNo: `HT-${String(i).padStart(4, '0')}`,
-        blankName: `热处理件-${i}`,
-        specification: specificationList[Math.floor(Math.random() * specificationList.length)],
-        materialGrade: materialList[Math.floor(Math.random() * materialList.length)],
-        planQuantity: planQuantity,
-        actualQuantity: actualQuantity,
-        completionRate: planQuantity > 0 ? (actualQuantity / planQuantity) * 100 : 0
-      })
-    }
+  const startDate = selectedDateRange.value[0]
+  const planDate = viewType.value === 'monthly'
+    ? startDate.format('YYYY-MM')
+    : startDate.format('YYYY-MM-DD')
+  
+  const rowCount = viewType.value === 'daily' ? 20 : (viewType.value === 'weekly' ? 15 : 10)
+  const quantityBase = viewType.value === 'daily' ? 40 : (viewType.value === 'weekly' ? 250 : 1000)
+  
+  // 日明细 / 周统计 / 月汇总数据
+  for (let i = 1; i <= rowCount; i++) {
+    const planQuantity = Math.floor(Math.random() * quantityBase) + Math.floor(quantityBase / 2)
+    const actualQuantity = Math.floor(Math.random() * planQuantity)
+    
+    mockData.push({
+      key: String(i),
+      planDate: planDate,
+      productSeries: seriesList[Math.floor(Math.random() * seriesList.length)],
+      partNo: `HT-${String(i).padStart(4, '0')}`,
+      blankName: `热处理件-${i}`,
+      specification: specificationList[Math.floor(Math.random() * specificationList.length)],
+      materialGrade: materialList[Math.floor(Math.random() * materialList.length)],
+      planQuantity: planQuantity,
+      actualQuantity: actualQuantity,
+      completionRate: planQuantity > 0 ? (actualQuantity / planQuantity) * 100 : 0
+    })
   }
   
   // 筛选
@@ -517,20 +537,4 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-/* 完成状态行样式 */
-:deep(.row-completed) {
-  background-color: #f6ffed;
-}
-
-:deep(.row-good) {
-  background-color: #e6f7ff;
-}
-
-:deep(.row-warning) {
-  background-color: #fffbe6;
-}
-
-:deep(.row-danger) {
-  background-color: #fff1f0;
-}
 </style>

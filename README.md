@@ -17,8 +17,7 @@
 ```
 src/
 ├── components/          # 通用组件
-│   ├── Breadcrumb.vue  # 面包屑导航组件
-│   └── Empty.vue       # 空状态组件
+│   └── Breadcrumb.vue  # 面包屑导航组件
 ├── composables/        # 组合式函数
 │   └── useTheme.ts     # 主题组合式函数
 ├── lib/                # 工具库

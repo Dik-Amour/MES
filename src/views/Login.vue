@@ -61,6 +61,44 @@
         </a-form-item>
       </a-form>
 
+      <div class="demo-account">
+        <a-alert type="info" show-icon>
+          <template #message>
+            <div class="demo-account-content">
+              <span class="demo-label">演示账号</span>
+              <span>
+                账号：<b>admin</b>
+                <a-tag
+                  class="copy-tag"
+                  color="blue"
+                  @click="copyDemo('admin')"
+                >
+                  复制
+                </a-tag>
+              </span>
+              <span>
+                密码：<b>123456</b>
+                <a-tag
+                  class="copy-tag"
+                  color="blue"
+                  @click="copyDemo('123456')"
+                >
+                  复制
+                </a-tag>
+              </span>
+              <a-button
+                class="fill-btn"
+                type="link"
+                size="small"
+                @click="fillDemo"
+              >
+                一键填入
+              </a-button>
+            </div>
+          </template>
+        </a-alert>
+      </div>
+
       <div class="login-footer">
         <a-divider>其他登录方式</a-divider>
         <a-space :size="16">
@@ -91,11 +129,33 @@ const userStore = useUserStore()
 
 const loading = ref(false)
 
+const DEMO_ACCOUNT = {
+  username: 'admin',
+  password: '123456'
+}
+
 const formData = reactive({
   username: '',
   password: '',
   remember: false
 })
+
+// 一键填入演示账号
+const fillDemo = () => {
+  formData.username = DEMO_ACCOUNT.username
+  formData.password = DEMO_ACCOUNT.password
+  message.success('已填入演示账号')
+}
+
+// 复制文本到剪贴板
+const copyDemo = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text)
+    message.success('复制成功')
+  } catch {
+    message.error('复制失败，请手动复制')
+  }
+}
 
 const rules = {
   username: [
@@ -172,6 +232,32 @@ const handleLogin = async () => {
 
 .login-form {
   margin-bottom: 24px;
+}
+
+.demo-account {
+  margin-bottom: 24px;
+}
+
+.demo-account-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.8;
+}
+
+.demo-label {
+  font-weight: 600;
+  color: #1677ff;
+}
+
+.copy-tag {
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.fill-btn {
+  align-self: flex-start;
+  padding-left: 0;
 }
 
 .login-footer {

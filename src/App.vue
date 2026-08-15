@@ -47,6 +47,19 @@
             <a-menu-item key="/cleaning/fine-cleaning">细清排产</a-menu-item>
           </a-sub-menu>
 
+          <a-sub-menu key="wip">
+            <template #icon>
+              <InboxOutlined />
+            </template>
+            <template #title>在制品管理</template>
+            <a-menu-item key="/wip/initial-data">在制品初始数据</a-menu-item>
+            <a-menu-item key="/wip/detail">在制品明细</a-menu-item>
+            <a-menu-item key="/wip/summary">在制品汇总</a-menu-item>
+            <a-menu-item key="/wip/monthly-report">生产月度统计</a-menu-item>
+            <a-menu-item key="/wip/annual-report">生产年度统计</a-menu-item>
+            <a-menu-item key="/wip/material-stat">毛坯材质生产统计</a-menu-item>
+          </a-sub-menu>
+
           <a-sub-menu key="user">
             <template #icon>
               <UserOutlined />
@@ -155,10 +168,7 @@ import {
   BulbFilled,
   LogoutOutlined,
   CalendarOutlined,
-  FileTextOutlined,
-  InboxOutlined,
-  FireOutlined,
-  ToolOutlined
+  InboxOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useTheme } from '@/composables/useTheme'
@@ -174,15 +184,30 @@ const { theme, toggleTheme } = useTheme()
 
 const collapsed = ref(false)
 const selectedKeys = ref<string[]>(['/'])
-const openKeys = ref<string[]>(['user', 'system', 'cleaning'])
+// 默认所有目录收起，导航到子页面时自动展开对应目录
+const openKeys = ref<string[]>([])
 
 const siderTheme = computed(() => 'light')
 
-// 监听路由变化，更新选中的菜单项
+// 路由路径对应的父级菜单 key（用于自动展开目录）
+const parentKeyMap: Array<[string, string]> = [
+  ['/cleaning', 'cleaning'],
+  ['/wip', 'wip'],
+  ['/users', 'user'],
+  ['/settings', 'system'],
+  ['/security', 'system'],
+  ['/permissions', 'system']
+]
+
+// 监听路由变化，更新选中的菜单项，并自动展开当前页面所属的目录
 watch(
   () => route.path,
   (newPath) => {
     selectedKeys.value = [newPath]
+    const parent = parentKeyMap.find(([prefix]) => newPath.startsWith(prefix))
+    if (parent && !openKeys.value.includes(parent[1])) {
+      openKeys.value = [...openKeys.value, parent[1]]
+    }
   },
   { immediate: true }
 )
