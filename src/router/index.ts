@@ -47,6 +47,18 @@ const routes: RouteRecordRaw[] = [
   },
   // 清理生产记录路由
   {
+    path: '/cleaning-production/manipulator',
+    name: 'ManipulatorRecord',
+    component: () => import('@/views/cleaning-production/ManipulatorRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/rough-cleaning',
+    name: 'RoughCleaningRecord',
+    component: () => import('@/views/cleaning-production/RoughCleaningRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/cleaning-production/annealing',
     name: 'AnnealingRecord',
     component: () => import('@/views/cleaning-production/AnnealingRecord.vue'),
@@ -68,6 +80,12 @@ const routes: RouteRecordRaw[] = [
     path: '/cleaning-production/fine-polishing',
     name: 'FinePolishingRecord',
     component: () => import('@/views/cleaning-production/FinePolishingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/blow-cleaning',
+    name: 'BlowCleaningRecord',
+    component: () => import('@/views/cleaning-production/BlowCleaningRecord.vue'),
     meta: { requiresAuth: true }
   },
   {

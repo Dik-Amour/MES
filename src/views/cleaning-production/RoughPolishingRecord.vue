@@ -67,15 +67,16 @@ const columns = [
   { title: '抛丸开始时间', dataIndex: 'startTime', width: 170 },
   { title: '抛丸结束时间', dataIndex: 'endTime', width: 170 },
   { title: '抛丸时长(s)', dataIndex: 'duration', width: 120 },
+  { title: '排班人', dataIndex: 'scheduler', width: 100 },
   { title: '上机人', dataIndex: 'operator', width: 100 }
 ]
 const dataSource = ref([
-  { id: 1, productionLine: '造型三线HWS清理', productSeries: 'WP12', partNo: 'WP12-3001', workstation: 'A工位', subWorkstation: 'A-01', equipment: '抛丸机-01', startTime: '2026-09-03 08:15', endTime: '2026-09-03 08:45', duration: 180, operator: '张三' },
-  { id: 2, productionLine: '造型三线KW清理', productSeries: 'WP13', partNo: 'WP13-3010', workstation: 'A工位', subWorkstation: 'A-02', equipment: '抛丸机-01', startTime: '2026-09-03 09:00', endTime: '2026-09-03 09:40', duration: 240, operator: '李四' },
-  { id: 3, productionLine: '造型二线大件清理', productSeries: 'WP13', partNo: 'WP13-2015', workstation: 'B工位', subWorkstation: 'B-01', equipment: '抛丸机-02', startTime: '2026-09-03 10:20', endTime: '2026-09-03 11:00', duration: 240, operator: '王五' },
-  { id: 4, productionLine: '造型二线中件清理', productSeries: 'WP12', partNo: 'WP12-2012', workstation: 'C工位', subWorkstation: 'C-01', equipment: '抛丸机-03', startTime: '2026-09-03 13:10', endTime: '2026-09-03 13:35', duration: 150, operator: '赵六' },
-  { id: 5, productionLine: '造型一线大件清理', productSeries: 'WP12', partNo: 'WP12-1008', workstation: 'D工位', subWorkstation: 'D-01', equipment: '抛丸机-04', startTime: '2026-09-03 14:00', endTime: '2026-09-03 14:30', duration: 180, operator: '钱七' },
-  { id: 6, productionLine: '造型一线中件清理', productSeries: 'WP13', partNo: 'WP13-1005', workstation: 'E工位', subWorkstation: 'E-01', equipment: '抛丸机-05', startTime: '2026-09-03 15:00', endTime: '2026-09-03 15:25', duration: 150, operator: '孙八' }
+  { id: 1, productionLine: '造型三线HWS清理', productSeries: 'WP12', partNo: 'WP12-3001', workstation: 'A工位', subWorkstation: 'A-01', equipment: '抛丸机-01', startTime: '2026-09-03 08:15', endTime: '2026-09-03 08:45', duration: 180, scheduler: '周九', operator: '张三' },
+  { id: 2, productionLine: '造型三线KW清理', productSeries: 'WP13', partNo: 'WP13-3010', workstation: 'A工位', subWorkstation: 'A-02', equipment: '抛丸机-01', startTime: '2026-09-03 09:00', endTime: '2026-09-03 09:40', duration: 240, scheduler: '吴十', operator: '李四' },
+  { id: 3, productionLine: '造型二线大件清理', productSeries: 'WP13', partNo: 'WP13-2015', workstation: 'B工位', subWorkstation: 'B-01', equipment: '抛丸机-02', startTime: '2026-09-03 10:20', endTime: '2026-09-03 11:00', duration: 240, scheduler: '冯一', operator: '王五' },
+  { id: 4, productionLine: '造型二线中件清理', productSeries: 'WP12', partNo: 'WP12-2012', workstation: 'C工位', subWorkstation: 'C-01', equipment: '抛丸机-03', startTime: '2026-09-03 13:10', endTime: '2026-09-03 13:35', duration: 150, scheduler: '陈二', operator: '赵六' },
+  { id: 5, productionLine: '造型一线大件清理', productSeries: 'WP12', partNo: 'WP12-1008', workstation: 'D工位', subWorkstation: 'D-01', equipment: '抛丸机-04', startTime: '2026-09-03 14:00', endTime: '2026-09-03 14:30', duration: 180, scheduler: '林三', operator: '钱七' },
+  { id: 6, productionLine: '造型一线中件清理', productSeries: 'WP13', partNo: 'WP13-1005', workstation: 'E工位', subWorkstation: 'E-01', equipment: '抛丸机-05', startTime: '2026-09-03 15:00', endTime: '2026-09-03 15:25', duration: 150, scheduler: '郑四', operator: '孙八' }
 ])
 const pagination = reactive({ current: 1, pageSize: 10, total: 2, showSizeChanger: true, showQuickJumper: true, showTotal: (t: number) => `共 ${t} 条` })
 const handleTableChange = (pag: any) => { pagination.current = pag.current; pagination.pageSize = pag.pageSize }

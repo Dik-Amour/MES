@@ -64,16 +64,17 @@ const columns = [
   { title: '设备', dataIndex: 'equipment', width: 120 },
   { title: '搬运开始时间', dataIndex: 'startTime', width: 170 },
   { title: '搬运结束时间', dataIndex: 'endTime', width: 170 },
+  { title: '排班人', dataIndex: 'scheduler', width: 100 },
   { title: '上机人', dataIndex: 'operator', width: 100 }
 ]
 const dataSource = ref([
-  { id: 1, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-01', equipment: '机器人-01', startTime: '2026-09-03 08:05', endTime: '2026-09-03 08:08', operator: '张三' },
-  { id: 2, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-02', equipment: '机器人-01', startTime: '2026-09-03 09:30', endTime: '2026-09-03 09:33', operator: '张三' },
-  { id: 3, productionLine: '造型三线KW清理', workstation: 'B工位', subWorkstation: 'B-01', equipment: '机器人-02', startTime: '2026-09-03 09:00', endTime: '2026-09-03 09:04', operator: '李四' },
-  { id: 4, productionLine: '造型二线大件清理', workstation: 'C工位', subWorkstation: 'C-01', equipment: '机器人-03', startTime: '2026-09-03 10:00', endTime: '2026-09-03 10:05', operator: '王五' },
-  { id: 5, productionLine: '造型二线中件清理', workstation: 'D工位', subWorkstation: 'D-01', equipment: '机器人-04', startTime: '2026-09-03 13:00', endTime: '2026-09-03 13:03', operator: '赵六' },
-  { id: 6, productionLine: '造型一线大件清理', workstation: 'E工位', subWorkstation: 'E-01', equipment: '机器人-05', startTime: '2026-09-03 14:00', endTime: '2026-09-03 14:04', operator: '钱七' },
-  { id: 7, productionLine: '造型一线中件清理', workstation: 'F工位', subWorkstation: 'F-01', equipment: '机器人-06', startTime: '2026-09-03 15:00', endTime: '2026-09-03 15:03', operator: '孙八' }
+  { id: 1, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-01', equipment: '机器人-01', startTime: '2026-09-03 08:05', endTime: '2026-09-03 08:08', scheduler: '周九', operator: '张三' },
+  { id: 2, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-02', equipment: '机器人-01', startTime: '2026-09-03 09:30', endTime: '2026-09-03 09:33', scheduler: '吴十', operator: '张三' },
+  { id: 3, productionLine: '造型三线KW清理', workstation: 'B工位', subWorkstation: 'B-01', equipment: '机器人-02', startTime: '2026-09-03 09:00', endTime: '2026-09-03 09:04', scheduler: '冯一', operator: '李四' },
+  { id: 4, productionLine: '造型二线大件清理', workstation: 'C工位', subWorkstation: 'C-01', equipment: '机器人-03', startTime: '2026-09-03 10:00', endTime: '2026-09-03 10:05', scheduler: '陈二', operator: '王五' },
+  { id: 5, productionLine: '造型二线中件清理', workstation: 'D工位', subWorkstation: 'D-01', equipment: '机器人-04', startTime: '2026-09-03 13:00', endTime: '2026-09-03 13:03', scheduler: '林三', operator: '赵六' },
+  { id: 6, productionLine: '造型一线大件清理', workstation: 'E工位', subWorkstation: 'E-01', equipment: '机器人-05', startTime: '2026-09-03 14:00', endTime: '2026-09-03 14:04', scheduler: '郑四', operator: '钱七' },
+  { id: 7, productionLine: '造型一线中件清理', workstation: 'F工位', subWorkstation: 'F-01', equipment: '机器人-06', startTime: '2026-09-03 15:00', endTime: '2026-09-03 15:03', scheduler: '黄五', operator: '孙八' }
 ])
 const pagination = reactive({ current: 1, pageSize: 10, total: 7, showSizeChanger: true, showQuickJumper: true, showTotal: (t: number) => `共 ${t} 条` })
 const handleTableChange = (pag: any) => { pagination.current = pag.current; pagination.pageSize = pag.pageSize }

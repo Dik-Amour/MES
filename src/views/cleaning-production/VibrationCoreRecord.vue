@@ -95,14 +95,14 @@ const searchForm = reactive({
 const loading = ref(false)
 
 const mockData = [
-  { id: 1, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-01', equipment: '振芯机-01', loadTime: '2026-09-03 08:00', unloadTime: '2026-09-03 08:25', pressure: 4.5, duration: 180, operator: '张三' },
-  { id: 2, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-02', equipment: '振芯机-01', loadTime: '2026-09-03 08:30', unloadTime: '2026-09-03 08:55', pressure: 4.8, duration: 195, operator: '李四' },
-  { id: 3, productionLine: '造型三线KW清理', workstation: 'B工位', subWorkstation: 'B-01', equipment: '振芯机-02', loadTime: '2026-09-03 09:10', unloadTime: '2026-09-03 09:40', pressure: 5.0, duration: 200, operator: '王五' },
-  { id: 4, productionLine: '造型二线大件清理', workstation: 'C工位', subWorkstation: 'C-01', equipment: '振芯机-03', loadTime: '2026-09-03 10:00', unloadTime: '2026-09-03 10:35', pressure: 5.2, duration: 210, operator: '赵六' },
-  { id: 5, productionLine: '造型二线大件清理', workstation: 'C工位', subWorkstation: 'C-02', equipment: '振芯机-03', loadTime: '2026-09-03 10:45', unloadTime: '2026-09-03 11:15', pressure: 4.9, duration: 190, operator: '钱七' },
-  { id: 6, productionLine: '造型二线中件清理', workstation: 'D工位', subWorkstation: 'D-01', equipment: '振芯机-04', loadTime: '2026-09-03 13:00', unloadTime: '2026-09-03 13:25', pressure: 4.6, duration: 175, operator: '孙八' },
-  { id: 7, productionLine: '造型一线大件清理', workstation: 'E工位', subWorkstation: 'E-01', equipment: '振芯机-05', loadTime: '2026-09-03 14:00', unloadTime: '2026-09-03 14:30', pressure: 5.1, duration: 205, operator: '周九' },
-  { id: 8, productionLine: '造型一线中件清理', workstation: 'F工位', subWorkstation: 'F-01', equipment: '振芯机-06', loadTime: '2026-09-03 15:00', unloadTime: '2026-09-03 15:28', pressure: 4.7, duration: 185, operator: '张三' }
+  { id: 1, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-01', equipment: '振芯机-01', loadTime: '2026-09-03 08:00', unloadTime: '2026-09-03 08:25', pressure: 4.5, duration: 180, scheduler: '周九', operator: '张三' },
+  { id: 2, productionLine: '造型三线HWS清理', workstation: 'A工位', subWorkstation: 'A-02', equipment: '振芯机-01', loadTime: '2026-09-03 08:30', unloadTime: '2026-09-03 08:55', pressure: 4.8, duration: 195, scheduler: '吴十', operator: '李四' },
+  { id: 3, productionLine: '造型三线KW清理', workstation: 'B工位', subWorkstation: 'B-01', equipment: '振芯机-02', loadTime: '2026-09-03 09:10', unloadTime: '2026-09-03 09:40', pressure: 5.0, duration: 200, scheduler: '冯一', operator: '王五' },
+  { id: 4, productionLine: '造型二线大件清理', workstation: 'C工位', subWorkstation: 'C-01', equipment: '振芯机-03', loadTime: '2026-09-03 10:00', unloadTime: '2026-09-03 10:35', pressure: 5.2, duration: 210, scheduler: '陈二', operator: '赵六' },
+  { id: 5, productionLine: '造型二线大件清理', workstation: 'C工位', subWorkstation: 'C-02', equipment: '振芯机-03', loadTime: '2026-09-03 10:45', unloadTime: '2026-09-03 11:15', pressure: 4.9, duration: 190, scheduler: '林三', operator: '钱七' },
+  { id: 6, productionLine: '造型二线中件清理', workstation: 'D工位', subWorkstation: 'D-01', equipment: '振芯机-04', loadTime: '2026-09-03 13:00', unloadTime: '2026-09-03 13:25', pressure: 4.6, duration: 175, scheduler: '郑四', operator: '孙八' },
+  { id: 7, productionLine: '造型一线大件清理', workstation: 'E工位', subWorkstation: 'E-01', equipment: '振芯机-05', loadTime: '2026-09-03 14:00', unloadTime: '2026-09-03 14:30', pressure: 5.1, duration: 205, scheduler: '黄五', operator: '周九' },
+  { id: 8, productionLine: '造型一线中件清理', workstation: 'F工位', subWorkstation: 'F-01', equipment: '振芯机-06', loadTime: '2026-09-03 15:00', unloadTime: '2026-09-03 15:28', pressure: 4.7, duration: 185, scheduler: '刘六', operator: '张三' }
 ]
 
 const dataSource = ref([...mockData])
@@ -141,6 +141,7 @@ const columns = [
   { title: '振击结束时间', dataIndex: 'unloadTime', width: 170 },
   { title: '振击压力(MPa)', dataIndex: 'pressure', width: 130 },
   { title: '振击时长(s)', dataIndex: 'duration', width: 120 },
+  { title: '排班人', dataIndex: 'scheduler', width: 100 },
   { title: '上机人', dataIndex: 'operator', width: 100 }
 ]
 

@@ -68,15 +68,16 @@ const columns = [
   { title: '抛丸时长(s)', dataIndex: 'duration', width: 120 },
   { title: '机械手角度(°)', dataIndex: 'robotAngle', width: 130 },
   { title: '抛丸配方编号', dataIndex: 'recipeNo', width: 140 },
+  { title: '排班人', dataIndex: 'scheduler', width: 100 },
   { title: '上机人', dataIndex: 'operator', width: 100 }
 ]
 const dataSource = ref([
-  { id: 1, productionLine: '造型三线HWS清理', productSeries: 'WP12', partNo: 'WP12-3001', workstation: 'A工位', subWorkstation: 'A-01', startTime: '2026-09-03 09:10', endTime: '2026-09-03 09:40', duration: 180, robotAngle: 42, recipeNo: 'JP-F01-01', operator: '张三' },
-  { id: 2, productionLine: '造型三线KW清理', productSeries: 'WP13', partNo: 'WP13-3010', workstation: 'A工位', subWorkstation: 'A-02', startTime: '2026-09-03 10:00', endTime: '2026-09-03 10:30', duration: 180, robotAngle: 55, recipeNo: 'JP-F01-02', operator: '李四' },
-  { id: 3, productionLine: '造型二线大件清理', productSeries: 'WP13', partNo: 'WP13-2015', workstation: 'B工位', subWorkstation: 'B-01', startTime: '2026-09-03 10:30', endTime: '2026-09-03 11:05', duration: 210, robotAngle: 48, recipeNo: 'JP-F02-01', operator: '王五' },
-  { id: 4, productionLine: '造型二线中件清理', productSeries: 'WP12', partNo: 'WP12-2012', workstation: 'C工位', subWorkstation: 'C-01', startTime: '2026-09-03 13:10', endTime: '2026-09-03 13:35', duration: 150, robotAngle: 38, recipeNo: 'JP-F03-01', operator: '赵六' },
-  { id: 5, productionLine: '造型一线大件清理', productSeries: 'WP12', partNo: 'WP12-1008', workstation: 'D工位', subWorkstation: 'D-01', startTime: '2026-09-03 14:10', endTime: '2026-09-03 14:45', duration: 210, robotAngle: 50, recipeNo: 'JP-F04-01', operator: '钱七' },
-  { id: 6, productionLine: '造型一线中件清理', productSeries: 'WP13', partNo: 'WP13-1005', workstation: 'E工位', subWorkstation: 'E-01', startTime: '2026-09-03 15:10', endTime: '2026-09-03 15:35', duration: 150, robotAngle: 44, recipeNo: 'JP-F05-01', operator: '孙八' }
+  { id: 1, productionLine: '造型三线HWS清理', productSeries: 'WP12', partNo: 'WP12-3001', workstation: 'A工位', subWorkstation: 'A-01', startTime: '2026-09-03 09:10', endTime: '2026-09-03 09:40', duration: 180, robotAngle: 42, recipeNo: 'JP-F01-01', scheduler: '周九', operator: '张三' },
+  { id: 2, productionLine: '造型三线KW清理', productSeries: 'WP13', partNo: 'WP13-3010', workstation: 'A工位', subWorkstation: 'A-02', startTime: '2026-09-03 10:00', endTime: '2026-09-03 10:30', duration: 180, robotAngle: 55, recipeNo: 'JP-F01-02', scheduler: '吴十', operator: '李四' },
+  { id: 3, productionLine: '造型二线大件清理', productSeries: 'WP13', partNo: 'WP13-2015', workstation: 'B工位', subWorkstation: 'B-01', startTime: '2026-09-03 10:30', endTime: '2026-09-03 11:05', duration: 210, robotAngle: 48, recipeNo: 'JP-F02-01', scheduler: '冯一', operator: '王五' },
+  { id: 4, productionLine: '造型二线中件清理', productSeries: 'WP12', partNo: 'WP12-2012', workstation: 'C工位', subWorkstation: 'C-01', startTime: '2026-09-03 13:10', endTime: '2026-09-03 13:35', duration: 150, robotAngle: 38, recipeNo: 'JP-F03-01', scheduler: '陈二', operator: '赵六' },
+  { id: 5, productionLine: '造型一线大件清理', productSeries: 'WP12', partNo: 'WP12-1008', workstation: 'D工位', subWorkstation: 'D-01', startTime: '2026-09-03 14:10', endTime: '2026-09-03 14:45', duration: 210, robotAngle: 50, recipeNo: 'JP-F04-01', scheduler: '林三', operator: '钱七' },
+  { id: 6, productionLine: '造型一线中件清理', productSeries: 'WP13', partNo: 'WP13-1005', workstation: 'E工位', subWorkstation: 'E-01', startTime: '2026-09-03 15:10', endTime: '2026-09-03 15:35', duration: 150, robotAngle: 44, recipeNo: 'JP-F05-01', scheduler: '郑四', operator: '孙八' }
 ])
 const pagination = reactive({ current: 1, pageSize: 10, total: 6, showSizeChanger: true, showQuickJumper: true, showTotal: (t: number) => `共 ${t} 条` })
 const handleTableChange = (pag: any) => { pagination.current = pag.current; pagination.pageSize = pag.pageSize }

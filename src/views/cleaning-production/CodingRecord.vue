@@ -67,15 +67,16 @@ const columns = [
   { title: '打码启动时间', dataIndex: 'startTime', width: 170 },
   { title: '打码结束时间', dataIndex: 'endTime', width: 170 },
   { title: 'DPM 码字符串', dataIndex: 'dpmCode', width: 260 },
+  { title: '排班人', dataIndex: 'scheduler', width: 100 },
   { title: '上机人', dataIndex: 'operator', width: 100 }
 ]
 const dataSource = ref([
-  { id: 1, productionLine: '造型三线HWS清理', productSeries: 'WP12', partNo: 'WP12-3001', workstation: 'A工位', subWorkstation: 'A-01', recipeNo: 'DM-R01-01', startTime: '2026-09-03 08:20', endTime: '2026-09-03 08:20', dpmCode: 'GQN-20260903-001|WP12-3001|120.5kg|2026-09-03|造型三线HWS', operator: '张三' },
-  { id: 2, productionLine: '造型三线KW清理', productSeries: 'WP13', partNo: 'WP13-3010', workstation: 'A工位', subWorkstation: 'A-02', recipeNo: 'DM-R01-02', startTime: '2026-09-03 09:20', endTime: '2026-09-03 09:20', dpmCode: 'GQE-20260903-001|WP13-3010|98.3kg|2026-09-03|造型三线KW', operator: '李四' },
-  { id: 3, productionLine: '造型二线大件清理', productSeries: 'WP13', partNo: 'WP13-2015', workstation: 'B工位', subWorkstation: 'B-01', recipeNo: 'DM-R02-01', startTime: '2026-09-03 10:15', endTime: '2026-09-03 10:15', dpmCode: 'GQC-20260903-001|WP13-2015|135.2kg|2026-09-03|造型二线大件', operator: '王五' },
-  { id: 4, productionLine: '造型二线中件清理', productSeries: 'WP12', partNo: 'WP12-2012', workstation: 'C工位', subWorkstation: 'C-01', recipeNo: 'DM-R03-01', startTime: '2026-09-03 13:10', endTime: '2026-09-03 13:10', dpmCode: 'GQB-20260903-001|WP12-2012|88.7kg|2026-09-03|造型二线中件', operator: '赵六' },
-  { id: 5, productionLine: '造型一线大件清理', productSeries: 'WP12', partNo: 'WP12-1008', workstation: 'D工位', subWorkstation: 'D-01', recipeNo: 'DM-R04-01', startTime: '2026-09-03 14:10', endTime: '2026-09-03 14:10', dpmCode: 'GQD-20260903-001|WP12-1008|142.0kg|2026-09-03|造型一线大件', operator: '钱七' },
-  { id: 6, productionLine: '造型一线中件清理', productSeries: 'WP13', partNo: 'WP13-1005', workstation: 'E工位', subWorkstation: 'E-01', recipeNo: 'DM-R05-01', startTime: '2026-09-03 15:10', endTime: '2026-09-03 15:10', dpmCode: 'GQZ-20260903-001|WP13-1005|76.5kg|2026-09-03|造型一线中件', operator: '孙八' }
+  { id: 1, productionLine: '造型三线HWS清理', productSeries: 'WP12', partNo: 'WP12-3001', workstation: 'A工位', subWorkstation: 'A-01', recipeNo: 'DM-R01-01', startTime: '2026-09-03 08:20', endTime: '2026-09-03 08:20', dpmCode: 'GQN-20260903-001|WP12-3001|120.5kg|2026-09-03|造型三线HWS', scheduler: '周九', operator: '张三' },
+  { id: 2, productionLine: '造型三线KW清理', productSeries: 'WP13', partNo: 'WP13-3010', workstation: 'A工位', subWorkstation: 'A-02', recipeNo: 'DM-R01-02', startTime: '2026-09-03 09:20', endTime: '2026-09-03 09:20', dpmCode: 'GQE-20260903-001|WP13-3010|98.3kg|2026-09-03|造型三线KW', scheduler: '吴十', operator: '李四' },
+  { id: 3, productionLine: '造型二线大件清理', productSeries: 'WP13', partNo: 'WP13-2015', workstation: 'B工位', subWorkstation: 'B-01', recipeNo: 'DM-R02-01', startTime: '2026-09-03 10:15', endTime: '2026-09-03 10:15', dpmCode: 'GQC-20260903-001|WP13-2015|135.2kg|2026-09-03|造型二线大件', scheduler: '冯一', operator: '王五' },
+  { id: 4, productionLine: '造型二线中件清理', productSeries: 'WP12', partNo: 'WP12-2012', workstation: 'C工位', subWorkstation: 'C-01', recipeNo: 'DM-R03-01', startTime: '2026-09-03 13:10', endTime: '2026-09-03 13:10', dpmCode: 'GQB-20260903-001|WP12-2012|88.7kg|2026-09-03|造型二线中件', scheduler: '陈二', operator: '赵六' },
+  { id: 5, productionLine: '造型一线大件清理', productSeries: 'WP12', partNo: 'WP12-1008', workstation: 'D工位', subWorkstation: 'D-01', recipeNo: 'DM-R04-01', startTime: '2026-09-03 14:10', endTime: '2026-09-03 14:10', dpmCode: 'GQD-20260903-001|WP12-1008|142.0kg|2026-09-03|造型一线大件', scheduler: '林三', operator: '钱七' },
+  { id: 6, productionLine: '造型一线中件清理', productSeries: 'WP13', partNo: 'WP13-1005', workstation: 'E工位', subWorkstation: 'E-01', recipeNo: 'DM-R05-01', startTime: '2026-09-03 15:10', endTime: '2026-09-03 15:10', dpmCode: 'GQZ-20260903-001|WP13-1005|76.5kg|2026-09-03|造型一线中件', scheduler: '郑四', operator: '孙八' }
 ])
 const pagination = reactive({ current: 1, pageSize: 10, total: 6, showSizeChanger: true, showQuickJumper: true, showTotal: (t: number) => `共 ${t} 条` })
 const handleTableChange = (pag: any) => { pagination.current = pag.current; pagination.pageSize = pag.pageSize }

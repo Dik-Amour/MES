@@ -53,17 +53,20 @@
               <ToolOutlined />
             </template>
             <template #title>清理生产记录</template>
-            <a-menu-item key="/cleaning-production/annealing">退火记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/vibration-core">振芯记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/grinding">磨削记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/rough-polishing">粗抛记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/intelligent-polishing">智能磨削记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/inner-cavity">内腔抛丸记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/fine-polishing">精抛记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/powder-coating">喷粉记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/barcode">明码识别记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/coding">打码记录</a-menu-item>
-            <a-menu-item key="/cleaning-production/robot-loading">机器人上下料记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/manipulator">机械手</a-menu-item>
+            <a-menu-item key="/cleaning-production/rough-cleaning">粗清</a-menu-item>
+            <a-menu-item key="/cleaning-production/annealing">热处理</a-menu-item>
+            <a-menu-item key="/cleaning-production/vibration-core">振芯</a-menu-item>
+            <a-menu-item key="/cleaning-production/grinding">磨床</a-menu-item>
+            <a-menu-item key="/cleaning-production/rough-polishing">粗抛</a-menu-item>
+            <a-menu-item key="/cleaning-production/intelligent-polishing">智能磨削</a-menu-item>
+            <a-menu-item key="/cleaning-production/inner-cavity">内腔抛丸</a-menu-item>
+            <a-menu-item key="/cleaning-production/fine-polishing">精抛</a-menu-item>
+            <a-menu-item key="/cleaning-production/blow-cleaning">吹清</a-menu-item>
+            <a-menu-item key="/cleaning-production/powder-coating">喷粉</a-menu-item>
+            <a-menu-item key="/cleaning-production/barcode">明码识别</a-menu-item>
+            <a-menu-item key="/cleaning-production/coding">打码</a-menu-item>
+            <a-menu-item key="/cleaning-production/robot-loading">机器人上下料</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="wip">
