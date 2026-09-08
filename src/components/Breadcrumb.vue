@@ -57,7 +57,35 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/wip/summary': { title: '在制品汇总', path: '/wip/summary', icon: InboxOutlined },
     '/wip/monthly-report': { title: '生产月度统计', path: '/wip/monthly-report', icon: InboxOutlined },
     '/wip/annual-report': { title: '生产年度统计', path: '/wip/annual-report', icon: InboxOutlined },
-    '/wip/material-stat': { title: '毛坯材质生产统计', path: '/wip/material-stat', icon: InboxOutlined }
+    '/wip/material-stat': { title: '毛坯材质生产统计', path: '/wip/material-stat', icon: InboxOutlined },
+    // 清理生产记录路径
+    '/cleaning-production': { title: '清理生产记录', path: '/cleaning-production/annealing', icon: CalendarOutlined },
+    '/cleaning-production/annealing': { title: '退火记录', path: '/cleaning-production/annealing', icon: CalendarOutlined },
+    '/cleaning-production/barcode': { title: '明码识别记录', path: '/cleaning-production/barcode', icon: CalendarOutlined },
+    '/cleaning-production/coding': { title: '打码记录', path: '/cleaning-production/coding', icon: CalendarOutlined },
+    '/cleaning-production/fine-polishing': { title: '精抛记录', path: '/cleaning-production/fine-polishing', icon: CalendarOutlined },
+    '/cleaning-production/grinding': { title: '磨削记录', path: '/cleaning-production/grinding', icon: CalendarOutlined },
+    '/cleaning-production/inner-cavity': { title: '内腔抛丸记录', path: '/cleaning-production/inner-cavity', icon: CalendarOutlined },
+    '/cleaning-production/intelligent-polishing': { title: '智能磨削记录', path: '/cleaning-production/intelligent-polishing', icon: CalendarOutlined },
+    '/cleaning-production/powder-coating': { title: '喷粉记录', path: '/cleaning-production/powder-coating', icon: CalendarOutlined },
+    '/cleaning-production/robot-loading': { title: '机器人上下料记录', path: '/cleaning-production/robot-loading', icon: CalendarOutlined },
+    '/cleaning-production/rough-polishing': { title: '粗抛记录', path: '/cleaning-production/rough-polishing', icon: CalendarOutlined },
+    '/cleaning-production/vibration-core': { title: '振芯记录', path: '/cleaning-production/vibration-core', icon: CalendarOutlined },
+    // 安灯异常管理路径
+    '/andon': { title: '安灯异常管理', path: '/andon/config', icon: CalendarOutlined },
+    '/andon/config': { title: '安灯异常配置', path: '/andon/config', icon: CalendarOutlined },
+    '/andon/record': { title: '安灯异常记录', path: '/andon/record', icon: CalendarOutlined },
+    // 生产管理路径
+    '/molding': { title: '生产管理', path: '/molding/monthly-storage', icon: CalendarOutlined },
+    '/molding/monthly-storage': { title: '月度生产入库', path: '/molding/monthly-storage', icon: CalendarOutlined },
+    '/molding/daily-stats': { title: '产品日报统计', path: '/molding/daily-stats', icon: CalendarOutlined },
+    // PDA操作路径
+    '/pda': { title: 'PDA操作', path: '/pda/sand-core-inbound', icon: CalendarOutlined },
+    '/pda/sand-core-inbound': { title: '砂芯入库', path: '/pda/sand-core-inbound', icon: CalendarOutlined },
+    '/pda/sand-core-outbound': { title: '砂芯出库', path: '/pda/sand-core-outbound', icon: CalendarOutlined },
+    // 现场管理路径
+    '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
+    '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },
   }
 
   const matched = route.matched.filter(item => item.path !== '/')
@@ -74,6 +102,30 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   // 添加在制品管理父级菜单
   if (route.path.startsWith('/wip')) {
     items.push(pathMap['/wip'])
+  }
+  // 添加清理生产记录父级菜单
+  if (route.path.startsWith('/cleaning-production')) {
+    items.push(pathMap['/cleaning-production'])
+  }
+
+  // 添加安灯异常管理父级菜单
+  if (route.path.startsWith('/andon')) {
+    items.push(pathMap['/andon'])
+  }
+
+  // 添加生产管理父级菜单
+  if (route.path.startsWith('/molding')) {
+    items.push(pathMap['/molding'])
+  }
+
+  // 添加PDA操作父级菜单
+  if (route.path.startsWith('/pda')) {
+    items.push(pathMap['/pda'])
+  }
+
+  // 添加现场管理父级菜单
+  if (route.path.startsWith('/site')) {
+    items.push(pathMap['/site'])
   }
 
   // 添加匹配的路由
@@ -97,3 +149,4 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   margin-right: 4px;
 }
 </style>
+

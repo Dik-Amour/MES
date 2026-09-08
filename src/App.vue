@@ -29,6 +29,7 @@
           mode="inline"
           :theme="siderTheme"
           @click="handleMenuClick"
+          @openChange="handleOpenChange"
         >
           <a-menu-item key="/">
             <HomeOutlined />
@@ -47,6 +48,24 @@
             <a-menu-item key="/cleaning/fine-cleaning">细清排产</a-menu-item>
           </a-sub-menu>
 
+          <a-sub-menu key="cleaning-production">
+            <template #icon>
+              <ToolOutlined />
+            </template>
+            <template #title>清理生产记录</template>
+            <a-menu-item key="/cleaning-production/annealing">退火记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/vibration-core">振芯记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/grinding">磨削记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/rough-polishing">粗抛记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/intelligent-polishing">智能磨削记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/inner-cavity">内腔抛丸记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/fine-polishing">精抛记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/powder-coating">喷粉记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/barcode">明码识别记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/coding">打码记录</a-menu-item>
+            <a-menu-item key="/cleaning-production/robot-loading">机器人上下料记录</a-menu-item>
+          </a-sub-menu>
+
           <a-sub-menu key="wip">
             <template #icon>
               <InboxOutlined />
@@ -58,6 +77,41 @@
             <a-menu-item key="/wip/monthly-report">生产月度统计</a-menu-item>
             <a-menu-item key="/wip/annual-report">生产年度统计</a-menu-item>
             <a-menu-item key="/wip/material-stat">毛坯材质生产统计</a-menu-item>
+          </a-sub-menu>
+
+          <a-sub-menu key="andon">
+            <template #icon>
+              <AlertOutlined />
+            </template>
+            <template #title>安灯异常管理</template>
+            <a-menu-item key="/andon/config">安灯异常配置</a-menu-item>
+            <a-menu-item key="/andon/record">安灯异常记录</a-menu-item>
+          </a-sub-menu>
+
+          <a-sub-menu key="molding">
+            <template #icon>
+              <BarChartOutlined />
+            </template>
+            <template #title>生产管理</template>
+            <a-menu-item key="/molding/monthly-storage">月度生产入库</a-menu-item>
+            <a-menu-item key="/molding/daily-stats">产品日报统计</a-menu-item>
+          </a-sub-menu>
+
+          <a-sub-menu key="pda">
+            <template #icon>
+              <MobileOutlined />
+            </template>
+            <template #title>PDA操作</template>
+            <a-menu-item key="/pda/sand-core-inbound">砂芯入库</a-menu-item>
+            <a-menu-item key="/pda/sand-core-outbound">砂芯出库</a-menu-item>
+          </a-sub-menu>
+
+          <a-sub-menu key="site">
+            <template #icon>
+              <SafetyOutlined />
+            </template>
+            <template #title>现场管理</template>
+            <a-menu-item key="/site/safety-inspection">安全巡检</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="user">
@@ -168,6 +222,11 @@ import {
   BulbFilled,
   LogoutOutlined,
   CalendarOutlined,
+  ToolOutlined,
+  AlertOutlined,
+  BarChartOutlined,
+  MobileOutlined,
+  SafetyOutlined,
   InboxOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
@@ -192,28 +251,57 @@ const siderTheme = computed(() => 'light')
 // 路由路径对应的父级菜单 key（用于自动展开目录）
 const parentKeyMap: Array<[string, string]> = [
   ['/cleaning', 'cleaning'],
+  ['/cleaning-production', 'cleaning-production'],
   ['/wip', 'wip'],
+  ['/andon', 'andon'],
+  ['/molding', 'molding'],
+  ['/pda', 'pda'],
+  ['/site', 'site'],
   ['/users', 'user'],
   ['/settings', 'system'],
   ['/security', 'system'],
   ['/permissions', 'system']
 ]
 
+// 所有子菜单 key 列表
+// 根据路径查找所属的父级目录 key（路径段边界匹配，避免 '/cleaning-production' 被误匹配到 '/cleaning'）
+const findParent = (path: string): string | undefined => {
+  const found = parentKeyMap.find(
+    ([prefix]) => path === prefix || path.startsWith(prefix + '/')
+  )
+  return found?.[1]
+}
+
 // 监听路由变化，更新选中的菜单项，并自动展开当前页面所属的目录
 watch(
   () => route.path,
   (newPath) => {
     selectedKeys.value = [newPath]
-    const parent = parentKeyMap.find(([prefix]) => newPath.startsWith(prefix))
-    if (parent && !openKeys.value.includes(parent[1])) {
-      openKeys.value = [...openKeys.value, parent[1]]
+    const parentKey = findParent(newPath)
+    if (parentKey) {
+      openKeys.value = [parentKey]
     }
   },
   { immediate: true }
 )
 
-// 菜单点击处理
+// 手风琴：展开一个子目录时，自动折叠其他已展开的子目录（同一时刻只保留一个目录展开）
+const handleOpenChange = (keys: string[]) => {
+  // 用户点开某目录标题（keys 增）时，只保留最近展开的那个；全部收起（keys 为空）时则全收
+  openKeys.value = keys.length ? [keys[keys.length - 1]] : []
+}
+
+// 菜单项点击处理 - 点击叶子菜单项时只保留所属目录展开，并跳转路由
 const handleMenuClick = ({ key }: { key: string }) => {
+  // 点击的是菜单项（叶子项），找到所属的父级 sub-menu key
+  const clickedParent = findParent(key)
+  if (clickedParent) {
+    // 只保留当前所属目录展开，自动折叠其他目录
+    openKeys.value = [clickedParent]
+  } else {
+    // 点击的是首页等无父级的菜单，收起所有目录
+    openKeys.value = []
+  }
   router.push(key)
 }
 
@@ -347,3 +435,5 @@ const handleLogout = () => {
   }
 }
 </style>
+
+

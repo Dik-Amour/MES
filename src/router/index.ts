@@ -18,94 +18,207 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/cleaning/monthly',
     name: 'MonthlyCleaningPlan',
-    component: () => import('@/views/MonthlyCleaningPlan.vue'),
+    component: () => import('@/views/cleaning/MonthlyCleaningPlan.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/cleaning/feeding',
     name: 'FeedingSchedule',
-    component: () => import('@/views/FeedingSchedule.vue'),
+    component: () => import('@/views/cleaning/FeedingSchedule.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/cleaning/molding',
     name: 'MoldingSchedule',
-    component: () => import('@/views/MoldingSchedule.vue'),
+    component: () => import('@/views/cleaning/MoldingSchedule.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/cleaning/heat-treatment',
     name: 'HeatTreatmentSchedule',
-    component: () => import('@/views/HeatTreatmentSchedule.vue'),
+    component: () => import('@/views/cleaning/HeatTreatmentSchedule.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/cleaning/fine-cleaning',
     name: 'FineCleaningSchedule',
-    component: () => import('@/views/FineCleaningSchedule.vue'),
+    component: () => import('@/views/cleaning/FineCleaningSchedule.vue'),
+    meta: { requiresAuth: true }
+  },
+  // 清理生产记录路由
+  {
+    path: '/cleaning-production/annealing',
+    name: 'AnnealingRecord',
+    component: () => import('@/views/cleaning-production/AnnealingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/barcode',
+    name: 'BarcodeRecognitionRecord',
+    component: () => import('@/views/cleaning-production/BarcodeRecognitionRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/coding',
+    name: 'CodingRecord',
+    component: () => import('@/views/cleaning-production/CodingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/fine-polishing',
+    name: 'FinePolishingRecord',
+    component: () => import('@/views/cleaning-production/FinePolishingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/grinding',
+    name: 'GrindingRecord',
+    component: () => import('@/views/cleaning-production/GrindingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/inner-cavity',
+    name: 'InnerCavityShotBlastingRecord',
+    component: () => import('@/views/cleaning-production/InnerCavityShotBlastingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/intelligent-polishing',
+    name: 'IntelligentPolishingRecord',
+    component: () => import('@/views/cleaning-production/IntelligentPolishingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/powder-coating',
+    name: 'PowderCoatingRecord',
+    component: () => import('@/views/cleaning-production/PowderCoatingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/robot-loading',
+    name: 'RobotLoadingRecord',
+    component: () => import('@/views/cleaning-production/RobotLoadingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/rough-polishing',
+    name: 'RoughPolishingRecord',
+    component: () => import('@/views/cleaning-production/RoughPolishingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cleaning-production/vibration-core',
+    name: 'VibrationCoreRecord',
+    component: () => import('@/views/cleaning-production/VibrationCoreRecord.vue'),
     meta: { requiresAuth: true }
   },
   // 在制品管理路由
   {
     path: '/wip/initial-data',
     name: 'WipInitialData',
-    component: () => import('@/views/WipInitialData.vue'),
+    component: () => import('@/views/wip/WipInitialData.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/wip/detail',
     name: 'WipDetail',
-    component: () => import('@/views/WipDetail.vue'),
+    component: () => import('@/views/wip/WipDetail.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/wip/summary',
     name: 'WipSummary',
-    component: () => import('@/views/WipSummary.vue'),
+    component: () => import('@/views/wip/WipSummary.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/wip/monthly-report',
     name: 'WipMonthlyReport',
-    component: () => import('@/views/WipMonthlyReport.vue'),
+    component: () => import('@/views/wip/WipMonthlyReport.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/wip/annual-report',
     name: 'WipAnnualReport',
-    component: () => import('@/views/WipAnnualReport.vue'),
+    component: () => import('@/views/wip/WipAnnualReport.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/wip/material-stat',
     name: 'WipMaterialStat',
-    component: () => import('@/views/WipMaterialStat.vue'),
+    component: () => import('@/views/wip/WipMaterialStat.vue'),
+    meta: { requiresAuth: true }
+  },
+  // 安灯异常管理路由
+  {
+    path: '/andon/config',
+    name: 'AndonExceptionConfig',
+    component: () => import('@/views/andon/AndonExceptionConfig.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/andon/record',
+    name: 'AndonExceptionRecord',
+    component: () => import('@/views/andon/AndonExceptionRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  // 生产管理路由
+  {
+    path: '/molding/monthly-storage',
+    name: 'MonthlyProductionStorage',
+    component: () => import('@/views/molding/MonthlyProductionStorage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/molding/daily-stats',
+    name: 'ProductDailyStats',
+    component: () => import('@/views/molding/ProductDailyStats.vue'),
+    meta: { requiresAuth: true }
+  },
+  // PDA操作路由
+  {
+    path: '/pda/sand-core-inbound',
+    name: 'SandCoreInbound',
+    component: () => import('@/views/pda/SandCoreInbound.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/sand-core-outbound',
+    name: 'SandCoreOutbound',
+    component: () => import('@/views/pda/SandCoreOutbound.vue'),
+    meta: { requiresAuth: true }
+  },
+  // 现场管理路由
+  {
+    path: '/site/safety-inspection',
+    name: 'SafetyInspection',
+    component: () => import('@/views/site/SafetyInspection.vue'),
     meta: { requiresAuth: true }
   },
   // 用户管理路由
   {
     path: '/users',
     name: 'Users',
-    component: () => import('@/views/Home.vue'), // 暂时指向Home，后续替换为用户管理页面
+    component: () => import('@/views/Home.vue'),
     meta: { requiresAuth: true }
   },
   // 系统管理路由
   {
     path: '/settings',
     name: 'Settings',
-    component: () => import('@/views/Home.vue'), // 暂时指向Home，后续替换为设置页面
+    component: () => import('@/views/Home.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/security',
     name: 'Security',
-    component: () => import('@/views/Home.vue'), // 暂时指向Home，后续替换为安全页面
+    component: () => import('@/views/Home.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/permissions',
     name: 'Permissions',
-    component: () => import('@/views/Home.vue'), // 暂时指向Home，后续替换为权限页面
+    component: () => import('@/views/Home.vue'),
     meta: { requiresAuth: true }
   },
   {
