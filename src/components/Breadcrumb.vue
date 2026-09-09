@@ -78,8 +78,8 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/andon': { title: '安灯异常管理', path: '/andon/config', icon: CalendarOutlined },
     '/andon/config': { title: '安灯异常配置', path: '/andon/config', icon: CalendarOutlined },
     '/andon/record': { title: '安灯异常记录', path: '/andon/record', icon: CalendarOutlined },
-    // 生产管理路径
-    '/molding': { title: '生产管理', path: '/molding/monthly-storage', icon: CalendarOutlined },
+    // 生产报表路径
+    '/molding': { title: '生产报表', path: '/molding/monthly-storage', icon: CalendarOutlined },
     '/molding/monthly-storage': { title: '月度生产入库', path: '/molding/monthly-storage', icon: CalendarOutlined },
     '/molding/daily-stats': { title: '产品日报统计', path: '/molding/daily-stats', icon: CalendarOutlined },
     // PDA操作路径
@@ -116,7 +116,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     items.push(pathMap['/andon'])
   }
 
-  // 添加生产管理父级菜单
+  // 添加生产报表父级菜单
   if (route.path.startsWith('/molding')) {
     items.push(pathMap['/molding'])
   }

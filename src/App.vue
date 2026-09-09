@@ -95,7 +95,7 @@
             <template #icon>
               <BarChartOutlined />
             </template>
-            <template #title>生产管理</template>
+            <template #title>生产报表</template>
             <a-menu-item key="/molding/monthly-storage">月度生产入库</a-menu-item>
             <a-menu-item key="/molding/daily-stats">产品日报统计</a-menu-item>
           </a-sub-menu>

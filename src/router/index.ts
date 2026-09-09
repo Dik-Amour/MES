@@ -180,7 +180,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/andon/AndonExceptionRecord.vue'),
     meta: { requiresAuth: true }
   },
-  // 生产管理路由
+  // 生产报表路由
   {
     path: '/molding/monthly-storage',
     name: 'MonthlyProductionStorage',

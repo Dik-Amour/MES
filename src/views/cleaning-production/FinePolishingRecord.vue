@@ -35,12 +35,13 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import { ref, reactive, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 
 const productionLineOptions = ['造型三线HWS清理', '造型三线KW清理', '造型二线大件清理', '造型二线中件清理', '造型一线大件清理', '造型一线中件清理']
-const searchForm = reactive({ productionLine: undefined as string | undefined, equipment: '', subWorkstation: '', dateRange: null as any })
+const searchForm = reactive({ productionLine: undefined as string | undefined, equipment: '', subWorkstation: '', dateRange: [dayjs(), dayjs()] as any })
 const filteredData = computed(() => {
   let r = dataSource.value
   if (searchForm.productionLine) r = r.filter(i => i.productionLine === searchForm.productionLine)

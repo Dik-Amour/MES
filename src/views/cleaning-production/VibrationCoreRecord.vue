@@ -72,6 +72,7 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import { ref, reactive, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons-vue'
@@ -89,7 +90,7 @@ const searchForm = reactive({
   productionLine: undefined as string | undefined,
   equipmentName: '',
   subWorkstation: '',
-  dateRange: null as any
+  dateRange: [dayjs(), dayjs()] as any
 })
 
 const loading = ref(false)

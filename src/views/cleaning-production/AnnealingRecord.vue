@@ -110,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import { ref, reactive, computed, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import {
@@ -164,7 +165,7 @@ const searchForm = reactive({
   productionLine: undefined as string | undefined,
   equipmentName: '',
   subWorkstation: '',
-  dateRange: null as any
+  dateRange: [dayjs(), dayjs()] as any
 })
 
 // 加载状态
