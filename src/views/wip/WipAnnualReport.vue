@@ -44,7 +44,7 @@ import { computed } from 'vue'
 interface AnnualData {
   year: number
   production: number[] // 出产 12个月
-  sales: number[] // 销售 12个月
+  sales: number[] // 投料 12个月
 }
 
 interface AnnualRow {
@@ -60,7 +60,7 @@ interface AnnualRow {
   yearSpan: number
 }
 
-// 年度模拟数据（出产/销售各12个月）
+// 年度模拟数据（出产/投料各12个月）
 const annualMock: AnnualData[] = [
   {
     year: 2025,
@@ -125,14 +125,14 @@ const annualColumns = computed(() => {
   ]
 })
 
-// 年度报表行：每个年度生成 出产/销售 两行，年度列纵向合并
+// 年度报表行：每个年度生成 出产/投料 两行，年度列纵向合并
 const annualRows = computed<AnnualRow[]>(() => {
   const rows: AnnualRow[] = []
   annualMock.forEach(data => {
     const year = data.year
     const categories = [
       { name: '出产', values: data.production },
-      { name: '销售', values: data.sales }
+      { name: '投料', values: data.sales }
     ]
     categories.forEach((cat, idx) => {
       const sumQuarter = (startIdx: number) =>
