@@ -107,6 +107,18 @@
                 <div class="stat-value stat-blue">400</div>
                 <div class="stat-label">生产数量</div>
               </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">47.06颗/小时</div>
+                <div class="stat-label">生产效率</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">08:00:00</div>
+                <div class="stat-label">启动时间</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">16:30:00</div>
+                <div class="stat-label">关闭时间</div>
+              </div>
             </div>
           </div>
         </template>
@@ -172,8 +184,16 @@
                 <div class="stat-label">生产数量</div>
               </div>
               <div class="stat-item">
+                <div class="stat-value stat-blue">32.94颗/小时</div>
+                <div class="stat-label">生产效率</div>
+              </div>
+              <div class="stat-item">
                 <div class="stat-value stat-blue">07:00:00</div>
-                <div class="stat-label">时间点</div>
+                <div class="stat-label">启动时间</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">15:30:00</div>
+                <div class="stat-label">关闭时间</div>
               </div>
             </div>
           </div>
@@ -192,8 +212,16 @@
                 <div class="stat-label">生产数量</div>
               </div>
               <div class="stat-item">
+                <div class="stat-value stat-blue">41.18颗/小时</div>
+                <div class="stat-label">生产效率</div>
+              </div>
+              <div class="stat-item">
                 <div class="stat-value stat-blue">08:00:00</div>
-                <div class="stat-label">时间点</div>
+                <div class="stat-label">启动时间</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">16:30:00</div>
+                <div class="stat-label">关闭时间</div>
               </div>
             </div>
           </div>

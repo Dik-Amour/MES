@@ -137,6 +137,11 @@
                       {{ formatNumber(record[column.key]) }}
                     </span>
                   </template>
+                  <template v-else-if="column.key === 'recordType'">
+                    <a-tag :color="record.recordType === '改制' ? 'purple' : 'default'">
+                      {{ record.recordType }}
+                    </a-tag>
+                  </template>
                   <template v-else-if="column.key === 'action'">
                     <template v-if="activeLine === 'ALL'">
                       <a-button type="link" size="small" @click="handleViewDetail(record)">明细</a-button>
@@ -144,7 +149,6 @@
                     <template v-else>
                       <a-space>
                         <a-button type="link" size="small" @click="handleEdit(record)">编辑</a-button>
-                        <a-button type="link" size="small" @click="handleRowReform(record)">改制</a-button>
                         <a-popconfirm
                           title="确定删除该条记录吗？"
                           @confirm="handleDelete(record)"
@@ -260,9 +264,17 @@
               <a-input-number v-model:value="formData.buyBackQuantity" :min="0" :precision="0" style="width: 100%" />
             </a-form-item>
           </a-col>
-          <a-col :span="12">
+                          <a-col :span="12">
             <a-form-item label="二次检验报废数量" name="reinspectionScrapQuantity">
               <a-input-number v-model:value="formData.reinspectionScrapQuantity" :min="0" :precision="0" style="width: 100%" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="类型" name="recordType">
+              <a-select v-model:value="formData.recordType" placeholder="请选择类型">
+                <a-select-option value="正常">正常</a-select-option>
+                <a-select-option value="改制">改制</a-select-option>
+              </a-select>
             </a-form-item>
           </a-col>
         </a-row>
@@ -433,6 +445,7 @@ interface WipDetailData {
   externalScrapQuantity: number
   buyBackQuantity: number
   reinspectionScrapQuantity: number
+  recordType: string
   creator: string
   createTime: string
 }
@@ -553,6 +566,7 @@ const columns = [
   { title: '外废数量', dataIndex: 'externalScrapQuantity', key: 'externalScrapQuantity', width: 110 },
   { title: '回购数量', dataIndex: 'buyBackQuantity', key: 'buyBackQuantity', width: 110 },
   { title: '二次检验报废数量', dataIndex: 'reinspectionScrapQuantity', key: 'reinspectionScrapQuantity', width: 150 },
+  { title: '类型', dataIndex: 'recordType', key: 'recordType', width: 90 },
   { title: '创建人', dataIndex: 'creator', key: 'creator', width: 100 },
   { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 },
   { title: '操作', key: 'action', width: 210, fixed: 'right' as const }
@@ -575,6 +589,7 @@ const mockDataByLine: Record<string, WipDetailData[]> = {
       externalScrapQuantity: 0,
       buyBackQuantity: 0,
       reinspectionScrapQuantity: 0,
+      recordType: '正常',
       creator: '张三',
       createTime: '2026-08-05 07:05:59'
     },
@@ -592,6 +607,7 @@ const mockDataByLine: Record<string, WipDetailData[]> = {
       externalScrapQuantity: 0,
       buyBackQuantity: 0,
       reinspectionScrapQuantity: 0,
+      recordType: '正常',
       creator: '张三',
       createTime: '2026-08-05 07:05:45'
     },
@@ -609,6 +625,7 @@ const mockDataByLine: Record<string, WipDetailData[]> = {
       externalScrapQuantity: 0,
       buyBackQuantity: 0,
       reinspectionScrapQuantity: 0,
+      recordType: '正常',
       creator: '张三',
       createTime: '2026-08-05 07:05:30'
     }
@@ -628,6 +645,7 @@ const mockDataByLine: Record<string, WipDetailData[]> = {
       externalScrapQuantity: 0,
       buyBackQuantity: 5,
       reinspectionScrapQuantity: 1,
+      recordType: '正常',
       creator: '张三',
       createTime: '2026-08-05 07:06:12'
     },
@@ -645,6 +663,7 @@ const mockDataByLine: Record<string, WipDetailData[]> = {
       externalScrapQuantity: 1,
       buyBackQuantity: 0,
       reinspectionScrapQuantity: 0,
+      recordType: '正常',
       creator: '王芳',
       createTime: '2026-08-05 07:07:00'
     }
@@ -664,6 +683,7 @@ const mockDataByLine: Record<string, WipDetailData[]> = {
       externalScrapQuantity: 4,
       buyBackQuantity: 8,
       reinspectionScrapQuantity: 2,
+      recordType: '正常',
       creator: '李强',
       createTime: '2026-08-05 07:08:20'
     },
@@ -681,6 +701,7 @@ const mockDataByLine: Record<string, WipDetailData[]> = {
       externalScrapQuantity: 0,
       buyBackQuantity: 2,
       reinspectionScrapQuantity: 0,
+      recordType: '正常',
       creator: '李强',
       createTime: '2026-08-05 07:09:05'
     }
@@ -703,7 +724,8 @@ const formData = reactive({
   inFeedQuantity: 0,
   externalScrapQuantity: 0,
   buyBackQuantity: 0,
-  reinspectionScrapQuantity: 0
+  reinspectionScrapQuantity: 0,
+  recordType: '正常'
 })
 const formRules = {
   seriesName: [{ required: true, message: '请选择系列名称', trigger: 'change' }],
@@ -811,6 +833,7 @@ const handleAdd = () => {
   formData.externalScrapQuantity = 0
   formData.buyBackQuantity = 0
   formData.reinspectionScrapQuantity = 0
+  formData.recordType = '正常'
   formModalVisible.value = true
 }
 
@@ -828,6 +851,7 @@ const handleEdit = (record: WipDetailData) => {
   formData.externalScrapQuantity = record.externalScrapQuantity
   formData.buyBackQuantity = record.buyBackQuantity
   formData.reinspectionScrapQuantity = record.reinspectionScrapQuantity
+  formData.recordType = record.recordType || '正常'
   // 与新增逻辑一致：按毛坯件号联动回显毛坯名称
   handleFormPartNoChange()
   formModalVisible.value = true
@@ -855,6 +879,7 @@ const handleFormSubmit = async () => {
     record.externalScrapQuantity = formData.externalScrapQuantity
     record.buyBackQuantity = formData.buyBackQuantity
     record.reinspectionScrapQuantity = formData.reinspectionScrapQuantity
+    record.recordType = formData.recordType
     message.success('修改成功')
   } else {
     const lineData = mockDataByLine[formData.lineCode]
@@ -873,6 +898,7 @@ const handleFormSubmit = async () => {
         externalScrapQuantity: formData.externalScrapQuantity,
         buyBackQuantity: formData.buyBackQuantity,
         reinspectionScrapQuantity: formData.reinspectionScrapQuantity,
+        recordType: formData.recordType,
         creator: currentUser,
         createTime: now
       })
@@ -1015,7 +1041,6 @@ const handleImportConfirm = () => {
 
 // ========== 改制功能 ==========
 const reformModalVisible = ref(false)
-const reformRecord = ref<WipDetailData | null>(null)
 const reformFormData = reactive({
   reformPartNo: '' as string,
   feedPartNo: '' as string,
@@ -1064,16 +1089,7 @@ const handleReformFeedChange = () => {
 }
 
 const handleReform = () => {
-  reformRecord.value = null
   reformFormData.reformPartNo = ''
-  reformFormData.feedPartNo = ''
-  reformFormData.quantity = undefined
-  reformModalVisible.value = true
-}
-
-const handleRowReform = (record: WipDetailData) => {
-  reformRecord.value = record
-  reformFormData.reformPartNo = record.blankPartNo
   reformFormData.feedPartNo = ''
   reformFormData.quantity = undefined
   reformModalVisible.value = true
@@ -1133,6 +1149,7 @@ const handleReformSubmit = () => {
       externalScrapQuantity: 0,
       buyBackQuantity: 0,
       reinspectionScrapQuantity: 0,
+      recordType: '改制',
       creator: 'admin',
       createTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
     })
