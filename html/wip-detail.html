@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在制品明细 - MES系统</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; color: #333; font-size: 14px; }
+
+    /* Layout */
+    .wip-detail { padding: 16px; }
+    .card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+
+    /* Search form */
+    .search-form { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .form-item { display: flex; align-items: center; gap: 6px; }
+    .form-item label { white-space: nowrap; color: #666; }
+    .form-item select, .form-item input[type="text"], .form-item input[type="date"] {
+      height: 32px; padding: 4px 11px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; outline: none; background: #fff;
+    }
+    .form-item select:focus, .form-item input:focus { border-color: #4096ff; box-shadow: 0 0 0 2px rgba(64,150,255,0.1); }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 15px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; cursor: pointer; background: #fff; color: #333; transition: all 0.2s; }
+    .btn:hover { border-color: #4096ff; color: #4096ff; }
+    .btn-primary { background: #1677ff; border-color: #1677ff; color: #fff; }
+    .btn-primary:hover { background: #4096ff; border-color: #4096ff; color: #fff; }
+    .btn-primary-ghost { background: transparent; border-color: #1677ff; color: #1677ff; }
+    .btn-primary-ghost:hover { background: rgba(22,119,255,0.06); }
+    .btn-danger-ghost { background: transparent; border-color: #ff4d4f; color: #ff4d4f; }
+    .btn-danger-ghost:hover { background: rgba(255,77,79,0.06); }
+    .btn-danger-ghost:disabled, .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+    .btn-link { border: none; background: none; color: #1677ff; cursor: pointer; padding: 0 4px; height: auto; }
+    .btn-link:hover { color: #4096ff; }
+    .btn-link.danger { color: #ff4d4f; }
+    .btn-link.danger:hover { color: #ff7875; }
+    .btn-sm { height: 24px; padding: 0 7px; font-size: 13px; }
+
+    /* Action bar */
+    .action-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .action-bar .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Tabs */
+    .tabs { border-bottom: 1px solid #f0f0f0; margin-bottom: 16px; display: flex; gap: 0; }
+    .tab { padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; color: #666; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; font-size: 14px; }
+    .tab:hover { color: #1677ff; }
+    .tab.active { color: #1677ff; border-bottom-color: #1677ff; font-weight: 500; }
+
+    /* Table */
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 1700px; }
+    th, td { padding: 10px 12px; border: 1px solid #f0f0f0; text-align: left; white-space: nowrap; }
+    th { background: #fafafa; font-weight: 500; color: #333; position: sticky; top: 0; }
+    td { background: #fff; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .zero { color: #bfbfbf; }
+    .summary-row { background: #fafafa; font-weight: 500; }
+    .summary-row td { background: #fafafa; }
+    td.fixed-left, th.fixed-left { position: sticky; left: 0; z-index: 1; }
+    td.fixed-right, th.fixed-right { position: sticky; right: 0; z-index: 1; background: #fff; }
+    th.fixed-left { background: #fafafa; z-index: 2; }
+    th.fixed-right { background: #fafafa; z-index: 2; }
+    .summary-row td.fixed-right { background: #fafafa; }
+
+    /* Tags */
+    .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 12px; line-height: 20px; border: 1px solid #d9d9d9; background: #fafafa; color: #666; }
+    .tag-purple { color: #531dab; background: #f9f0ff; border-color: #d3adf7; }
+    .tag-blue { color: #1677ff; background: #e6f4ff; border-color: #91caff; }
+    .tag-orange { color: #d46b08; background: #fff7e6; border-color: #ffd591; }
+
+    /* Pagination */
+    .pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 14px; color: #666; }
+    .pagination select { height: 28px; padding: 2px 8px; border: 1px solid #d9d9d9; border-radius: 4px; }
+    .pagination button { height: 28px; min-width: 28px; padding: 0 8px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; cursor: pointer; }
+    .pagination button:hover { border-color: #1677ff; color: #1677ff; }
+    .pagination button.active { border-color: #1677ff; color: #1677ff; background: #e6f4ff; }
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Checkbox */
+    .checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: #1677ff; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal { background: #fff; border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); width: 720px; max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; }
+    .modal-sm { width: 560px; }
+    .modal-md { width: 600px; }
+    .modal-lg { width: 1100px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid #f0f0f0; }
+    .modal-header h3 { font-size: 16px; font-weight: 500; }
+    .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #999; padding: 4px; }
+    .modal-close:hover { color: #333; }
+    .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px; border-top: 1px solid #f0f0f0; }
+
+    /* Form in modal */
+    .modal-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+    .modal-form .full-width { grid-column: 1 / -1; }
+    .modal-form .form-group { display: flex; align-items: center; gap: 8px; }
+    .modal-form .form-group label { width: 100px; text-align: right; color: #666; flex-shrink: 0; }
+    .modal-form .form-group select, .modal-form .form-group input {
+      flex: 1; height: 32px; padding: 4px 11px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; background: #fff;
+    }
+    .modal-form .form-group input:disabled { background: #f5f5f5; color: #999; }
+    .modal-form .form-group input[type="number"] { -moz-appearance: textfield; }
+    .modal-form .form-group input::-webkit-outer-spin-button, .modal-form .form-group input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    /* Alert */
+    .alert { padding: 8px 16px; border-radius: 6px; margin-bottom: 16px; border: 1px solid #ffe58f; background: #fffbe6; color: #ad6800; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; }
+    .alert::before { content: "⚠"; }
+
+    /* Upload */
+    .upload-area { display: flex; align-items: center; gap: 8px; }
+    .upload-tip { color: #999; font-size: 12px; margin-top: 4px; }
+
+    /* Toast */
+    .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 6px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .toast-success { background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; }
+    .toast-warning { background: #fffbe6; border: 1px solid #ffe58f; color: #d48806; }
+    .toast-info { background: #e6f4ff; border: 1px solid #91caff; color: #1677ff; }
+
+    /* Confirm dialog */
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .confirm-overlay.show { opacity: 1; pointer-events: auto; }
+    .confirm-dialog { background: #fff; border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); width: 420px; padding: 24px; }
+    .confirm-dialog h4 { font-size: 16px; margin-bottom: 8px; }
+    .confirm-dialog p { color: #666; margin-bottom: 20px; font-size: 14px; }
+    .confirm-dialog .confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wip-detail">
+    <!-- 搜索栏 -->
+    <div class="card">
+      <div class="search-form">
+        <div class="form-item">
+          <label>产品系列</label>
+          <select id="searchSeries" style="width:180px">
+            <option value="">请选择产品系列</option>
+            <option value="WP12">WP12</option>
+            <option value="WP13">WP13</option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label>毛坯件号</label>
+          <select id="searchPartNo" style="width:180px">
+            <option value="">请选择毛坯件号</option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label>毛坯名称</label>
+          <input type="text" id="searchName" placeholder="请输入毛坯名称" style="width:180px" />
+        </div>
+        <div class="form-item">
+          <button class="btn btn-primary" onclick="handleSearch()">🔍 查询</button>
+          <button class="btn" onclick="handleReset()">🔄 重置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 功能按钮区 + 日期快捷条 -->
+    <div class="card">
+      <div class="action-bar">
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="handleAdd()">＋ 新增</button>
+          <button class="btn btn-primary-ghost" onclick="handleReform()">🔄 改制</button>
+          <button class="btn btn-primary-ghost" onclick="handleImport()">📤 导入</button>
+          <button class="btn btn-danger-ghost" id="btnBatchDelete" onclick="handleBatchDelete()" disabled>🗑 批量删除</button>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-sm" id="btnToday" onclick="handleQuickDate('today')" style="background:#1677ff;color:#fff;border-color:#1677ff">当天</button>
+          <button class="btn btn-sm" id="btnYesterday" onclick="handleQuickDate('yesterday')">◀ 昨天</button>
+          <input type="date" id="selectedDate" style="height:24px;padding:2px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px" />
+          <button class="btn btn-sm" id="btnTomorrow" onclick="handleQuickDate('tomorrow')">明天 ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 产线Tab + 数据列表 -->
+    <div class="card">
+      <div class="tabs" id="lineTabs"></div>
+      <div class="table-wrapper">
+        <table id="dataTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+          <tfoot id="tableFoot"></tfoot>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <!-- 新增/编辑弹窗 -->
+  <div class="modal-overlay" id="formModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="formModalTitle">新增在制品明细</h3>
+        <button class="modal-close" onclick="closeFormModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-form">
+          <div class="form-group">
+            <label>产线</label>
+            <select id="formLine"></select>
+          </div>
+          <div class="form-group">
+            <label>系列名称</label>
+            <select id="formSeries" onchange="handleFormSeriesChange()">
+              <option value="">请选择系列名称</option>
+              <option value="WP12">WP12</option>
+              <option value="WP13">WP13</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>毛坯件号</label>
+            <select id="formPartNo" onchange="handleFormPartNoChange()"></select>
+          </div>
+          <div class="form-group">
+            <label>毛坯名称</label>
+            <input type="text" id="formBlankName" disabled placeholder="选择毛坯件号后自动回显" />
+          </div>
+          <div class="form-group"><label>出产数量</label><input type="number" id="formOutput" min="0" value="0" /></div>
+          <div class="form-group"><label>细清数量</label><input type="number" id="formFineClean" min="0" value="0" /></div>
+          <div class="form-group"><label>内废数量</label><input type="number" id="formInternalScrap" min="0" value="0" /></div>
+          <div class="form-group"><label>入库/投料数量</label><input type="number" id="formInFeed" min="0" value="0" /></div>
+          <div class="form-group"><label>外废数量</label><input type="number" id="formExternalScrap" min="0" value="0" /></div>
+          <div class="form-group"><label>回购数量</label><input type="number" id="formBuyBack" min="0" value="0" /></div>
+          <div class="form-group"><label>二次检验报废</label><input type="number" id="formReinspection" min="0" value="0" /></div>
+          <div class="form-group">
+            <label>类型</label>
+            <select id="formRecordType">
+              <option value="正常">正常</option>
+              <option value="改制">改制</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeFormModal()">取消</button>
+        <button class="btn btn-primary" onclick="handleFormSubmit()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导入弹窗 -->
+  <div class="modal-overlay" id="importModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Excel批量导入</h3>
+        <button class="modal-close" onclick="closeImportModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert">导入文件将按当前产线覆盖在制品明细数据，请先下载模板按格式填写！</div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+          <label style="width:80px;text-align:right;color:#666">选择文件</label>
+          <div class="upload-area">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">📤 选择Excel文件</button>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFileSelected(this)" />
+          </div>
+        </div>
+        <div class="upload-tip" style="margin-left:88px">仅支持.xlsx、.xls格式文件</div>
+        <div id="fileName" style="margin-left:88px;margin-top:8px;color:#1677ff;font-size:13px"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeImportModal()">取消</button>
+        <button class="btn btn-primary" onclick="handleImportConfirm()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 件号改制弹窗 -->
+  <div class="modal-overlay" id="reformModal">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>件号改制</h3>
+        <button class="modal-close" onclick="closeReformModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-form">
+          <div class="form-group full-width"><label>产线</label><input type="text" id="reformLine" disabled /></div>
+          <div class="form-group full-width">
+            <label>改制件号</label>
+            <select id="reformPartNo" onchange="handleReformPartChange()"></select>
+          </div>
+          <div class="form-group full-width"><label>产品系列</label><input type="text" id="reformPartSeries" disabled /></div>
+          <div class="form-group full-width"><label>毛坯名称</label><input type="text" id="reformPartName" disabled /></div>
+          <div class="form-group full-width">
+            <label>投料件号</label>
+            <select id="reformFeedNo" onchange="handleReformFeedChange()"></select>
+          </div>
+          <div class="form-group full-width"><label>产品系列</label><input type="text" id="reformFeedSeries" disabled /></div>
+          <div class="form-group full-width"><label>毛坯名称</label><input type="text" id="reformFeedName" disabled /></div>
+          <div class="form-group full-width"><label>数量</label><input type="number" id="reformQty" min="1" placeholder="请输入" /></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeReformModal()">取消</button>
+        <button class="btn btn-primary" onclick="handleReformSubmit()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 明细列表弹窗 -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>明细列表</h3>
+        <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-wrapper">
+          <table id="detailTable">
+            <thead>
+              <tr>
+                <th>日期</th><th>产线</th><th>产品系列</th><th>毛坯件号</th><th>毛坯名称</th>
+                <th class="text-right">出产数量</th><th class="text-right">细清数量</th><th class="text-right">内废数量</th>
+                <th class="text-right">入库数量</th><th class="text-right">外废数量</th><th class="text-right">回购数量</th>
+                <th class="text-right">二次检验报废</th>
+              </tr>
+            </thead>
+            <tbody id="detailBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeDetailModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+  <!-- Confirm -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <h4 id="confirmTitle">提示</h4>
+      <p id="confirmContent"></p>
+      <div class="confirm-actions">
+        <button class="btn" onclick="confirmCancel()">取消</button>
+        <button class="btn btn-danger-ghost" id="confirmOkBtn" onclick="confirmOk()">删除</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ========== 数据 ==========
+const seriesOptions = ['WP12', 'WP13'];
+const blankPartOptions = [
+  { partNo: '1003449788R', name: '气缸体毛坯', series: 'WP13' },
+  { partNo: '1012995998R', name: '机体毛坯', series: 'WP12' },
+  { partNo: '612630010001R', name: '气缸体毛坯', series: 'WP12' },
+  { partNo: '612630020001R', name: '气缸盖毛坯', series: 'WP12' },
+  { partNo: '1003449801R', name: '飞轮壳毛坯', series: 'WP13' },
+  { partNo: '1003449777R', name: '齿轮室毛坯', series: 'WP13' }
+];
+const partNoOptions = blankPartOptions.map(p => p.partNo);
+const lineOptions = [
+  { label: '造型一线大件清理', value: 'LINE-01' },
+  { label: '造型三线KW清理', value: 'LINE-02' },
+  { label: '造型三线HWS清理', value: 'LINE-03' },
+  { label: '总览', value: 'ALL' }
+];
+const lineNameMap = Object.fromEntries(lineOptions.map(l => [l.value, l.label]));
+const formLineOptions = lineOptions.filter(l => l.value !== 'ALL');
+const quantityKeys = ['outputQuantity','fineCleanQuantity','internalScrapQuantity','inFeedQuantity','externalScrapQuantity','buyBackQuantity','reinspectionScrapQuantity'];
+
+// 模拟数据（深拷贝以支持运行时修改）
+const mockDataByLine = {
+  'LINE-01': [
+    { key:'1', lineCode:'LINE-01', seriesName:'WP13', blankPartNo:'1003449788R', blankName:'气缸体毛坯', outputQuantity:0, fineCleanQuantity:0, internalScrapQuantity:0, inFeedQuantity:354, externalScrapQuantity:0, buyBackQuantity:0, reinspectionScrapQuantity:0, recordType:'正常', creator:'张三', createTime:'2026-08-05 07:05:59' },
+    { key:'2', lineCode:'LINE-01', seriesName:'WP12', blankPartNo:'1012995998R', blankName:'机体毛坯', outputQuantity:0, fineCleanQuantity:0, internalScrapQuantity:0, inFeedQuantity:20, externalScrapQuantity:0, buyBackQuantity:0, reinspectionScrapQuantity:0, recordType:'正常', creator:'张三', createTime:'2026-08-05 07:05:45' },
+    { key:'3', lineCode:'LINE-01', seriesName:'WP12', blankPartNo:'612630010001R', blankName:'气缸体毛坯', outputQuantity:0, fineCleanQuantity:0, internalScrapQuantity:0, inFeedQuantity:60, externalScrapQuantity:0, buyBackQuantity:0, reinspectionScrapQuantity:0, recordType:'正常', creator:'张三', createTime:'2026-08-05 07:05:30' }
+  ],
+  'LINE-02': [
+    { key:'1', lineCode:'LINE-02', seriesName:'WP12', blankPartNo:'612630020001R', blankName:'气缸盖毛坯', outputQuantity:120, fineCleanQuantity:98, internalScrapQuantity:2, inFeedQuantity:128, externalScrapQuantity:0, buyBackQuantity:5, reinspectionScrapQuantity:1, recordType:'正常', creator:'张三', createTime:'2026-08-05 07:06:12' },
+    { key:'2', lineCode:'LINE-02', seriesName:'WP13', blankPartNo:'1003449801R', blankName:'飞轮壳毛坯', outputQuantity:45, fineCleanQuantity:40, internalScrapQuantity:0, inFeedQuantity:46, externalScrapQuantity:1, buyBackQuantity:0, reinspectionScrapQuantity:0, recordType:'正常', creator:'王芳', createTime:'2026-08-05 07:07:00' }
+  ],
+  'LINE-03': [
+    { key:'1', lineCode:'LINE-03', seriesName:'WP13', blankPartNo:'1003449777R', blankName:'齿轮室毛坯', outputQuantity:200, fineCleanQuantity:185, internalScrapQuantity:3, inFeedQuantity:210, externalScrapQuantity:4, buyBackQuantity:8, reinspectionScrapQuantity:2, recordType:'正常', creator:'李强', createTime:'2026-08-05 07:08:20' },
+    { key:'2', lineCode:'LINE-03', seriesName:'WP12', blankPartNo:'1012995998R', blankName:'机体毛坯', outputQuantity:88, fineCleanQuantity:80, internalScrapQuantity:1, inFeedQuantity:90, externalScrapQuantity:0, buyBackQuantity:2, reinspectionScrapQuantity:0, recordType:'正常', creator:'李强', createTime:'2026-08-05 07:09:05' }
+  ]
+};
+
+// ========== 状态 ==========
+let activeLine = 'LINE-01';
+let selectedRowKeys = new Set();
+let dataSource = [];
+let pagination = { current: 1, pageSize: 20, total: 0 };
+let editingRecord = null;
+let selectedFile = null;
+let confirmCallback = null;
+
+const columns = [
+  { title: '系列名称', key: 'seriesName', width: 110 },
+  { title: '毛坯件号', key: 'blankPartNo', width: 150 },
+  { title: '毛坯名称', key: 'blankName', width: 140 },
+  { title: '出产数量', key: 'outputQuantity', width: 110, numeric: true },
+  { title: '细清数量', key: 'fineCleanQuantity', width: 110, numeric: true },
+  { title: '内废数量', key: 'internalScrapQuantity', width: 110, numeric: true },
+  { title: '入库/投料数量', key: 'inFeedQuantity', width: 130, numeric: true },
+  { title: '外废数量', key: 'externalScrapQuantity', width: 110, numeric: true },
+  { title: '回购数量', key: 'buyBackQuantity', width: 110, numeric: true },
+  { title: '二次检验报废', key: 'reinspectionScrapQuantity', width: 150, numeric: true },
+  { title: '类型', key: 'recordType', width: 90 },
+  { title: '创建人', key: 'creator', width: 100 },
+  { title: '创建时间', key: 'createTime', width: 170 },
+  { title: '操作', key: 'action', width: 180 }
+];
+
+// ========== 初始化 ==========
+window.addEventListener('DOMContentLoaded', () => {
+  // 日期默认今天
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('selectedDate').value = today;
+
+  // 搜索栏毛坯件号下拉
+  const sel = document.getElementById('searchPartNo');
+  partNoOptions.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; sel.appendChild(o); });
+
+  // 渲染Tab
+  renderTabs();
+  loadData();
+});
+
+// ========== Tab ==========
+function renderTabs() {
+  const container = document.getElementById('lineTabs');
+  container.innerHTML = '';
+  lineOptions.forEach(line => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (line.value === activeLine ? ' active' : '');
+    btn.textContent = line.label;
+    btn.onclick = () => { activeLine = line.value; selectedRowKeys.clear(); pagination.current = 1; renderTabs(); loadData(); };
+    container.appendChild(btn);
+  });
+}
+
+// ========== 数据加载 ==========
+function loadData() {
+  let allData = [];
+  if (activeLine === 'ALL') {
+    Object.values(mockDataByLine).forEach(items => { allData = allData.concat(items.map(r => ({...r}))); });
+  } else {
+    allData = (mockDataByLine[activeLine] || []).map(r => ({...r}));
+  }
+  const { productSeries, blankPartNo, blankName } = getSearchForm();
+  dataSource = allData.filter(item => {
+    if (productSeries && item.seriesName !== productSeries) return false;
+    if (blankPartNo && item.blankPartNo !== blankPartNo) return false;
+    if (blankName && !item.blankName.includes(blankName)) return false;
+    return true;
+  });
+  pagination.total = dataSource.length;
+  renderTable();
+  updateBatchBtn();
+}
+
+function getSearchForm() {
+  return {
+    productSeries: document.getElementById('searchSeries').value,
+    blankPartNo: document.getElementById('searchPartNo').value,
+    blankName: document.getElementById('searchName').value.trim()
+  };
+}
+
+// ========== 搜索 ==========
+function handleSearch() { selectedRowKeys.clear(); pagination.current = 1; loadData(); }
+function handleReset() {
+  document.getElementById('searchSeries').value = '';
+  document.getElementById('searchPartNo').value = '';
+  document.getElementById('searchName').value = '';
+  handleSearch();
+}
+
+// ========== 日期快捷 ==========
+function handleQuickDate(key) {
+  const d = new Date();
+  if (key === 'yesterday') d.setDate(d.getDate() - 1);
+  else if (key === 'tomorrow') d.setDate(d.getDate() + 1);
+  document.getElementById('selectedDate').value = d.toISOString().split('T')[0];
+  ['btnToday','btnYesterday','btnTomorrow'].forEach(id => {
+    document.getElementById(id).style.background = '';
+    document.getElementById(id).style.color = '';
+    document.getElementById(id).style.borderColor = '';
+  });
+  if (key === 'today') { const b = document.getElementById('btnToday'); b.style.background='#1677ff'; b.style.color='#fff'; b.style.borderColor='#1677ff'; }
+  if (key === 'yesterday') { const b = document.getElementById('btnYesterday'); b.style.background='#1677ff'; b.style.color='#fff'; b.style.borderColor='#1677ff'; }
+  if (key === 'tomorrow') { const b = document.getElementById('btnTomorrow'); b.style.background='#1677ff'; b.style.color='#fff'; b.style.borderColor='#1677ff'; }
+}
+
+// ========== 表格渲染 ==========
+function renderTable() {
+  // thead
+  const thead = document.getElementById('tableHead');
+  thead.innerHTML = '<tr><th style="width:40px"><input type="checkbox" class="checkbox" id="checkAll" onchange="toggleAll(this.checked)" /></th>' +
+    columns.map((c, i) => {
+      const cls = i === 0 ? 'fixed-left' : (i === columns.length - 1 ? 'fixed-right' : '');
+      return `<th class="${cls}" style="width:${c.width}px">${c.title}</th>`;
+    }).join('') + '</tr>';
+
+  // tbody
+  const tbody = document.getElementById('tableBody');
+  const start = (pagination.current - 1) * pagination.pageSize;
+  const pageData = dataSource.slice(start, start + pagination.pageSize);
+
+  tbody.innerHTML = pageData.map(row => {
+    const rowKey = row.lineCode + '::' + row.key;
+    const checked = selectedRowKeys.has(rowKey) ? 'checked' : '';
+    let html = `<tr data-key="${rowKey}"><td><input type="checkbox" class="checkbox row-check" value="${rowKey}" ${checked} onchange="toggleRow('${rowKey}', this.checked)" /></td>`;
+    columns.forEach((c, i) => {
+      const cls = i === 0 ? 'fixed-left' : (i === columns.length - 1 ? 'fixed-right' : '');
+      if (c.key === 'action') {
+        if (activeLine === 'ALL') {
+          html += `<td class="${cls}"><button class="btn-link" onclick="handleViewDetail('${row.lineCode}','${row.key}')">明细</button></td>`;
+        } else {
+          html += `<td class="${cls}"><button class="btn-link" onclick="handleEditRow('${row.lineCode}','${row.key}')">编辑</button> <button class="btn-link danger" onclick="handleDeleteRow('${row.lineCode}','${row.key}')">删除</button> <button class="btn-link" onclick="handleViewFeed('${row.blankPartNo}')">查看投料记录</button></td>`;
+        }
+      } else if (c.key === 'recordType') {
+        const tagCls = row.recordType === '改制' ? 'tag-purple' : '';
+        html += `<td class="${cls}"><span class="tag ${tagCls}">${row.recordType}</span></td>`;
+      } else if (c.numeric) {
+        const val = row[c.key] || 0;
+        const z = val === 0 ? ' zero' : '';
+        html += `<td class="${cls} text-right"><span class="${z}">${formatNumber(val)}</span></td>`;
+      } else {
+        html += `<td class="${cls}">${row[c.key] || ''}</td>`;
+      }
+    });
+    return html + '</tr>';
+  }).join('');
+
+  // tfoot
+  renderSummary();
+
+  // pagination
+  renderPagination();
+}
+
+function renderSummary() {
+  const tfoot = document.getElementById('tableFoot');
+  const totals = {};
+  quantityKeys.forEach(k => { totals[k] = dataSource.reduce((s, r) => s + (r[k] || 0), 0); });
+
+  let html = '<tr class="summary-row"><td></td>';
+  columns.forEach((c, i) => {
+    const cls = i === 0 ? 'fixed-left' : (i === columns.length - 1 ? 'fixed-right' : '');
+    if (i === 0) { html += `<td class="${cls}">合计</td>`; }
+    else if (c.numeric) { html += `<td class="${cls} text-right">${formatNumber(totals[c.key] || 0)}</td>`; }
+    else if (c.key === 'action') { html += `<td class="${cls}"></td>`; }
+    else { html += `<td class="${cls}"></td>`; }
+  });
+  tfoot.innerHTML = html + '</tr>';
+}
+
+function renderPagination() {
+  const pg = pagination;
+  const totalPages = Math.ceil(pg.total / pg.pageSize) || 1;
+  let html = `<span>共 ${pg.total} 条记录</span>`;
+  html += `<button ${pg.current <= 1 ? 'disabled' : ''} onclick="goPage(${pg.current - 1})">‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - pg.current) > 1) {
+      if (i === 3 || i === totalPages - 2) html += '<span>...</span>';
+      continue;
+    }
+    html += `<button class="${i === pg.current ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button ${pg.current >= totalPages ? 'disabled' : ''} onclick="goPage(${pg.current + 1})">›</button>`;
+  html += `<select onchange="changePageSize(this.value)"><option value="20" ${pg.pageSize===20?'selected':''}>20 条/页</option><option value="50" ${pg.pageSize===50?'selected':''}>50 条/页</option><option value="100" ${pg.pageSize===100?'selected':''}>100 条/页</option></select>`;
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(pagination.total / pagination.pageSize) || 1;
+  if (p < 1 || p > totalPages) return;
+  pagination.current = p;
+  selectedRowKeys.clear();
+  renderTable();
+}
+function changePageSize(v) { pagination.pageSize = parseInt(v); pagination.current = 1; selectedRowKeys.clear(); renderTable(); }
+
+// ========== 勾选 ==========
+function toggleRow(key, checked) {
+  if (checked) selectedRowKeys.add(key); else selectedRowKeys.delete(key);
+  updateBatchBtn();
+}
+function toggleAll(checked) {
+  const start = (pagination.current - 1) * pagination.pageSize;
+  const pageData = dataSource.slice(start, start + pagination.pageSize);
+  pageData.forEach(r => {
+    const k = r.lineCode + '::' + r.key;
+    if (checked) selectedRowKeys.add(k); else selectedRowKeys.delete(k);
+  });
+  renderTable();
+  updateBatchBtn();
+}
+function updateBatchBtn() {
+  const btn = document.getElementById('btnBatchDelete');
+  btn.disabled = selectedRowKeys.size === 0;
+  btn.textContent = selectedRowKeys.size > 0 ? `🗑 批量删除 (${selectedRowKeys.size})` : '🗑 批量删除';
+}
+
+// ========== 新增/编辑弹窗 ==========
+function handleAdd() {
+  editingRecord = null;
+  document.getElementById('formModalTitle').textContent = '新增在制品明细';
+  const line = activeLine === 'ALL' ? 'LINE-01' : activeLine;
+  populateFormLine(line);
+  document.getElementById('formSeries').value = '';
+  populateFormPartNo('');
+  document.getElementById('formBlankName').value = '';
+  ['formOutput','formFineClean','formInternalScrap','formInFeed','formExternalScrap','formBuyBack','formReinspection'].forEach(id => document.getElementById(id).value = 0);
+  document.getElementById('formRecordType').value = '正常';
+  document.getElementById('formModal').classList.add('show');
+}
+
+function handleEditRow(lineCode, key) {
+  const row = (mockDataByLine[lineCode] || []).find(r => r.key === key);
+  if (!row) return;
+  editingRecord = { lineCode, key };
+  document.getElementById('formModalTitle').textContent = '编辑在制品明细';
+  populateFormLine(lineCode);
+  document.getElementById('formSeries').value = row.seriesName;
+  populateFormPartNo(row.seriesName);
+  document.getElementById('formPartNo').value = row.blankPartNo;
+  document.getElementById('formBlankName').value = row.blankName;
+  document.getElementById('formOutput').value = row.outputQuantity;
+  document.getElementById('formFineClean').value = row.fineCleanQuantity;
+  document.getElementById('formInternalScrap').value = row.internalScrapQuantity;
+  document.getElementById('formInFeed').value = row.inFeedQuantity;
+  document.getElementById('formExternalScrap').value = row.externalScrapQuantity;
+  document.getElementById('formBuyBack').value = row.buyBackQuantity;
+  document.getElementById('formReinspection').value = row.reinspectionScrapQuantity;
+  document.getElementById('formRecordType').value = row.recordType || '正常';
+  document.getElementById('formModal').classList.add('show');
+}
+
+function populateFormLine(val) {
+  const sel = document.getElementById('formLine');
+  sel.innerHTML = '';
+  formLineOptions.forEach(l => { const o = document.createElement('option'); o.value = l.value; o.textContent = l.label; o.selected = l.value === val; sel.appendChild(o); });
+}
+function populateFormPartNo(series) {
+  const sel = document.getElementById('formPartNo');
+  sel.innerHTML = '<option value="">请选择毛坯件号</option>';
+  const filtered = series ? blankPartOptions.filter(p => p.series === series) : blankPartOptions;
+  filtered.forEach(p => { const o = document.createElement('option'); o.value = p.partNo; o.textContent = p.partNo; sel.appendChild(o); });
+}
+function handleFormSeriesChange() {
+  const series = document.getElementById('formSeries').value;
+  document.getElementById('formPartNo').value = '';
+  document.getElementById('formBlankName').value = '';
+  populateFormPartNo(series);
+}
+function handleFormPartNoChange() {
+  const partNo = document.getElementById('formPartNo').value;
+  const part = blankPartOptions.find(p => p.partNo === partNo);
+  document.getElementById('formBlankName').value = part ? part.name : '';
+}
+
+function handleFormSubmit() {
+  const form = {
+    lineCode: document.getElementById('formLine').value,
+    seriesName: document.getElementById('formSeries').value,
+    blankPartNo: document.getElementById('formPartNo').value,
+    blankName: document.getElementById('formBlankName').value,
+    outputQuantity: parseInt(document.getElementById('formOutput').value) || 0,
+    fineCleanQuantity: parseInt(document.getElementById('formFineClean').value) || 0,
+    internalScrapQuantity: parseInt(document.getElementById('formInternalScrap').value) || 0,
+    inFeedQuantity: parseInt(document.getElementById('formInFeed').value) || 0,
+    externalScrapQuantity: parseInt(document.getElementById('formExternalScrap').value) || 0,
+    buyBackQuantity: parseInt(document.getElementById('formBuyBack').value) || 0,
+    reinspectionScrapQuantity: parseInt(document.getElementById('formReinspection').value) || 0,
+    recordType: document.getElementById('formRecordType').value
+  };
+  if (!form.seriesName) { showToast('请选择系列名称', 'warning'); return; }
+  if (!form.blankPartNo) { showToast('请选择毛坯件号', 'warning'); return; }
+
+  if (editingRecord) {
+    const row = (mockDataByLine[editingRecord.lineCode] || []).find(r => r.key === editingRecord.key);
+    if (row) { Object.assign(row, form); row.lineName = lineNameMap[form.lineCode]; }
+    showToast('修改成功', 'success');
+  } else {
+    const lineData = mockDataByLine[form.lineCode];
+    if (lineData) {
+      lineData.unshift({
+        key: String(Date.now()), lineCode: form.lineCode, lineName: lineNameMap[form.lineCode],
+        seriesName: form.seriesName, blankPartNo: form.blankPartNo, blankName: form.blankName,
+        outputQuantity: form.outputQuantity, fineCleanQuantity: form.fineCleanQuantity,
+        internalScrapQuantity: form.internalScrapQuantity, inFeedQuantity: form.inFeedQuantity,
+        externalScrapQuantity: form.externalScrapQuantity, buyBackQuantity: form.buyBackQuantity,
+        reinspectionScrapQuantity: form.reinspectionScrapQuantity, recordType: form.recordType,
+        creator: 'admin', createTime: new Date().toLocaleString('sv').replace('T',' ')
+      });
+    }
+    showToast('新增成功', 'success');
+  }
+  closeFormModal();
+  loadData();
+}
+function closeFormModal() { document.getElementById('formModal').classList.remove('show'); }
+
+// ========== 删除 ==========
+function handleDeleteRow(lineCode, key) {
+  showConfirm('确定删除该条记录吗？', '删除', () => {
+    const lineData = mockDataByLine[lineCode];
+    if (lineData) { const i = lineData.findIndex(r => r.key === key); if (i !== -1) lineData.splice(i, 1); }
+    selectedRowKeys.delete(lineCode + '::' + key);
+    loadData();
+    showToast('删除成功', 'success');
+  });
+}
+function handleBatchDelete() {
+  if (selectedRowKeys.size === 0) { showToast('请先勾选要删除的记录', 'warning'); return; }
+  showConfirm(`确定删除选中的 ${selectedRowKeys.size} 条记录吗？`, '删除', () => {
+    Object.values(mockDataByLine).forEach(lineData => {
+      for (let i = lineData.length - 1; i >= 0; i--) {
+        if (selectedRowKeys.has(lineData[i].lineCode + '::' + lineData[i].key)) lineData.splice(i, 1);
+      }
+    });
+    selectedRowKeys.clear();
+    loadData();
+    showToast('批量删除成功', 'success');
+  });
+}
+function handleViewFeed(partNo) { showToast(`查看 ${partNo} 的投料记录`, 'info'); }
+
+// ========== 导入弹窗 ==========
+function handleImport() { selectedFile = null; document.getElementById('fileInput').value = ''; document.getElementById('fileName').textContent = ''; document.getElementById('importModal').classList.add('show'); }
+function closeImportModal() { document.getElementById('importModal').classList.remove('show'); }
+function handleFileSelected(input) { if (input.files.length) { selectedFile = input.files[0]; document.getElementById('fileName').textContent = selectedFile.name; } }
+function handleImportConfirm() {
+  if (!selectedFile) { showToast('请选择要导入的文件', 'warning'); return; }
+  showToast('导入成功', 'success'); closeImportModal(); loadData();
+}
+
+// ========== 改制弹窗 ==========
+function handleReform() {
+  document.getElementById('reformLine').value = lineNameMap[activeLine] || activeLine;
+  populateReformSelects();
+  document.getElementById('reformPartNo').value = '';
+  document.getElementById('reformFeedNo').value = '';
+  document.getElementById('reformPartSeries').value = '';
+  document.getElementById('reformPartName').value = '';
+  document.getElementById('reformFeedSeries').value = '';
+  document.getElementById('reformFeedName').value = '';
+  document.getElementById('reformQty').value = '';
+  document.getElementById('reformModal').classList.add('show');
+}
+function closeReformModal() { document.getElementById('reformModal').classList.remove('show'); }
+function populateReformSelects() {
+  const partSel = document.getElementById('reformPartNo');
+  const feedSel = document.getElementById('reformFeedNo');
+  partSel.innerHTML = '<option value="">请选择</option>';
+  feedSel.innerHTML = '<option value="">请选择</option>';
+  blankPartOptions.forEach(p => {
+    partSel.appendChild(Object.assign(document.createElement('option'), { value: p.partNo, textContent: p.partNo }));
+    feedSel.appendChild(Object.assign(document.createElement('option'), { value: p.partNo, textContent: p.partNo }));
+  });
+}
+function handleReformPartChange() {
+  const v = document.getElementById('reformPartNo').value;
+  const part = blankPartOptions.find(p => p.partNo === v);
+  document.getElementById('reformPartSeries').value = part ? part.series : '';
+  document.getElementById('reformPartName').value = part ? part.name : '';
+  if (document.getElementById('reformFeedNo').value === v) document.getElementById('reformFeedNo').value = '';
+  handleReformFeedChange();
+  // 更新投料件号列表：过滤掉已选的改制件号
+  const feedSel = document.getElementById('reformFeedNo');
+  const cur = feedSel.value;
+  feedSel.innerHTML = '<option value="">请选择</option>';
+  blankPartOptions.filter(p => p.partNo !== v).forEach(p => {
+    feedSel.appendChild(Object.assign(document.createElement('option'), { value: p.partNo, textContent: p.partNo }));
+  });
+  feedSel.value = cur;
+}
+function handleReformFeedChange() {
+  const v = document.getElementById('reformFeedNo').value;
+  const part = blankPartOptions.find(p => p.partNo === v);
+  document.getElementById('reformFeedSeries').value = part ? part.series : '';
+  document.getElementById('reformFeedName').value = part ? part.name : '';
+}
+function handleReformSubmit() {
+  const reformPartNo = document.getElementById('reformPartNo').value;
+  const feedPartNo = document.getElementById('reformFeedNo').value;
+  const qty = parseInt(document.getElementById('reformQty').value);
+  if (!reformPartNo) { showToast('请选择改制件号', 'warning'); return; }
+  if (!feedPartNo) { showToast('请选择投料件号', 'warning'); return; }
+  if (!qty || qty <= 0) { showToast('请输入有效的数量', 'warning'); return; }
+  if (reformPartNo === feedPartNo) { showToast('改制件号与投料件号不能相同', 'warning'); return; }
+
+  const lineData = mockDataByLine[activeLine] || [];
+  const feedPartInfo = blankPartOptions.find(p => p.partNo === feedPartNo);
+
+  // 改制件号出产减
+  const aRecord = lineData.find(r => r.blankPartNo === reformPartNo);
+  if (aRecord) aRecord.outputQuantity -= qty;
+
+  // 投料件号入库加
+  const bRecord = lineData.find(r => r.blankPartNo === feedPartNo);
+  if (bRecord) {
+    bRecord.inFeedQuantity += qty;
+  } else {
+    lineData.unshift({
+      key: String(Date.now()), lineCode: activeLine, lineName: lineNameMap[activeLine],
+      seriesName: feedPartInfo?.series || '', blankPartNo: feedPartNo, blankName: feedPartInfo?.name || '',
+      outputQuantity: 0, fineCleanQuantity: 0, internalScrapQuantity: 0, inFeedQuantity: qty,
+      externalScrapQuantity: 0, buyBackQuantity: 0, reinspectionScrapQuantity: 0,
+      recordType: '改制', creator: 'admin', createTime: new Date().toLocaleString('sv').replace('T',' ')
+    });
+  }
+  showToast(`改制成功：${reformPartNo} 出产数 -${qty}，${feedPartNo} 投料数 +${qty}`, 'success');
+  closeReformModal();
+  loadData();
+}
+
+// ========== 明细弹窗 ==========
+function handleViewDetail(lineCode, key) {
+  const row = (mockDataByLine[lineCode] || []).find(r => r.key === key);
+  if (!row) return;
+  const list = [];
+  Object.values(mockDataByLine).forEach(items => {
+    items.forEach(item => {
+      if (item.blankPartNo === row.blankPartNo) {
+        list.push(item);
+      }
+    });
+  });
+  const tbody = document.getElementById('detailBody');
+  tbody.innerHTML = list.map(r => {
+    const isZero = k => (r[k] || 0) === 0 ? 'zero' : '';
+    return `<tr>
+      <td>${r.createTime.slice(0,10)}</td><td>${lineNameMap[r.lineCode]||r.lineCode}</td><td>${r.seriesName}</td>
+      <td>${r.blankPartNo}</td><td>${r.blankName}</td>
+      <td class="text-right"><span class="${isZero('outputQuantity')}">${formatNumber(r.outputQuantity)}</span></td>
+      <td class="text-right"><span class="${isZero('fineCleanQuantity')}">${formatNumber(r.fineCleanQuantity)}</span></td>
+      <td class="text-right"><span class="${isZero('internalScrapQuantity')}">${formatNumber(r.internalScrapQuantity)}</span></td>
+      <td class="text-right"><span class="${isZero('inFeedQuantity')}">${formatNumber(r.inFeedQuantity)}</span></td>
+      <td class="text-right"><span class="${isZero('externalScrapQuantity')}">${formatNumber(r.externalScrapQuantity)}</span></td>
+      <td class="text-right"><span class="${isZero('buyBackQuantity')}">${formatNumber(r.buyBackQuantity)}</span></td>
+      <td class="text-right"><span class="${isZero('reinspectionScrapQuantity')}">${formatNumber(r.reinspectionScrapQuantity)}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('detailModal').classList.add('show');
+}
+function closeDetailModal() { document.getElementById('detailModal').classList.remove('show'); }
+
+// ========== 工具 ==========
+function formatNumber(v) { return (v || 0).toLocaleString('zh-CN'); }
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast toast-' + (type || 'info') + ' show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showConfirm(title, okText, callback) {
+  document.getElementById('confirmTitle').textContent = '批量删除';
+  document.getElementById('confirmContent').textContent = title;
+  document.getElementById('confirmOkBtn').textContent = okText;
+  confirmCallback = callback;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function confirmOk() { document.getElementById('confirmOverlay').classList.remove('show'); if (confirmCallback) confirmCallback(); }
+function confirmCancel() { document.getElementById('confirmOverlay').classList.remove('show'); confirmCallback = null; }
+
+// ESC关闭弹窗
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['formModal','importModal','reformModal','detailModal'].forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('confirmOverlay').classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>
