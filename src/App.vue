@@ -82,6 +82,19 @@
             <a-menu-item key="/wip/material-stat">毛坯材质生产统计</a-menu-item>
           </a-sub-menu>
 
+          <a-sub-menu key="visualization">
+            <template #icon>
+              <FundOutlined />
+            </template>
+            <template #title>可视化</template>
+            <a-menu-item key="/dashboard/production">生产大屏</a-menu-item>
+            <a-menu-item key="/dashboard/equipment">设备大屏</a-menu-item>
+            <a-menu-item key="/dashboard/quality">质量大屏</a-menu-item>
+            <a-menu-item key="/dashboard/personnel">人员大屏</a-menu-item>
+            <a-menu-item key="/dashboard/safety">安环大屏</a-menu-item>
+            <a-menu-item key="/dashboard/plant">厂区大屏</a-menu-item>
+          </a-sub-menu>
+
           <a-sub-menu key="andon">
             <template #icon>
               <AlertOutlined />
@@ -230,7 +243,8 @@ import {
   BarChartOutlined,
   MobileOutlined,
   SafetyOutlined,
-  InboxOutlined
+  InboxOutlined,
+  FundOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useTheme } from '@/composables/useTheme'
@@ -256,6 +270,7 @@ const parentKeyMap: Array<[string, string]> = [
   ['/cleaning', 'cleaning'],
   ['/cleaning-production', 'cleaning-production'],
   ['/wip', 'wip'],
+  ['/dashboard', 'visualization'],
   ['/andon', 'andon'],
   ['/molding', 'molding'],
   ['/pda', 'pda'],

@@ -193,6 +193,43 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/molding/ProductDailyStats.vue'),
     meta: { requiresAuth: true }
   },
+  // 可视化路由
+  {
+    path: '/dashboard/production',
+    name: 'ProductionDashboard',
+    component: () => import('@/views/dashboard/ProductionDashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/equipment',
+    name: 'EquipmentDashboard',
+    component: () => import('@/views/dashboard/EquipmentDashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/quality',
+    name: 'QualityDashboard',
+    component: () => import('@/views/dashboard/QualityDashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/personnel',
+    name: 'PersonnelDashboard',
+    component: () => import('@/views/dashboard/PersonnelDashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/safety',
+    name: 'SafetyDashboard',
+    component: () => import('@/views/dashboard/SafetyDashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/plant',
+    name: 'PlantDashboard',
+    component: () => import('@/views/dashboard/PlantDashboard.vue'),
+    meta: { requiresAuth: true }
+  },
   // PDA操作路由
   {
     path: '/pda/sand-core-inbound',

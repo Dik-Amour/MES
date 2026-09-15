@@ -52,7 +52,7 @@
           <div class="station-info">
             <div class="station-stats">
               <div class="stat-item">
-                <div class="stat-label">工位</div>
+                <div class="stat-label">子工位</div>
                 <div class="stat-value stat-blue">主体芯制芯工位</div>
               </div>
               <div class="stat-item">
@@ -100,7 +100,7 @@
           <div class="station-info dipping-station">
             <div class="station-stats">
               <div class="stat-item">
-                <div class="stat-label">工位</div>
+                <div class="stat-label">子工位</div>
                 <div class="stat-value stat-blue">浸涂机器人</div>
               </div>
               <div class="stat-item">
@@ -128,7 +128,7 @@
           <div class="station-info">
             <div class="station-stats">
               <div class="stat-item">
-                <div class="stat-label">工位</div>
+                <div class="stat-label">子工位</div>
                 <div class="stat-value stat-blue">底盘制芯机</div>
               </div>
               <div class="stat-item">
@@ -176,7 +176,7 @@
           <div class="station-info dipping-station">
             <div class="station-stats">
               <div class="stat-item">
-                <div class="stat-label">工位</div>
+                <div class="stat-label">子工位</div>
                 <div class="stat-value stat-blue">底盘芯浸涂机器人</div>
               </div>
               <div class="stat-item">
@@ -204,7 +204,7 @@
           <div class="station-info">
             <div class="station-stats">
               <div class="stat-item">
-                <div class="stat-label">工位</div>
+                <div class="stat-label">子工位</div>
                 <div class="stat-value stat-blue">浸涂机器人</div>
               </div>
               <div class="stat-item">
@@ -240,7 +240,7 @@
             <div class="station-info">
               <div class="station-stats">
                 <div class="stat-item">
-                  <div class="stat-label">工位</div>
+                  <div class="stat-label">子工位</div>
                   <div class="stat-value stat-blue">磨床</div>
                 </div>
                 <div class="stat-item">
@@ -271,7 +271,7 @@
             <div class="station-info">
               <div class="station-stats">
                 <div class="stat-item">
-                  <div class="stat-label">工位</div>
+                  <div class="stat-label">子工位</div>
                   <div class="stat-value stat-blue">粗抛</div>
                 </div>
                 <div class="stat-item">
@@ -299,7 +299,7 @@
             <div class="station-info">
               <div class="station-stats">
                 <div class="stat-item">
-                  <div class="stat-label">工位</div>
+                  <div class="stat-label">子工位</div>
                   <div class="stat-value stat-blue">精抛</div>
                 </div>
                 <div class="stat-item">
@@ -327,7 +327,7 @@
             <div class="station-info">
               <div class="station-stats">
                 <div class="stat-item">
-                  <div class="stat-label">工位</div>
+                  <div class="stat-label">子工位</div>
                   <div class="stat-value stat-blue">打码</div>
                 </div>
                 <div class="stat-item">
@@ -453,6 +453,7 @@ const moldingData = computed(() => {
 
 // 主体芯明细表格列
 const coreDetailColumns = [
+  { title: '毛坯件号', dataIndex: 'blankPartNo', key: 'blankPartNo', width: 140 },
   { title: '砂芯名称', dataIndex: 'coreName', key: 'coreName', width: 150 },
   { title: '计划颗数', dataIndex: 'planCount', key: 'planCount', width: 100, align: 'center' as const },
   { title: '数采颗数', dataIndex: '采Count', key: '采Count', width: 100, align: 'center' as const },
@@ -462,12 +463,13 @@ const coreDetailColumns = [
 
 // 主体芯明细模拟数据
 const coreDetailData = ref([
-  { key: '1', coreName: '底盘芯', planCount: 200, 采Count: 200, reportCount: 200, status: '进行中' },
-  { key: '2', coreName: '主体芯', planCount: 200, 采Count: 200, reportCount: 200, status: '待开始' }
+  { key: '1', blankPartNo: '1003449788R', coreName: '底盘芯', planCount: 200, 采Count: 200, reportCount: 200, status: '进行中' },
+  { key: '2', blankPartNo: '1003449788R', coreName: '主体芯', planCount: 200, 采Count: 200, reportCount: 200, status: '待开始' }
 ])
 
 // 底盘芯明细表格列
 const chassisCoreColumns = [
+  { title: '毛坯件号', dataIndex: 'blankPartNo', key: 'blankPartNo', width: 140 },
   { title: '砂芯名称', dataIndex: 'coreName', key: 'coreName', width: 150 },
   { title: '计划颗数', dataIndex: 'planCount', key: 'planCount', width: 100, align: 'center' as const },
   { title: '数采颗数', dataIndex: '采Count', key: '采Count', width: 100, align: 'center' as const },
@@ -477,7 +479,7 @@ const chassisCoreColumns = [
 
 // 底盘芯明细模拟数据
 const chassisCoreData = ref([
-  { key: '1', coreName: '底盘芯', planCount: 300, 采Count: 280, reportCount: 280, status: '进行中' }
+  { key: '1', blankPartNo: '612630020001R', coreName: '底盘芯', planCount: 300, 采Count: 280, reportCount: 280, status: '进行中' }
 ])
 </script>
 

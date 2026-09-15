@@ -86,6 +86,14 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/pda': { title: 'PDA操作', path: '/pda/sand-core-inbound', icon: CalendarOutlined },
     '/pda/sand-core-inbound': { title: '砂芯入库', path: '/pda/sand-core-inbound', icon: CalendarOutlined },
     '/pda/sand-core-outbound': { title: '砂芯出库', path: '/pda/sand-core-outbound', icon: CalendarOutlined },
+    // 可视化路径
+    '/dashboard': { title: '可视化', path: '/dashboard/production', icon: InboxOutlined },
+    '/dashboard/production': { title: '生产大屏', path: '/dashboard/production', icon: InboxOutlined },
+    '/dashboard/equipment': { title: '设备大屏', path: '/dashboard/equipment', icon: InboxOutlined },
+    '/dashboard/quality': { title: '质量大屏', path: '/dashboard/quality', icon: InboxOutlined },
+    '/dashboard/personnel': { title: '人员大屏', path: '/dashboard/personnel', icon: InboxOutlined },
+    '/dashboard/safety': { title: '安环大屏', path: '/dashboard/safety', icon: InboxOutlined },
+    '/dashboard/plant': { title: '厂区大屏', path: '/dashboard/plant', icon: InboxOutlined },
     // 现场管理路径
     '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
     '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },
