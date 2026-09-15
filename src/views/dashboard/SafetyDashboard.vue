@@ -1,13 +1,8 @@
 <template>
   <div class="safety-dashboard">
     <!-- 顶部标题栏 -->
-    <div class="top-bar">
-      <div class="run-days">安全生产运行<span class="days">184</span>天</div>
-      <div class="screen-title">材料成型中心工业园区安全环保大屏</div>
-      <div class="top-right">
-        <div class="logo-box">logo</div>
-      </div>
-    </div>
+    <DashboardHeader title="材料成型中心工业园区安全环保大屏" />
+    <div class="run-bar">安全生产运行<span class="days">184</span>天</div>
 
     <div class="safety-grid">
       <!-- 左列 -->
@@ -61,23 +56,51 @@
 
       <!-- 中列 -->
       <div class="col">
-        <div class="chart-card plant-card">
-          <div class="chart-header">
-            <span class="chart-title">厂区图-重点监测点位分布</span>
-            <div class="weather">
-              <span>温度：17℃</span>
-              <span>风向：东南风</span>
-              <span>风速：2m/s</span>
+          <div class="plant-card">
+            <div class="plant-header">
+              <span class="chart-title">厂区图-重点监测点位分布</span>
+              <div class="weather">
+                <span>温度：17℃</span>
+                <span>风向：东南风</span>
+                <span>风速：2m/s</span>
+              </div>
+            </div>
+            <div class="plant-viewport"
+              ref="plantViewportRef"
+              @mousedown="onDragStart"
+              @mousemove="onDragMove"
+              @mouseup="onDragEnd"
+              @mouseleave="onDragEnd"
+              @wheel.prevent="onZoom"
+            >
+              <img
+                :src="plantImg"
+                class="plant-img"
+                :style="imgStyle"
+                @load="onImgLoad"
+                alt="厂区图"
+                draggable="false"
+              />
+              <div
+                v-for="(d, i) in plantDots"
+                :key="i"
+                class="p-dot"
+                :class="{ active: activeDot === i }"
+                :style="{ left: d.x + '%', top: d.y + '%', background: d.color }"
+                @click.stop="toggleDot(i, $event)"
+              />
+            </div>
+            <div v-if="activeDot !== null" class="plant-tip"
+              :style="{ left: tipLeft + 'px', top: tipTop + 'px' }"
+              @click.stop="activeDot = null"
+            >
+              <div class="tip-title">{{ plantDots[activeDot].label }}</div>
+              <div class="tip-row">类型：{{ plantDots[activeDot].type }}</div>
+              <div class="tip-row">状态：<span :style="{ color: plantDots[activeDot].color }">{{ plantDots[activeDot].status }}</span></div>
+              <div class="tip-row">实时值：{{ plantDots[activeDot].value }}</div>
+              <div class="tip-row">更新时间：{{ plantDots[activeDot].time }}</div>
             </div>
           </div>
-          <div class="plant-placeholder">
-            <div class="plant-tip">冲天炉3# 熔融挥发<br/>温度：<b>1560℃</b></div>
-            <div class="dots-layer">
-              <span v-for="(d, i) in plantDots" :key="i" class="p-dot"
-                :style="{ left: d.x + '%', top: d.y + '%', background: d.color }"></span>
-            </div>
-          </div>
-        </div>
 
         <div class="chart-card">
           <div class="chart-header">
@@ -185,6 +208,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
+import DashboardHeader from './DashboardHeader.vue'
 
 // ========== 图表DOM与实例 ==========
 const furnace1ChartRef = ref<HTMLElement>()
@@ -203,17 +227,69 @@ const emissionCarouselPages = ['一期冲天炉', '二期冲天炉', 'VOCs']
 const electricCarouselIdx = ref(0)
 const electricCarouselPages = ['保温电炉', '熔化电炉']
 
-// 厂区监测点位（百分比坐标，绿=正常 红=报警）
+// 厂区图图片与拖拽状态
+import plantImg from '@/assets/image/寒亭厂区图.jpg'
+const plantViewportRef = ref<HTMLElement | null>(null)
+const imgOffset = reactive({ x: 0, y: 0 })
+const imgScale = ref(1)
+const isDragging = ref(false)
+const dragStart = reactive({ x: 0, y: 0, ox: 0, oy: 0 })
+const imgStyle = computed(() => ({
+  transform: `translate(${imgOffset.x}px, ${imgOffset.y}px) scale(${imgScale.value})`
+}))
+
+const onImgLoad = () => { /* 首次加载后可自动居中，此处保持原位 */ }
+const onDragStart = (e: MouseEvent) => {
+  isDragging.value = true
+  dragStart.x = e.clientX
+  dragStart.y = e.clientY
+  dragStart.ox = imgOffset.x
+  dragStart.oy = imgOffset.y
+}
+const onDragMove = (e: MouseEvent) => {
+  if (!isDragging.value) return
+  imgOffset.x = dragStart.ox + (e.clientX - dragStart.x)
+  imgOffset.y = dragStart.oy + (e.clientY - dragStart.y)
+}
+const onDragEnd = () => { isDragging.value = false }
+const onZoom = (e: WheelEvent) => {
+  const delta = e.deltaY > 0 ? -0.1 : 0.1
+  imgScale.value = Math.min(3, Math.max(0.5, imgScale.value + delta))
+}
+
+// 厂区监测点位（百分比坐标）
 const plantDots = [
-  { x: 78, y: 12, color: '#c00000' }, { x: 66, y: 16, color: '#70ad47' },
-  { x: 84, y: 22, color: '#70ad47' }, { x: 58, y: 24, color: '#c00000' },
-  { x: 72, y: 30, color: '#70ad47' }, { x: 88, y: 36, color: '#70ad47' },
-  { x: 62, y: 38, color: '#70ad47' }, { x: 50, y: 42, color: '#c00000' },
-  { x: 78, y: 46, color: '#70ad47' }, { x: 42, y: 50, color: '#70ad47' },
-  { x: 66, y: 54, color: '#70ad47' }, { x: 34, y: 58, color: '#c00000' },
-  { x: 54, y: 62, color: '#70ad47' }, { x: 26, y: 66, color: '#70ad47' },
-  { x: 44, y: 70, color: '#70ad47' }
+  { x: 78, y: 12, color: '#c00000', label: '冲天炉1# 排放口', type: '烟气排放', status: '超标', value: 'PM₂.₅: 42mg/m³（限值30）', time: '2026-09-15 08:30' },
+  { x: 66, y: 16, color: '#70ad47', label: '造型车间 落砂区', type: '粉尘监测', status: '正常', value: 'PM₁₀: 18mg/m³', time: '2026-09-15 08:30' },
+  { x: 84, y: 22, color: '#70ad47', label: '熔炼炉 耳部', type: '温度监测', status: '正常', value: '炉壁温度: 286℃', time: '2026-09-15 08:30' },
+  { x: 58, y: 24, color: '#c00000', label: '冲天炉3# 熔融区', type: '温度监测', status: '报警', value: '熔温: 1560℃（限值1520℃）', time: '2026-09-15 08:30' },
+  { x: 72, y: 30, color: '#70ad47', label: '浇注工位', type: '环境监测', status: '正常', value: '温度: 32℃ / 湿度: 45%', time: '2026-09-15 08:30' },
+  { x: 88, y: 36, color: '#70ad47', label: '热处理车间', type: '温度监测', status: '正常', value: '炉温: 920℃', time: '2026-09-15 08:30' },
+  { x: 62, y: 38, color: '#70ad47', label: '砂处理中心', type: '粉尘监测', status: '正常', value: 'PM₁₀: 15mg/m³', time: '2026-09-15 08:30' },
+  { x: 50, y: 42, color: '#c00000', label: '污水处理站 进水口', type: '水质监测', status: '超标', value: 'COD: 156mg/L（限值120）', time: '2026-09-15 08:30' },
+  { x: 78, y: 46, color: '#70ad47', label: '物流通道', type: '空气质量', status: '正常', value: 'VOCs: 0.8mg/m³', time: '2026-09-15 08:30' },
+  { x: 42, y: 50, color: '#70ad47', label: '配电房', type: '电气安全', status: '正常', value: '温度: 28℃ / 湿度: 38%', time: '2026-09-15 08:30' },
+  { x: 66, y: 54, color: '#70ad47', label: '空压站', type: '设备运行', status: '正常', value: '压力: 0.72MPa', time: '2026-09-15 08:30' },
+  { x: 34, y: 58, color: '#c00000', label: '废水总排口', type: '水质监测', status: '超标', value: 'SS: 85mg/L（限值70）', time: '2026-09-15 08:30' },
+  { x: 54, y: 62, color: '#70ad47', label: '成品仓库', type: '环境监测', status: '正常', value: '温度: 25℃ / 湿度: 52%', time: '2026-09-15 08:30' },
+  { x: 26, y: 66, color: '#70ad47', label: '消防水池', type: '液位监测', status: '正常', value: '液位: 3.2m', time: '2026-09-15 08:30' },
+  { x: 44, y: 70, color: '#70ad47', label: '办公区', type: '空气质量', status: '正常', value: 'PM₂.₅: 22mg/m³', time: '2026-09-15 08:30' }
 ]
+
+const activeDot = ref<number | null>(null)
+const tipLeft = ref(0)
+const tipTop = ref(0)
+const toggleDot = (i: number, e: MouseEvent) => {
+  if (activeDot.value === i) { activeDot.value = null; return }
+  activeDot.value = i
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const vpRect = plantViewportRef.value?.getBoundingClientRect() || { left: 0, top: 0 }
+  tipLeft.value = rect.left - vpRect.left + 14
+  tipTop.value = rect.top - vpRect.top - 80
+}
+
+// 点击空白处关闭弹窗
+const closeTip = () => { activeDot.value = null }
 
 // 实时报警数据
 const alarmRows = [
@@ -464,73 +540,28 @@ onBeforeUnmount(() => {
   padding: 8px;
   background: #fff;
   min-height: calc(100vh - 90px);
+  overflow-x: auto;
 }
 
-.top-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  border: 1px solid #eee;
-  padding: 6px 12px;
-  margin-bottom: 8px;
-}
-
-.run-days {
+.run-bar {
+  text-align: center;
   font-size: 15px;
   font-weight: 600;
   color: #333;
+  margin-bottom: 8px;
 }
 
-.run-days .days {
+.run-bar .days {
   color: #52c41a;
   font-size: 20px;
   margin: 0 2px;
 }
 
-.screen-title {
-  text-align: center;
-  font-size: 22px;
-  font-weight: 600;
-}
-
-.top-right {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-}
-
-.seq-badge {
-  background: #ffc000;
-  color: #fff;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.logo-box {
-  width: 90px;
-  height: 40px;
-  border: 1px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  font-size: 16px;
-  letter-spacing: 2px;
-  background: #fff
-    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><line x1="0" y1="0" x2="100%" y2="100%" stroke="%23eee" stroke-width="1"/><line x1="100%" y1="0" x2="0" y2="100%" stroke="%23eee" stroke-width="1"/></svg>');
-}
-
 .safety-grid {
   display: grid;
-  grid-template-columns: 27% 46% 27%;
+  grid-template-columns: 28% 44% 28%;
   gap: 8px;
+  min-width: 0;
 }
 
 .col {
@@ -543,14 +574,17 @@ onBeforeUnmount(() => {
   background: #f2f2f2;
   border-radius: 4px;
   padding: 8px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
 .chart-header.sub {
@@ -676,72 +710,104 @@ onBeforeUnmount(() => {
   flex-direction: column;
 }
 
-.plant-placeholder {
+.plant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.plant-viewport {
   position: relative;
   flex: 1;
   min-height: 320px;
   border: 1px solid #e0e0e0;
-  background:
-    linear-gradient(135deg, #dfe8df 0%, #cfe0cf 40%, #c3d8c3 100%),
-    radial-gradient(circle at 50% 50%, #e6efe6, #cfe0cf);
+  background: #f5f5f5;
   overflow: hidden;
+  cursor: grab;
+  user-select: none;
 }
 
-.plant-placeholder::before {
-  content: '';
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 18%;
-  bottom: 22%;
-  background: repeating-linear-gradient(
-    to right,
-    #b9c9b9 0, #b9c9b9 26px,
-    #c6d5c6 26px, #c6d5c6 30px
-  );
-  border: 1px solid #a8bca8;
-  transform: skewX(-6deg);
+.plant-viewport:active {
+  cursor: grabbing;
 }
 
-.plant-tip {
+.plant-img {
   position: absolute;
-  left: 6%;
-  top: 38%;
-  background: #fff;
-  border: 1px solid #4472c4;
-  color: #333;
-  font-size: 11px;
-  padding: 6px 10px;
-  line-height: 1.6;
-  z-index: 2;
-}
-
-.dots-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 0 0;
+  transition: transform 0.05s linear;
+  pointer-events: none;
 }
 
 .p-dot {
   position: absolute;
-  width: 9px;
-  height: 9px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  z-index: 2;
+  transition: transform 0.15s;
+  transform: translate(-50%, -50%);
 }
 
-.p-dot.sm {
-  position: static;
-  display: inline-block;
-  width: 10px;
-  height: 10px;
+.p-dot:hover {
+  transform: translate(-50%, -50%) scale(1.35);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-/* 实时报警表格 */
-.alarm-table-wrap {
-  max-height: 210px;
-  overflow-y: auto;
+.p-dot.active {
+  transform: translate(-50%, -50%) scale(1.4);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+}
+
+.plant-tip {
+  position: absolute;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 11px;
+  line-height: 1.6;
+  min-width: 180px;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.plant-tip .tip-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 3px;
+}
+
+.plant-tip .tip-row {
+  font-size: 11px;
+  color: #ddd;
+}
+
+.plant-tip .tip-row span {
+  font-weight: 600;
+}
+
+.weather {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: #333;
+  background: #fff;
+  padding: 2px 10px;
+  border-radius: 2px;
 }
 
 .alarm-table {

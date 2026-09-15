@@ -1,16 +1,14 @@
 <template>
   <div class="plant-dashboard">
     <!-- 顶部导航 + 标题 -->
-    <div class="top-bar">
-      <div class="screen-title">材料成型中心运营管控系统</div>
-      <div class="top-nav">
-        <button
-          v-for="n in topNavs"
-          :key="n.key"
-          class="nav-btn"
-          @click="goDashboard(n.path)"
-        >{{ n.label }}</button>
-      </div>
+    <DashboardHeader title="材料成型中心运营管控系统" />
+    <div class="top-nav">
+      <button
+        v-for="n in topNavs"
+        :key="n.key"
+        class="nav-btn"
+        @click="goDashboard(n.path)"
+      >{{ n.label }}</button>
     </div>
 
     <div class="plant-grid">
@@ -189,6 +187,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
+import DashboardHeader from './DashboardHeader.vue'
 
 // ========== 图表DOM与实例 ==========
 const monthlyTrendChartRef = ref<HTMLElement>()
@@ -467,19 +466,13 @@ onBeforeUnmount(() => {
   min-height: calc(100vh - 90px);
 }
 
-.top-bar {
-  position: relative;
-  border: 1px solid #eee;
-  padding: 30px 12px 6px;
-  margin-bottom: 8px;
-}
-
 .top-nav {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .nav-btn {
@@ -498,16 +491,6 @@ onBeforeUnmount(() => {
 .nav-btn:hover {
   background: #4472c4;
   color: #fff;
-}
-
-.screen-title {
-  position: absolute;
-  top: 6px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 22px;
-  font-weight: 600;
 }
 
 .plant-grid {

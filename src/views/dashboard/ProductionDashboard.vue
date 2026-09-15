@@ -1,7 +1,7 @@
 <template>
   <div class="production-dashboard">
     <!-- 大屏标题 -->
-    <div class="screen-title">材料成型中心工业园区生产运营大屏</div>
+    <DashboardHeader title="材料成型中心工业园区生产运营大屏" />
 
     <div class="dashboard-grid">
       <!-- 左列 -->
@@ -126,6 +126,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
+import DashboardHeader from './DashboardHeader.vue'
 
 const seriesOptions = ['WP12', 'WP13']
 
@@ -381,15 +382,6 @@ onBeforeUnmount(() => {
   padding: 8px;
   background: #fff;
   min-height: calc(100vh - 90px);
-}
-
-.screen-title {
-  text-align: center;
-  font-size: 22px;
-  font-weight: 600;
-  padding: 8px 0 12px;
-  border: 1px solid #eee;
-  margin-bottom: 8px;
 }
 
 .dashboard-grid {

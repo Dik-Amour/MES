@@ -1,7 +1,7 @@
 <template>
   <div class="equipment-dashboard">
     <!-- 大屏标题 -->
-    <div class="screen-title">材料成型中心工业园区设备监控大屏</div>
+    <DashboardHeader title="材料成型中心工业园区设备监控大屏" />
 
     <!-- 第一行：指标卡片 -->
     <div class="top-row">
@@ -189,6 +189,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
+import DashboardHeader from './DashboardHeader.vue'
 
 // ========== 图表DOM与实例 ==========
 const repairTrendChartRef = ref<HTMLElement>()
@@ -599,15 +600,6 @@ onBeforeUnmount(() => {
   padding: 8px;
   background: #fff;
   min-height: calc(100vh - 90px);
-}
-
-.screen-title {
-  text-align: center;
-  font-size: 22px;
-  font-weight: 600;
-  padding: 8px 0 12px;
-  border: 1px solid #eee;
-  margin-bottom: 8px;
 }
 
 .chart-card {
