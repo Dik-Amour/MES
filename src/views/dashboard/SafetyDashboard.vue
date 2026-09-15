@@ -72,6 +72,7 @@
               @mouseup="onDragEnd"
               @mouseleave="onDragEnd"
               @wheel.prevent="onZoom"
+              @click="closeTip"
             >
               <img
                 :src="plantImg"
@@ -89,16 +90,22 @@
                 :style="{ left: d.x + '%', top: d.y + '%', background: d.color }"
                 @click.stop="toggleDot(i, $event)"
               />
-            </div>
-            <div v-if="activeDot !== null" class="plant-tip"
-              :style="{ left: tipLeft + 'px', top: tipTop + 'px' }"
-              @click.stop="activeDot = null"
-            >
-              <div class="tip-title">{{ plantDots[activeDot].label }}</div>
-              <div class="tip-row">类型：{{ plantDots[activeDot].type }}</div>
-              <div class="tip-row">状态：<span :style="{ color: plantDots[activeDot].color }">{{ plantDots[activeDot].status }}</span></div>
-              <div class="tip-row">实时值：{{ plantDots[activeDot].value }}</div>
-              <div class="tip-row">更新时间：{{ plantDots[activeDot].time }}</div>
+              <div class="zoom-controls" @click.stop>
+                <button title="放大" @click="zoomBy(0.2)">＋</button>
+                <button title="缩小" @click="zoomBy(-0.2)">－</button>
+                <button title="重置" @click="resetView">⟲</button>
+              </div>
+
+              <div v-if="activeDot !== null" class="plant-tip"
+                :style="{ left: tipLeft + 'px', top: tipTop + 'px' }"
+                @click.stop="activeDot = null"
+              >
+                <div class="tip-title">{{ plantDots[activeDot].label }}</div>
+                <div class="tip-row">类型：{{ plantDots[activeDot].type }}</div>
+                <div class="tip-row">状态：<span :style="{ color: plantDots[activeDot].color }">{{ plantDots[activeDot].status }}</span></div>
+                <div class="tip-row">实时值：{{ plantDots[activeDot].value }}</div>
+                <div class="tip-row">更新时间：{{ plantDots[activeDot].time }}</div>
+              </div>
             </div>
           </div>
 
@@ -206,9 +213,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import DashboardHeader from './DashboardHeader.vue'
+import plantImg from '@/assets/image/寒亭厂区图.jpg'
 
 // ========== 图表DOM与实例 ==========
 const furnace1ChartRef = ref<HTMLElement>()
@@ -228,7 +236,6 @@ const electricCarouselIdx = ref(0)
 const electricCarouselPages = ['保温电炉', '熔化电炉']
 
 // 厂区图图片与拖拽状态
-import plantImg from '@/assets/image/寒亭厂区图.jpg'
 const plantViewportRef = ref<HTMLElement | null>(null)
 const imgOffset = reactive({ x: 0, y: 0 })
 const imgScale = ref(1)
@@ -254,7 +261,16 @@ const onDragMove = (e: MouseEvent) => {
 const onDragEnd = () => { isDragging.value = false }
 const onZoom = (e: WheelEvent) => {
   const delta = e.deltaY > 0 ? -0.1 : 0.1
-  imgScale.value = Math.min(3, Math.max(0.5, imgScale.value + delta))
+  imgScale.value = Math.min(4, Math.max(0.4, Number((imgScale.value + delta).toFixed(2))))
+}
+const zoomBy = (delta: number) => {
+  imgScale.value = Math.min(4, Math.max(0.4, Number((imgScale.value + delta).toFixed(2))))
+}
+const resetView = () => {
+  imgOffset.x = 0
+  imgOffset.y = 0
+  imgScale.value = 1
+  activeDot.value = null
 }
 
 // 厂区监测点位（百分比坐标）
@@ -281,16 +297,32 @@ const tipLeft = ref(0)
 const tipTop = ref(0)
 const toggleDot = (i: number, e: MouseEvent) => {
   if (activeDot.value === i) { activeDot.value = null; return }
+  // 必须在事件回调内同步读取 currentTarget（回调结束后会被置为 null）
+  const dotEl = e.currentTarget as HTMLElement
+  const dotRect = dotEl.getBoundingClientRect()
+  const vp = plantViewportRef.value
+  if (!vp) { activeDot.value = i; return }
+  const vpRect = vp.getBoundingClientRect()
+  const dotLeft = dotRect.left - vpRect.left
+  const dotTop = dotRect.top - vpRect.top
   activeDot.value = i
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-  const vpRect = plantViewportRef.value?.getBoundingClientRect() || { left: 0, top: 0 }
-  tipLeft.value = rect.left - vpRect.left + 14
-  tipTop.value = rect.top - vpRect.top - 80
+  // 等待弹框渲染后再测量尺寸并定位
+  nextTick(() => {
+    const tipEl = vp.querySelector('.plant-tip') as HTMLElement | null
+    const tipW = tipEl?.offsetWidth || 200
+    const tipH = tipEl?.offsetHeight || 110
+    let left = dotLeft + dotRect.width / 2 - tipW / 2
+    let top = dotTop - tipH - 10
+    left = Math.max(6, Math.min(left, vpRect.width - tipW - 6))
+    if (top < 6) top = dotTop + dotRect.height + 10
+    top = Math.max(6, Math.min(top, vpRect.height - tipH - 6))
+    tipLeft.value = left
+    tipTop.value = top
+  })
 }
 
 // 点击空白处关闭弹窗
 const closeTip = () => { activeDot.value = null }
-
 // 实时报警数据
 const alarmRows = [
   { id: 1, time: '2026-9-22 14:23', area: '潍坊三线', point: '监测点1', type: '天然气/压强报警器', value: '23mg/m³' },
@@ -741,8 +773,34 @@ onBeforeUnmount(() => {
   height: 100%;
   object-fit: cover;
   transform-origin: 0 0;
-  transition: transform 0.05s linear;
   pointer-events: none;
+}
+
+.zoom-controls {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 5;
+}
+
+.zoom-controls button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid #4472c4;
+  background: rgba(255, 255, 255, 0.92);
+  color: #4472c4;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.zoom-controls button:hover {
+  background: #4472c4;
+  color: #fff;
 }
 
 .p-dot {
@@ -770,14 +828,15 @@ onBeforeUnmount(() => {
 
 .plant-tip {
   position: absolute;
-  z-index: 10;
-  background: rgba(0, 0, 0, 0.82);
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.85);
   color: #fff;
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 11px;
   line-height: 1.6;
-  min-width: 180px;
+  min-width: 170px;
+  max-width: 230px;
   pointer-events: auto;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
