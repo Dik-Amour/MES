@@ -60,8 +60,8 @@
             <div class="stat-title">年度出产</div>
             <div class="stat-value">339,200<span class="unit">吨</span></div>
           </div>
-          <div class="casting-placeholder">
-            <div class="casting-box">铸件图</div>
+          <div class="casting-img-wrap">
+            <img :src="castingImg" class="casting-img" alt="铸件图" draggable="false" />
           </div>
           <div class="stat-block big">
             <div class="stat-title">年度入库</div>
@@ -127,6 +127,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
 import DashboardHeader from './DashboardHeader.vue'
+import castingImg from '@/assets/image/发动机.png'
 
 const seriesOptions = ['WP12', 'WP13']
 
@@ -505,6 +506,10 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
+.stat-block.big {
+  white-space: nowrap;
+}
+
 .stat-title {
   font-size: 18px;
   font-weight: 600;
@@ -536,29 +541,33 @@ onBeforeUnmount(() => {
 }
 
 .center-middle {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
+  min-height: 220px;
 }
 
-.casting-placeholder {
-  flex: 1;
-  display: flex;
-  justify-content: center;
+.stat-block.big {
+  white-space: nowrap;
+  text-align: center;
 }
 
-.casting-box {
-  width: 320px;
-  height: 220px;
-  border: 1px solid #e0e0e0;
-  background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><line x1="0" y1="0" x2="100%" y2="100%" stroke="%23e0e0e0" stroke-width="1"/><line x1="100%" y1="0" x2="0" y2="100%" stroke="%23e0e0e0" stroke-width="1"/></svg>');
+.casting-img-wrap {
+  width: 160px;
+  height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #555;
-  font-size: 20px;
-  letter-spacing: 4px;
+  flex-shrink: 0;
+}
+
+.casting-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
 }
 
 .annual-card {

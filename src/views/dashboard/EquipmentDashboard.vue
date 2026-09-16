@@ -374,7 +374,7 @@ const brandDataMap: Record<string, Record<string, BrandGroup[]>> = {
 }
 
 // 其余两个品牌Tab视图维度（数据同源，换分组标题）
-const brandDataMap2: Record<string, BrandGroup[]> = {}
+const brandDataMap2: Record<string, Record<string, BrandGroup[]>> = {}
 Object.keys(brandDataMap).forEach(type => {
   const groups = brandDataMap[type]['type-brand']
   // 品牌-XX分布：按品牌聚合
@@ -457,6 +457,7 @@ const buildRateLineSeries = () => {
   return repairLineNames.map(name => {
     const { base, amp, phase } = repairLineBase[name]
     const baseRate = 97.5 + (base % 5) * 0.3
+    const waveAmp = 0.3 + amp * 0.01
     return {
       name,
       type: 'line',
@@ -464,7 +465,7 @@ const buildRateLineSeries = () => {
       symbol: 'circle',
       symbolSize: 4,
       data: months.map((_, i) => {
-        const v = baseRate + Math.sin(phase + i * 0.9) * 0.6 + (i % 4 === 0 ? 0.3 : 0)
+        const v = baseRate + Math.sin(phase + i * 0.9) * waveAmp + (i % 4 === 0 ? 0.3 : 0)
         return Math.min(99.8, Math.round(v * 10) / 10)
       }),
       itemStyle: { color: repairLineColors[repairLineNames.indexOf(name)] },
