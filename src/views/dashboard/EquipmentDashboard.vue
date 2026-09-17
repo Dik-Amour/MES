@@ -83,11 +83,7 @@
 
       <div class="chart-card">
         <div class="chart-header">
-          <span class="chart-title">吨均备件库存资金</span>
-          <div class="mini-tabs">
-            <button :class="{ active: spareMode === 'year' }" @click="spareMode = 'year'">分厂年度</button>
-            <button :class="{ active: spareMode === 'month' }" @click="spareMode = 'month'">分厂月度</button>
-          </div>
+          <span class="chart-title">各产线备件库存资金</span>
         </div>
         <div ref="spareChartRef" class="chart-body"></div>
       </div>
@@ -199,7 +195,6 @@ const charts: Record<string, echarts.ECharts> = {}
 
 // ========== 状态 ==========
 const repairTrendMode = ref('factory-year')
-const spareMode = ref<'year' | 'month'>('year')
 const rateMode = ref('factory-year')
 const activeEquipmentType = ref('视觉')
 const brandMode = ref('type-brand')
@@ -214,7 +209,7 @@ const rateTabs = [
   { key: 'factory-month', label: '分厂月度' },
   { key: 'line-month', label: '各产线月度' }
 ]
-const equipmentTypes = ['机器人', '加工中心', '三坐标', '叉车', '视觉', '数控系统', 'PLC']
+const equipmentTypes = ['机器人', '熔炼设备', '三坐标', '叉车', '视觉', 'AGV和RGV', 'PLC']
 const brandTabs = [
   { key: 'brand-visual', label: '品牌-视觉类型分布' },
   { key: 'brand-app', label: '品牌-应用设备类型分布' },
@@ -224,11 +219,11 @@ const brandTabs = [
 // ========== 设备类型统计（产线 x 类型列） ==========
 const typeColumnsMap: Record<string, string[]> = {
   '机器人': ['焊接', '搬运', '喷涂', '打磨', '其他', '合计'],
-  '加工中心': ['立式', '卧式', '龙门', '五轴', '其他', '合计'],
+  '熔炼设备': ['中频炉', '冲天炉', '保温炉', '浇注机', '其他', '合计'],
   '三坐标': ['桥式', '龙门式', '关节臂', '其他', '合计'],
   '叉车': ['内燃', '电动', '堆高', '其他', '合计'],
   '视觉': ['相机', '光学', '红外', '激光', '其他', '合计'],
-  '数控系统': ['车床', '铣床', '磨床', '其他', '合计'],
+  'AGV和RGV': ['AGV小车', 'RGV小车', '其他', '合计'],
   'PLC': ['西门子', '三菱', '欧姆龙', '施耐德', '其他', '合计']
 }
 
@@ -249,10 +244,10 @@ const workshopRows = [
 const typeBaseCounts: Record<string, number[]> = {
   '视觉': [77, 1, 2, 3, 10, 11, 15, 13, 18, 1],
   '机器人': [12, 4, 6, 8, 5, 7, 9, 6, 11, 3],
-  '加工中心': [8, 3, 5, 4, 6, 5, 7, 4, 8, 2],
+  '熔炼设备': [8, 3, 5, 4, 6, 5, 7, 4, 8, 2],
   '三坐标': [2, 1, 1, 2, 1, 1, 2, 1, 2, 1],
   '叉车': [5, 3, 4, 6, 4, 5, 6, 4, 7, 2],
-  '数控系统': [10, 6, 8, 9, 7, 8, 10, 7, 12, 4],
+  'AGV和RGV': [10, 6, 8, 9, 7, 8, 10, 7, 12, 4],
   'PLC': [15, 9, 12, 14, 11, 12, 15, 11, 18, 6]
 }
 
@@ -319,11 +314,11 @@ const brandDataMap: Record<string, Record<string, BrandGroup[]>> = {
       ]}
     ]
   },
-  '加工中心': {
+  '熔炼设备': {
     'type-brand': [
-      { name: '加工中心', subtotal: 52, items: [
-        { name: '日本-马扎克', value: 18 }, { name: '德国-德玛吉', value: 14 },
-        { name: '日本-森精机', value: 10 }, { name: '中国-海天精工', value: 7 }, { name: '台湾-友嘉', value: 3 }
+      { name: '熔炼设备', subtotal: 52, items: [
+        { name: '德国-应达', value: 18 }, { name: '美国-ABP', value: 14 },
+        { name: '中国-新研', value: 10 }, { name: '日本-富士电机', value: 7 }, { name: '中国-中频', value: 3 }
       ]},
       { name: '清理设备', subtotal: 8, items: [{ name: '中国-纽威', value: 8 }] }
     ]
@@ -355,11 +350,11 @@ const brandDataMap: Record<string, Record<string, BrandGroup[]>> = {
       ]}
     ]
   },
-  '数控系统': {
+  'AGV和RGV': {
     'type-brand': [
-      { name: '数控系统', subtotal: 91, items: [
-        { name: '日本-FANUC', value: 46 }, { name: '德国-西门子', value: 28 },
-        { name: '日本-三菱', value: 12 }, { name: '中国-华中数控', value: 5 }
+      { name: 'AGV和RGV', subtotal: 91, items: [
+        { name: '中国-新松', value: 32 }, { name: '中国-海康机器人', value: 28 },
+        { name: '德国-德马泰克', value: 19 }, { name: '日本-大福', value: 12 }
       ]}
     ]
   },
@@ -442,9 +437,16 @@ const buildRepairLineSeries = () => {
   })
 }
 
-const spareData: Record<string, { x: string[]; y: number[] }> = {
-  year: { x: ['2020','2021','2022','2023','2024','2025','2026'], y: [100, 140, 230, 100, 130, 105, 144] },
-  month: { x: ['造型一线大件', '造型一线中件', '造型二线大件', '造型二线中件', '造型三线KW', '造型三线HWS'], y: [105, 82, 138, 74, 96, 118] }
+// 各产线备件库存资金（横轴：产线）
+const spareLineNames = [
+  '熔炼一线', '熔炼二线', '熔炼三线',
+  '造型一线大件', '造型一线中件',
+  '造型二线大件', '造型二线中件',
+  '造型三线HWS', '造型三线KW'
+]
+const spareData: { x: string[]; y: number[] } = {
+  x: spareLineNames,
+  y: [105, 82, 138, 74, 96, 118, 132, 88, 110]
 }
 
 const rateData: Record<string, { x: string[]; y: number[] }> = {
@@ -513,17 +515,19 @@ function renderRepairTrend() {
 }
 
 function renderSpare() {
-  const d = spareData[spareMode.value]
   charts.spare?.setOption({
-    tooltip: { trigger: 'axis' },
-    grid: { left: 40, right: 10, top: 16, bottom: 24 },
+    tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + ' 万元' },
+    grid: { left: 46, right: 16, top: 24, bottom: 58 },
     xAxis: {
-      type: 'category', data: d.x, ...baseAxis, splitLine: { show: false },
-      axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 10, rotate: 20 }
+      type: 'category', data: spareData.x, ...baseAxis, splitLine: { show: false },
+      axisLabel: {
+        ...baseAxis.axisLabel, interval: 0, fontSize: 9, rotate: 45,
+        margin: 4
+      }
     },
-    yAxis: { type: 'value', ...baseAxis },
+    yAxis: { type: 'value', name: '万元', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
     series: [{
-      type: 'bar', data: d.y, itemStyle: { color: '#4472c4' }, barWidth: 18,
+      type: 'bar', data: spareData.y, itemStyle: { color: '#4472c4' }, barWidth: 20,
       label: { show: true, position: 'top', color: '#4472c4', fontSize: 10 }
     }]
   }, { notMerge: true })
@@ -587,7 +591,6 @@ const handleResize = () => {
 }
 
 watch([repairTrendMode], renderRepairTrend)
-watch([spareMode], renderSpare)
 watch([rateMode], renderRate)
 
 onBeforeUnmount(() => {
@@ -601,6 +604,7 @@ onBeforeUnmount(() => {
   padding: 8px;
   background: #fff;
   min-height: calc(100vh - 90px);
+  min-width: 1180px;
 }
 
 .chart-card {

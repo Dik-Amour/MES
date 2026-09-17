@@ -243,6 +243,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/pda/SandCoreOutbound.vue'),
     meta: { requiresAuth: true }
   },
+  // 制芯计划路由
+  {
+    path: '/core-making/binhai-scheduling',
+    name: 'BinhaiCoreMakingScheduling',
+    component: () => import('@/views/core-making/BinhaiCoreMakingScheduling.vue'),
+    meta: { requiresAuth: true }
+  },
   // 现场管理路由
   {
     path: '/site/safety-inspection',

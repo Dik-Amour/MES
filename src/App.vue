@@ -122,6 +122,14 @@
             <a-menu-item key="/pda/sand-core-outbound">砂芯出库</a-menu-item>
           </a-sub-menu>
 
+          <a-sub-menu key="core-making">
+            <template #icon>
+              <ToolOutlined />
+            </template>
+            <template #title>制芯计划</template>
+            <a-menu-item key="/core-making/binhai-scheduling">滨海制芯排产</a-menu-item>
+          </a-sub-menu>
+
           <a-sub-menu key="site">
             <template #icon>
               <SafetyOutlined />
