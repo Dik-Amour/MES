@@ -341,24 +341,29 @@ const baseAxis = {
   splitLine: { lineStyle: { color: '#e8e8e8' } }
 }
 
+// 统一单位：吨
+const TON_UNIT = '吨'
+const tons = (v: any) => `${v ?? ''} ${TON_UNIT}`
+const axisNameStyle = { color: '#666', fontSize: 10 }
+
 function renderLineInOut() {
   charts.lineInOut?.setOption({
-    tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + ' 吨' },
+    tooltip: { trigger: 'axis', valueFormatter: tons },
     legend: {
       data: ['出产', '入库'], top: 0, right: 0,
       textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
     },
-    grid: { left: 48, right: 10, top: 30, bottom: 24 },
+    grid: { left: 48, right: 14, top: 30, bottom: 24 },
     xAxis: { type: 'category', data: lineInOutData.lines, ...baseAxis, splitLine: { show: false } },
-    yAxis: { type: 'value', name: '吨', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
+    yAxis: { type: 'value', name: TON_UNIT, nameTextStyle: axisNameStyle, ...baseAxis },
     series: [
       {
         name: '出产', type: 'bar', data: lineInOutData.prod, itemStyle: { color: '#4472c4' }, barWidth: 14,
-        label: { show: true, position: 'top', color: '#4472c4', fontSize: 9, formatter: (p: any) => p.value ?? '' }
+        label: { show: true, position: 'top', color: '#4472c4', fontSize: 9, formatter: (p: any) => tons(p.value) }
       },
       {
         name: '入库', type: 'bar', data: lineInOutData.in, itemStyle: { color: '#3ba8a0' }, barWidth: 14,
-        label: { show: true, position: 'top', color: '#3ba8a0', fontSize: 9, formatter: (p: any) => p.value ?? '' }
+        label: { show: true, position: 'top', color: '#3ba8a0', fontSize: 9, formatter: (p: any) => tons(p.value) }
       }
     ]
   }, { notMerge: true })
@@ -371,14 +376,14 @@ function renderLineInOut() {
 function renderFactory() {
   const d = factoryData[factoryMode.value]
   charts.factory?.setOption({
-    tooltip: { trigger: 'axis' },
-    grid: { left: 90, right: 40, top: 10, bottom: 24 },
-    xAxis: { type: 'value', ...baseAxis, splitLine: { show: true } },
+    tooltip: { trigger: 'axis', valueFormatter: tons },
+    grid: { left: 90, right: 46, top: 16, bottom: 24 },
+    xAxis: { type: 'value', name: TON_UNIT, nameTextStyle: axisNameStyle, ...baseAxis, splitLine: { show: true } },
     yAxis: { type: 'category', data: d.names, ...baseAxis, splitLine: { show: false } },
     series: [
       {
         type: 'bar', data: d.values, itemStyle: { color: '#4472c4' }, barWidth: 12,
-        label: { show: true, position: 'right', color: '#666', fontSize: 11 }
+        label: { show: true, position: 'right', color: '#666', fontSize: 11, formatter: (p: any) => tons(p.value) }
       }
     ]
   }, { notMerge: true })
@@ -389,12 +394,12 @@ function renderTonnage() {
     '造型一线': '#4472c4', '造型二线': '#3ba8a0', '造型三线': '#70ad47', '造型四线': '#ffc000'
   }
   charts.tonnage?.setOption({
-    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    tooltip: { trigger: 'item', formatter: (p: any) => `${p.name}: ${p.value} ${TON_UNIT} (${p.percent}%)` },
     series: [
       {
         type: 'pie', radius: '65%', center: ['50%', '50%'],
         data: tonnageData[tonnageMode.value].map(item => ({ ...item, itemStyle: { color: colorMap[item.name] } })),
-        label: { color: '#666', fontSize: 11, formatter: '{b}\n{c}' },
+        label: { color: '#666', fontSize: 11, formatter: (p: any) => `${p.name}\n${p.value}${TON_UNIT}` },
         labelLine: { length: 8, length2: 8 }
       }
     ]
@@ -404,11 +409,11 @@ function renderTonnage() {
 function renderAnnual() {
   const d = annualData[annualMode.value]
   charts.annual?.setOption({
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: 'axis', valueFormatter: tons },
     legend: { data: annualData.years, top: 0, textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9 },
-    grid: { left: 40, right: 10, top: 30, bottom: 24 },
+    grid: { left: 46, right: 14, top: 30, bottom: 24 },
     xAxis: { type: 'category', data: months, ...baseAxis, splitLine: { show: false } },
-    yAxis: { type: 'value', ...baseAxis },
+    yAxis: { type: 'value', name: TON_UNIT, nameTextStyle: axisNameStyle, ...baseAxis },
     series: annualData.years.map((y, i) => ({
       name: y, type: 'bar', data: d[i], barWidth: 8,
       itemStyle: { color: ['#2f3542', '#747d8c', '#a4b0be'][i] },
@@ -434,14 +439,14 @@ function renderLineDetail(key: string) {
   }
   const wave = seriesFilter ? seriesWave[seriesFilter] : null
   chart.setOption({
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: 'axis', valueFormatter: tons },
     legend: {
       data: years, top: 0, right: 0,
       textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
     },
-    grid: { left: 40, right: 10, top: 30, bottom: 24 },
+    grid: { left: 46, right: 14, top: 30, bottom: 24 },
     xAxis: { type: 'category', data: months, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
-    yAxis: { type: 'value', ...baseAxis },
+    yAxis: { type: 'value', name: TON_UNIT, nameTextStyle: axisNameStyle, ...baseAxis },
     series: years.map((y, i) => ({
       name: y, type: 'line', smooth: true, symbol: 'circle', symbolSize: 5,
       data: data[y].map((v: number, idx: number) => {
@@ -451,8 +456,7 @@ function renderLineDetail(key: string) {
       }),
       itemStyle: { color: i === 0 ? '#4472c4' : '#3ba8a0' },
       lineStyle: { width: 2 },
-      label: { show: true, color: '#999', fontSize: 9, formatter: (p: any) => p.value ?? '' },
-      connectNulls: false
+      label: { show: true, color: '#999', fontSize: 9 }
     }))
   }, { notMerge: true })
 }
