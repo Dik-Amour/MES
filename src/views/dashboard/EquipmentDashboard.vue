@@ -69,21 +69,19 @@
       <div class="chart-card">
         <div class="chart-header">
           <span class="chart-title">吨均设备维修费用分析</span>
-          <div class="mini-tabs">
-            <button
-              v-for="t in repairTrendTabs"
-              :key="t.key"
-              :class="{ active: repairTrendMode === t.key }"
-              @click="repairTrendMode = t.key"
-            >{{ t.label }}</button>
-          </div>
+          <select v-model="repairTrendMode" class="series-select">
+            <option v-for="t in repairTrendTabs" :key="t.key" :value="t.key">{{ t.label }}</option>
+          </select>
         </div>
         <div ref="repairTrendChartRef" class="chart-body"></div>
       </div>
 
       <div class="chart-card">
         <div class="chart-header">
-          <span class="chart-title">各产线备件库存资金</span>
+          <span class="chart-title">备件库存金额</span>
+          <select v-model="spareMode" class="series-select">
+            <option v-for="t in repairTrendTabs" :key="t.key" :value="t.key">{{ t.label }}</option>
+          </select>
         </div>
         <div ref="spareChartRef" class="chart-body"></div>
       </div>
@@ -91,14 +89,9 @@
       <div class="chart-card">
         <div class="chart-header">
           <span class="chart-title">设备可动率</span>
-          <div class="mini-tabs">
-            <button
-              v-for="t in rateTabs"
-              :key="t.key"
-              :class="{ active: rateMode === t.key }"
-              @click="rateMode = t.key"
-            >{{ t.label }}</button>
-          </div>
+          <select v-model="rateMode" class="series-select">
+            <option v-for="t in rateTabs" :key="t.key" :value="t.key">{{ t.label }}</option>
+          </select>
         </div>
         <div ref="rateChartRef" class="chart-body"></div>
       </div>
@@ -195,6 +188,7 @@ const charts: Record<string, echarts.ECharts> = {}
 
 // ========== 状态 ==========
 const repairTrendMode = ref('factory-year')
+const spareMode = ref('factory-year')
 const rateMode = ref('factory-year')
 const activeEquipmentType = ref('视觉')
 const brandMode = ref('type-brand')
@@ -392,9 +386,25 @@ const currentBrandGroups = computed<BrandGroup[]>(() => {
 const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027']
 const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
 
-const repairTrendData: Record<string, { x: string[]; y: number[] }> = {
-  'factory-year': { x: years, y: [102, 140, 230, 101, 110, 129, 160, 222] },
-  'factory-month': { x: months, y: [120, 135, 118, 142, 128, 155, 138, 126, 148, 132, 158, 144] }
+// 分厂维度：安丘厂区 / 寒亭厂区
+const factoryNames = ['安丘厂区', '寒亭厂区']
+const factoryColors = ['#4472c4', '#3ba8a0']
+
+const repairTrendData: Record<string, { x: string[]; y: Record<string, number[]> }> = {
+  'factory-year': {
+    x: years,
+    y: {
+      '安丘厂区': [102, 140, 230, 101, 110, 129, 160, 222],
+      '寒亭厂区': [88, 126, 205, 118, 132, 108, 145, 196]
+    }
+  },
+  'factory-month': {
+    x: months,
+    y: {
+      '安丘厂区': [120, 135, 118, 142, 128, 155, 138, 126, 148, 132, 158, 144],
+      '寒亭厂区': [105, 122, 140, 118, 146, 128, 152, 138, 120, 145, 136, 130]
+    }
+  }
 }
 
 // 产线月度趋势：多条折线，9条产线
@@ -437,21 +447,61 @@ const buildRepairLineSeries = () => {
   })
 }
 
-// 各产线备件库存资金（横轴：产线）
-const spareLineNames = [
-  '熔炼一线', '熔炼二线', '熔炼三线',
-  '造型一线大件', '造型一线中件',
-  '造型二线大件', '造型二线中件',
-  '造型三线HWS', '造型三线KW'
-]
-const spareData: { x: string[]; y: number[] } = {
-  x: spareLineNames,
-  y: [105, 82, 138, 74, 96, 118, 132, 88, 110]
+// 备件库存金额（分厂年度 / 分厂月度 / 产线月度）
+const spareTrendData: Record<string, { x: string[]; y: Record<string, number[]> }> = {
+  'factory-year': {
+    x: years,
+    y: {
+      '安丘厂区': [820, 910, 1060, 880, 940, 1020, 1180, 1090],
+      '寒亭厂区': [640, 720, 860, 790, 830, 880, 960, 900]
+    }
+  },
+  'factory-month': {
+    x: months,
+    y: {
+      '安丘厂区': [95, 102, 88, 115, 108, 126, 98, 112, 132, 105, 121, 118],
+      '寒亭厂区': [68, 75, 82, 71, 88, 79, 92, 84, 74, 90, 81, 86]
+    }
+  }
+}
+// 产线月度趋势：各产线基准库存金额（万元）
+const spareLineValues = [105, 82, 138, 74, 96, 118, 132, 88, 110]
+
+const buildSpareLineSeries = () => {
+  return repairLineNames.map((name, i) => {
+    const base = spareLineValues[i] ?? 100
+    const amp = base * 0.16
+    const phase = i * 0.8
+    return {
+      name,
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 4,
+      data: months.map((_, m) =>
+        Math.max(0, Math.round(base + Math.sin(phase + m * 0.9) * amp + (m % 3 === 0 ? amp * 0.3 : 0)))
+      ),
+      itemStyle: { color: repairLineColors[i] },
+      lineStyle: { width: 2 }
+    }
+  })
 }
 
-const rateData: Record<string, { x: string[]; y: number[] }> = {
-  'factory-year': { x: years.slice(0, 7), y: [98.2, 98.6, 98.4, 98.8, 98.5, 98.7, 98.9] },
-  'factory-month': { x: months, y: [98.3, 98.6, 98.4, 98.7, 98.5, 98.8, 98.6, 98.5, 98.9, 98.6, 98.7, 98.8] }
+const rateData: Record<string, { x: string[]; y: Record<string, number[]> }> = {
+  'factory-year': {
+    x: years.slice(0, 7),
+    y: {
+      '安丘厂区': [98.2, 98.6, 98.4, 98.8, 98.5, 98.7, 98.9],
+      '寒亭厂区': [97.6, 98.1, 98.3, 97.9, 98.6, 98.2, 98.8]
+    }
+  },
+  'factory-month': {
+    x: months,
+    y: {
+      '安丘厂区': [98.3, 98.6, 98.4, 98.7, 98.5, 98.8, 98.6, 98.5, 98.9, 98.6, 98.7, 98.8],
+      '寒亭厂区': [97.8, 98.2, 98.5, 98.0, 98.7, 98.3, 98.6, 98.1, 98.8, 98.4, 98.2, 98.9]
+    }
+  }
 }
 
 // 各产线月度：多条折线，每条曲线一条产线（百分比）
@@ -502,34 +552,55 @@ function renderRepairTrend() {
   const d = repairTrendData[repairTrendMode.value]
   charts.repairTrend?.setOption({
     tooltip: { trigger: 'axis' },
-    legend: { show: false, top: 0 },
-    grid: { left: 40, right: 16, top: 16, bottom: 24 },
+    legend: {
+      data: factoryNames, top: 0, right: 0,
+      textStyle: { color: '#666', fontSize: 10 }, itemWidth: 14, itemHeight: 8
+    },
+    grid: { left: 40, right: 16, top: 28, bottom: 24 },
     xAxis: { type: 'category', data: d.x, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
     yAxis: { type: 'value', ...baseAxis },
-    series: [{
-      type: 'line', smooth: true, symbol: 'circle', symbolSize: 5,
-      data: d.y, itemStyle: { color: '#4472c4' }, lineStyle: { width: 2 },
-      label: { show: true, color: '#4472c4', fontSize: 10, formatter: (p: any) => p.value ?? '' }
-    }]
+    series: factoryNames.map((name, i) => ({
+      name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 5,
+      data: d.y[name], itemStyle: { color: factoryColors[i] }, lineStyle: { width: 2 },
+      label: { show: true, color: factoryColors[i], fontSize: 9, formatter: (p: any) => p.value ?? '' }
+    }))
   }, { notMerge: true })
 }
 
 function renderSpare() {
+  if (spareMode.value === 'line-month') {
+    // 产线月度趋势：多条折线
+    charts.spare?.setOption({
+      tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + ' 万元' },
+      legend: {
+        data: repairLineNames, top: 0, type: 'scroll',
+        textStyle: { color: '#666', fontSize: 10 }, itemWidth: 14, itemHeight: 8
+      },
+      grid: { left: 44, right: 16, top: 28, bottom: 24 },
+      xAxis: { type: 'category', data: months, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
+      yAxis: { type: 'value', name: '万元', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
+      series: buildSpareLineSeries()
+    }, { notMerge: true })
+    return
+  }
+  const d = spareTrendData[spareMode.value] || spareTrendData['factory-year']
   charts.spare?.setOption({
     tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + ' 万元' },
-    grid: { left: 46, right: 16, top: 24, bottom: 58 },
+    legend: {
+      data: factoryNames, top: 0, right: 0,
+      textStyle: { color: '#666', fontSize: 10 }, itemWidth: 14, itemHeight: 8
+    },
+    grid: { left: 44, right: 16, top: 28, bottom: 24 },
     xAxis: {
-      type: 'category', data: spareData.x, ...baseAxis, splitLine: { show: false },
-      axisLabel: {
-        ...baseAxis.axisLabel, interval: 0, fontSize: 9, rotate: 45,
-        margin: 4
-      }
+      type: 'category', data: d.x, ...baseAxis, boundaryGap: false, splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 10 }
     },
     yAxis: { type: 'value', name: '万元', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
-    series: [{
-      type: 'bar', data: spareData.y, itemStyle: { color: '#4472c4' }, barWidth: 20,
-      label: { show: true, position: 'top', color: '#4472c4', fontSize: 10 }
-    }]
+    series: factoryNames.map((name, i) => ({
+      name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 5,
+      data: d.y[name], itemStyle: { color: factoryColors[i] }, lineStyle: { width: 2 },
+      label: { show: true, color: factoryColors[i], fontSize: 9, formatter: (p: any) => p.value ?? '' }
+    }))
   }, { notMerge: true })
 }
 
@@ -555,18 +626,21 @@ function renderRate() {
   const d = rateData[rateMode.value]
   charts.rate?.setOption({
     tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + '%' },
-    legend: { show: false, top: 0 },
-    grid: { left: 40, right: 16, top: 16, bottom: 24 },
+    legend: {
+      data: factoryNames, top: 0, right: 0,
+      textStyle: { color: '#666', fontSize: 10 }, itemWidth: 14, itemHeight: 8
+    },
+    grid: { left: 40, right: 16, top: 28, bottom: 24 },
     xAxis: { type: 'category', data: d.x, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
     yAxis: {
       type: 'value', min: (v: any) => Math.floor((v.min - 2) / 10) * 10, max: 100, ...baseAxis,
       axisLabel: { ...baseAxis.axisLabel, formatter: '{value}%' }
     },
-    series: [{
-      type: 'line', smooth: true, symbol: 'circle', symbolSize: 4,
-      data: d.y, itemStyle: { color: '#4472c4' }, lineStyle: { width: 2 },
-      label: { show: true, color: '#999', fontSize: 9, formatter: (p: any) => p.value ?? '' }
-    }]
+    series: factoryNames.map((name, i) => ({
+      name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 4,
+      data: d.y[name], itemStyle: { color: factoryColors[i] }, lineStyle: { width: 2 },
+      label: { show: true, color: factoryColors[i], fontSize: 9, formatter: (p: any) => p.value ?? '' }
+    }))
   }, { notMerge: true })
 }
 
@@ -591,6 +665,7 @@ const handleResize = () => {
 }
 
 watch([repairTrendMode], renderRepairTrend)
+watch([spareMode], renderSpare)
 watch([rateMode], renderRate)
 
 onBeforeUnmount(() => {
@@ -634,24 +709,15 @@ onBeforeUnmount(() => {
   margin-bottom: 0;
 }
 
-.mini-tabs {
-  display: flex;
-  gap: 4px;
-}
-
-.mini-tabs button {
-  border: none;
-  background: #fff;
-  color: #4472c4;
+.series-select {
   font-size: 12px;
-  padding: 2px 10px;
-  cursor: pointer;
+  padding: 2px 8px;
+  border: 1px solid #d9d9d9;
   border-radius: 2px;
-}
-
-.mini-tabs button.active {
-  background: #4472c4;
-  color: #fff;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* 第一行指标 */

@@ -97,6 +97,9 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     // 现场管理路径
     '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
     '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },
+    // 大屏数据管理路径
+    '/screen-data': { title: '大屏数据管理', path: '/screen-data/equipment', icon: InboxOutlined },
+    '/screen-data/equipment': { title: '设备数据导入', path: '/screen-data/equipment', icon: InboxOutlined },
   }
 
   const matched = route.matched.filter(item => item.path !== '/')
@@ -137,6 +140,11 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   // 添加现场管理父级菜单
   if (route.path.startsWith('/site')) {
     items.push(pathMap['/site'])
+  }
+
+  // 添加大屏数据管理父级菜单
+  if (route.path.startsWith('/screen-data')) {
+    items.push(pathMap['/screen-data'])
   }
 
   // 添加匹配的路由

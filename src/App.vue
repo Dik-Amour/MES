@@ -95,6 +95,14 @@
             <a-menu-item key="/dashboard/plant">厂区大屏</a-menu-item>
           </a-sub-menu>
 
+          <a-sub-menu key="screen-data">
+            <template #icon>
+              <DatabaseOutlined />
+            </template>
+            <template #title>大屏数据管理</template>
+            <a-menu-item key="/screen-data/equipment">设备数据导入</a-menu-item>
+          </a-sub-menu>
+
           <a-sub-menu key="andon">
             <template #icon>
               <AlertOutlined />
@@ -252,7 +260,8 @@ import {
   MobileOutlined,
   SafetyOutlined,
   InboxOutlined,
-  FundOutlined
+  FundOutlined,
+  DatabaseOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useTheme } from '@/composables/useTheme'
@@ -279,6 +288,7 @@ const parentKeyMap: Array<[string, string]> = [
   ['/cleaning-production', 'cleaning-production'],
   ['/wip', 'wip'],
   ['/dashboard', 'visualization'],
+  ['/screen-data', 'screen-data'],
   ['/andon', 'andon'],
   ['/molding', 'molding'],
   ['/pda', 'pda'],

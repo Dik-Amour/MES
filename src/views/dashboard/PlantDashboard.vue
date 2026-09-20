@@ -174,7 +174,12 @@
       <div class="cost-modal">
         <div class="cost-modal-header">
           <span class="cost-modal-title">{{ costModalFactory }}{{ costModalYear }}年成本吨均动能费用</span>
-          <button class="cost-modal-close" @click="costModalVisible = false">✕</button>
+          <div class="cost-modal-actions">
+            <select v-model="costTrendCategory" class="series-select">
+              <option v-for="c in costTrendCategories" :key="c" :value="c">{{ c }}</option>
+            </select>
+            <button class="cost-modal-close" @click="costModalVisible = false">✕</button>
+          </div>
         </div>
         <div ref="costTrendChartRef" class="cost-modal-chart"></div>
       </div>
@@ -512,33 +517,41 @@ function onCostChartClick() {
 }
 
 const costModalFactory = ref('安丘厂区')
+const costTrendCategory = ref(costTrendCategories[0])
+
+function renderCostTrend() {
+  if (!costTrendChartRef.value) return
+  if (costTrendChart) costTrendChart.dispose()
+  costTrendChart = echarts.init(costTrendChartRef.value)
+  const seed = costFactories.indexOf(costModalFactory.value) * 3 + parseInt(costModalYear.value) % 3
+  const trendData = genCostTrend(seed)
+  const idx = Math.max(0, costTrendCategories.indexOf(costTrendCategory.value))
+  costTrendChart.setOption({
+    tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + ' 元/吨' },
+    legend: { show: false },
+    grid: { left: 56, right: 34, top: 30, bottom: 40 },
+    xAxis: {
+      type: 'category', data: costTrendX, ...baseAxis, splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, interval: 0, rotate: 45, fontSize: 10 }
+    },
+    yAxis: { type: 'value', max: 280, name: '元/吨', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
+    series: [{
+      name: costTrendCategory.value,
+      type: 'line', smooth: true, symbol: 'circle', symbolSize: 5,
+      data: trendData[idx],
+      itemStyle: { color: costTrendColors[idx] },
+      lineStyle: { width: 2 },
+      label: { show: true, color: '#666', fontSize: 10 }
+    }]
+  }, { notMerge: true })
+}
+
 watch(costModalVisible, (v) => {
-  if (v) {
-    nextTick(() => {
-      if (costTrendChartRef.value) {
-        if (costTrendChart) { costTrendChart.dispose() }
-        costTrendChart = echarts.init(costTrendChartRef.value)
-        const seed = costFactories.indexOf(costModalFactory.value) * 3 + parseInt(costModalYear.value) % 3
-        const trendData = genCostTrend(seed)
-        costTrendChart.setOption({
-          tooltip: { trigger: 'axis' },
-          legend: {
-            data: costTrendCategories, top: 0, left: 'center',
-            textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
-          },
-          grid: { left: 50, right: 30, top: 40, bottom: 30 },
-          xAxis: { type: 'category', data: costTrendX, ...baseAxis, splitLine: { show: false }, axisLabel: { ...baseAxis.axisLabel, interval: 0, rotate: 45, fontSize: 10 } },
-          yAxis: { type: 'value', max: 280, name: '元/吨', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
-          series: costTrendCategories.map((name, i) => ({
-            name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 5,
-            data: trendData[i],
-            itemStyle: { color: costTrendColors[i] },
-            lineStyle: { width: 2 }
-          }))
-        })
-      }
-    })
-  }
+  if (v) nextTick(renderCostTrend)
+})
+
+watch(costTrendCategory, () => {
+  if (costModalVisible.value) renderCostTrend()
 })
 
 // 成本中心分组柱状图
@@ -917,8 +930,16 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 12px 18px;
   border-bottom: 1px solid #e8e8e8;
+}
+
+.cost-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .cost-modal-title {

@@ -230,6 +230,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/dashboard/PlantDashboard.vue'),
     meta: { requiresAuth: true }
   },
+  // 大屏数据管理路由
+  {
+    path: '/screen-data/equipment',
+    name: 'EquipmentDataImport',
+    component: () => import('@/views/screen-data/EquipmentDataImport.vue'),
+    meta: { requiresAuth: true }
+  },
   // PDA操作路由
   {
     path: '/pda/sand-core-inbound',

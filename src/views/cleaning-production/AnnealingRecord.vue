@@ -98,11 +98,7 @@
           <a-descriptions-item label="温区数量">{{ curveRecord.zoneCount }} 个温区</a-descriptions-item>
         </a-descriptions>
         <div class="curve-chart-wrapper">
-          <v-chart
-            class="curve-chart"
-            :option="curveChartOption"
-            :autoresize="true"
-          />
+          <div ref="curveChartRef" class="curve-chart"></div>
         </div>
       </div>
     </a-modal>
@@ -111,36 +107,18 @@
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { message } from 'ant-design-vue'
 import {
   SearchOutlined,
   ReloadOutlined,
   LineChartOutlined
 } from '@ant-design/icons-vue'
-import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { LineChart } from 'echarts/charts'
-import {
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-  MarkLineComponent,
-  MarkAreaComponent,
-  DataZoomComponent
-} from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
+import * as echarts from 'echarts'
 
-use([
-  LineChart,
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-  MarkLineComponent,
-  MarkAreaComponent,
-  DataZoomComponent,
-  CanvasRenderer
-])
+// 温度曲线图实例
+const curveChartRef = ref<HTMLElement>()
+let curveChart: echarts.ECharts | null = null
 
 // 产线选项（产线名称 → 编号映射）
 const productionLineOptions = [
@@ -461,6 +439,40 @@ const handleViewCurve = (record: any) => {
   curveRecord.value = { ...record }
   curveModalVisible.value = true
 }
+
+// 渲染温度曲线
+const renderCurve = () => {
+  if (!curveChartRef.value) return
+  if (!curveChart) {
+    curveChart = echarts.init(curveChartRef.value)
+  }
+  curveChart.setOption(curveChartOption.value as any, { notMerge: true })
+  curveChart.resize()
+}
+
+watch(curveModalVisible, async (v) => {
+  if (!v) return
+  await nextTick()
+  renderCurve()
+  // 弹框挂载可能存在延迟，补渲染一次以确保尺寸正确
+  setTimeout(renderCurve, 60)
+})
+
+watch(curveChartOption, () => {
+  if (curveModalVisible.value) renderCurve()
+})
+
+const handleResize = () => curveChart?.resize()
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  curveChart?.dispose()
+  curveChart = null
+})
 </script>
 
 <style scoped>

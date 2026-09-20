@@ -3,6 +3,16 @@
     <!-- 大屏标题 -->
     <DashboardHeader title="材料成型中心工业园区质量监管大屏" />
 
+    <!-- 数据指标（单独一行） -->
+    <div class="kpi-row">
+      <div class="kpi-box" v-for="k in kpiItems" :key="k.label">
+        <div class="kpi-label">{{ k.label }}</div>
+        <div class="kpi-value">
+          {{ k.value }}<span class="kpi-unit">{{ k.unit }}</span>
+        </div>
+      </div>
+    </div>
+
     <div class="quality-grid">
       <!-- 第一行 -->
       <div class="chart-card">
@@ -11,6 +21,7 @@
           <select v-model="scrapScope" class="series-select">
             <option value="factory">厂区统计</option>
             <option value="line">产线统计</option>
+            <option value="material">材质统计</option>
           </select>
         </div>
         <div ref="scrapChartRef" class="chart-body"></div>
@@ -19,6 +30,11 @@
       <div class="chart-card">
         <div class="chart-header">
           <span class="chart-title">主要产品废品率</span>
+          <select v-model="productScrapType" class="series-select">
+            <option value="comprehensive">综合废品率</option>
+            <option value="external">外部废品率</option>
+            <option value="internal">内部废品率</option>
+          </select>
         </div>
         <div ref="productScrapChartRef" class="chart-body"></div>
       </div>
@@ -34,6 +50,12 @@
       <div class="chart-card">
         <div class="chart-header">
           <span class="chart-title">吨均废品损失</span>
+          <select v-model="lossScope" class="series-select">
+            <option value="factory">厂区</option>
+            <option value="line">产线</option>
+            <option value="material">材质</option>
+            <option value="product">主要产品系列</option>
+          </select>
         </div>
         <div ref="lossChartRef" class="chart-body"></div>
       </div>
@@ -62,23 +84,46 @@
       <!-- 第三行 -->
       <div class="chart-card">
         <div class="chart-header">
-          <span class="chart-title">熔炼靶心率分析</span>
+          <span class="chart-title">过程检验分析</span>
         </div>
-        <div ref="hitRateChartRef" class="chart-body"></div>
+        <div ref="processChartRef" class="chart-body"></div>
       </div>
 
       <div class="chart-card">
         <div class="chart-header">
-          <span class="chart-title">熔炼退火率</span>
+          <span class="chart-title">异常数据分析</span>
+          <select v-model="abnormalPeriod" class="series-select">
+            <option value="day">按天</option>
+            <option value="week">按周</option>
+            <option value="month">按月</option>
+          </select>
         </div>
-        <div ref="annealChartRef" class="chart-body"></div>
+        <div ref="abnormalChartRef" class="chart-body"></div>
       </div>
 
       <div class="chart-card">
         <div class="chart-header">
-          <span class="chart-title">熔炼凉火率</span>
+          <span class="chart-title">工艺变更分析</span>
         </div>
-        <div ref="coolChartRef" class="chart-body"></div>
+        <div class="verify-grid">
+          <div class="verify-box" v-for="v in verifyItems" :key="v.label">
+            <div class="verify-label">{{ v.label }}</div>
+            <div class="verify-value">
+              {{ v.value }}<span class="verify-unit">{{ v.unit }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 过程检验分析 - 当月各模块弹框 -->
+    <div v-if="processModalVisible" class="q-modal-mask" @click.self="processModalVisible = false">
+      <div class="q-modal">
+        <div class="q-modal-header">
+          <span class="q-modal-title">{{ processModalMonth }}各模块过程检验数据</span>
+          <button class="q-modal-close" @click="processModalVisible = false">✕</button>
+        </div>
+        <div ref="processModalChartRef" class="q-modal-chart"></div>
       </div>
     </div>
   </div>
@@ -96,19 +141,36 @@ const silverChartRef = ref<HTMLElement>()
 const lossChartRef = ref<HTMLElement>()
 const repairChartRef = ref<HTMLElement>()
 const faultChartRef = ref<HTMLElement>()
-const hitRateChartRef = ref<HTMLElement>()
-const annealChartRef = ref<HTMLElement>()
-const coolChartRef = ref<HTMLElement>()
+const processChartRef = ref<HTMLElement>()
+const abnormalChartRef = ref<HTMLElement>()
+const processModalChartRef = ref<HTMLElement>()
+let processModalChart: echarts.ECharts | null = null
+const processModalVisible = ref(false)
+const processModalMonth = ref('1月')
 const charts: Record<string, echarts.ECharts> = {}
+
+// ========== 数据指标 ==========
+const kpiItems = [
+  { label: '铸件综合废品率', value: '1.28', unit: '%' },
+  { label: '铸件吨均废品损失', value: '492.00', unit: '元/吨' },
+  { label: '铸件试车故障率', value: '1.05', unit: '%' },
+  { label: '检验一次合格率', value: '98.62', unit: '%' },
+  { label: '过程检验合格率', value: '99.15', unit: '%' }
+]
 
 // ========== 状态 ==========
 const scrapScope = ref('factory')
+const productScrapType = ref('comprehensive')
+const lossScope = ref('factory')
 const repairLine = ref('造型一线大件')
 const faultMode = ref<'factory' | 'line'>('factory')
 
 const repairLineOptions = [
   '造型一线大件', '造型一线中件', '造型二线大件', '造型二线中件', '造型三线HWS', '造型三线KW'
 ]
+
+// 材质选项
+const materialOptions = ['HT250', 'HT300', 'RuT450', 'QT600', '合金铸铁']
 
 // ========== 模拟数据 ==========
 const years3 = ['2024', '2025', '2026']
@@ -141,7 +203,7 @@ const groupedBarOption = (x: string[], data: number[][], unitFormatter = false) 
   }))
 })
 
-// 铸件综合废品率
+// 铸件综合废品率（厂区 / 产线 / 材质）
 const scrapData: Record<string, number[][]> = {
   factory: [
     [1.0, 1.9, 1.5],
@@ -152,34 +214,50 @@ const scrapData: Record<string, number[][]> = {
     [1.1, 1.6, 1.3, 1.8, 1.5, 1.2],
     [1.3, 1.8, 1.5, 1.6, 1.4, 1.3],
     [1.2, 1.5, 1.4, 1.5, 1.6, 1.2]
+  ],
+  material: [
+    [1.05, 1.32, 1.48, 1.18, 1.62],
+    [1.18, 1.45, 1.62, 1.28, 1.75],
+    [1.12, 1.38, 1.55, 1.22, 1.68]
   ]
 }
 const scrapX: Record<string, string[]> = {
   factory: ['安丘厂区', '寒亭厂区', '材料成型中心'],
-  line: ['造型一线大件', '造型一线中件', '造型二线大件', '造型二线中件', '造型三线HWS', '造型三线KW']
+  line: ['造型一线大件', '造型一线中件', '造型二线大件', '造型二线中件', '造型三线HWS', '造型三线KW'],
+  material: materialOptions
 }
 
 function renderScrap() {
   charts.scrap?.setOption(groupedBarOption(scrapX[scrapScope.value], scrapData[scrapScope.value], true), { notMerge: true })
 }
 
-// 主要产品废品率（2025/2026 两年，横坐标取自系列编号）
+// 主要产品废品率（综合 / 外部 / 内部）
 const productX = ['WP12', 'WP13', 'WP10/WD615', 'WP10.5H', 'WP15', 'WP6', 'WP12T', 'WP2.3']
-const productData = [
-  [1.0, 1.1, 1.05, 1.08, 1.02, 1.06, 1.04, 1.07],
-  [1.1, 1.05, 1.08, 1.05, 1.07, 1.04, 1.06, 1.05]
-]
+const productScrapData: Record<string, number[][]> = {
+  comprehensive: [
+    [1.02, 1.12, 1.06, 1.09, 1.03, 1.07, 1.05, 1.08],
+    [1.12, 1.06, 1.09, 1.06, 1.08, 1.05, 1.07, 1.06],
+    [1.05, 1.02, 1.04, 1.03, 1.06, 1.04, 1.02, 1.05]
+  ],
+  external: [
+    [0.42, 0.48, 0.45, 0.46, 0.44, 0.47, 0.45, 0.46],
+    [0.48, 0.44, 0.47, 0.45, 0.46, 0.44, 0.46, 0.45],
+    [0.45, 0.43, 0.44, 0.43, 0.45, 0.44, 0.43, 0.44]
+  ],
+  internal: [
+    [0.60, 0.64, 0.61, 0.63, 0.59, 0.60, 0.60, 0.62],
+    [0.64, 0.62, 0.62, 0.61, 0.62, 0.61, 0.61, 0.61],
+    [0.60, 0.59, 0.60, 0.60, 0.61, 0.60, 0.59, 0.61]
+  ]
+}
 function renderProductScrap() {
   charts.productScrap?.setOption({
-    tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + '%' },
-    legend: { data: ['2025', '2026'], top: 0, textStyle: { color: '#666', fontSize: 10 }, itemWidth: 14, itemHeight: 9 },
-    grid: { left: 44, right: 10, top: 30, bottom: 26 },
-    xAxis: { type: 'category', data: productX, ...baseAxis, splitLine: { show: false }, axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 9, rotate: 25 } },
-    yAxis: { type: 'value', max: 1.2, ...baseAxis, axisLabel: { ...baseAxis.axisLabel, formatter: '{value}%' } },
-    series: [
-      { name: '2025', type: 'bar', data: productData[0], barWidth: 10, itemStyle: { color: '#4472c4' } },
-      { name: '2026', type: 'bar', data: productData[1], barWidth: 10, itemStyle: { color: '#3ba8a0' } }
-    ]
+    ...groupedBarOption(productX, productScrapData[productScrapType.value], true),
+    grid: { left: 44, right: 10, top: 30, bottom: 34 },
+    xAxis: {
+      type: 'category', data: productX, ...baseAxis, splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 9, rotate: 25 }
+    }
   }, { notMerge: true })
 }
 
@@ -192,20 +270,52 @@ const silverData = [
 ]
 
 // 吨均废品损失（元/吨）
-const lossX = ['安丘厂区', '寒亭厂区', '材料成型中心']
-const lossData = [
-  [2950, 3100, 3050],
-  [2980, 3150, 3080],
-  [3050, 3120, 3100]
-]
+const lossLineX = ['造型一线大件', '造型一线中件', '造型二线大件', '造型二线中件', '造型三线HWS', '造型三线KW']
+const lossX: Record<string, string[]> = {
+  factory: ['安丘厂区', '寒亭厂区', '材料成型中心'],
+  line: lossLineX,
+  material: materialOptions,
+  product: productX
+}
+const lossData: Record<string, number[][]> = {
+  factory: [
+    [2950, 3100, 3050],
+    [2980, 3150, 3080],
+    [3050, 3120, 3100]
+  ],
+  line: [
+    [2860, 3120, 3050, 2780, 3240, 2980],
+    [2940, 3180, 3110, 2850, 3300, 3040],
+    [2900, 3150, 3080, 2810, 3270, 3010]
+  ],
+  material: [
+    [2880, 3120, 3260, 3050, 3480],
+    [2950, 3200, 3340, 3120, 3560],
+    [2910, 3160, 3300, 3080, 3520]
+  ],
+  product: [
+    [2960, 3020, 2880, 3110, 3240, 2790, 3050, 3170],
+    [3040, 3100, 2950, 3190, 3320, 2860, 3120, 3250],
+    [3000, 3060, 2910, 3150, 3280, 2820, 3080, 3210]
+  ]
+}
 function renderLoss() {
+  const scope = lossScope.value
+  const needRotate = scope === 'product' || scope === 'material' || scope === 'line'
   charts.loss?.setOption({
-    ...groupedBarOption(lossX, lossData),
+    ...groupedBarOption(lossX[scope], lossData[scope]),
+    grid: { left: 56, right: 10, top: 34, bottom: needRotate ? 40 : 26 },
+    xAxis: {
+      type: 'category', data: lossX[scope], ...baseAxis, splitLine: { show: false },
+      axisLabel: {
+        ...baseAxis.axisLabel, interval: 0, fontSize: 9,
+        rotate: scope === 'product' ? 25 : (scope === 'line' ? 20 : 0)
+      }
+    },
     yAxis: {
       type: 'value', ...baseAxis,
       name: '元/吨', nameTextStyle: { color: '#666', fontSize: 11, padding: [0, 0, 4, 0] }
-    },
-    grid: { left: 52, right: 10, top: 34, bottom: 26 }
+    }
   }, { notMerge: true })
 }
 
@@ -254,28 +364,121 @@ function renderFault() {
   charts.fault?.setOption(opt, { notMerge: true })
 }
 
-// 熔炼三项（靶心率/退火率/凉火率）
-const meltX = ['熔炼一线', '熔炼二线', '熔炼三线']
-const meltData = {
-  hitRate: [
-    [0.2, 0.1, 0.1],
-    [0.2, 0.3, 0.1],
-    [0.3, 0.4, 0.3]
-  ],
-  anneal: [
-    [0.2, 0.1, 0.1],
-    [0.2, 0.3, 0.1],
-    [0.3, 0.4, 0.3]
-  ],
-  cool: [
-    [0.2, 0.1, 0.1],
-    [0.2, 0.3, 0.1],
-    [0.3, 0.4, 0.3]
-  ]
+// ========== 过程检验分析 ==========
+const processSeriesNames = ['过程检验数量', '已检验数量', '合格数']
+const processSeriesColors = ['#4472c4', '#5ec4d4', '#70ad47']
+// 各月数据（按 series 顺序：过程检验数量 / 已检验数量 / 合格数）
+const processData = [
+  [1580, 1620, 1550, 1680, 1720, 1650, 1590, 1700, 1740, 1660, 1610, 1690],
+  [1520, 1560, 1490, 1610, 1660, 1580, 1530, 1640, 1680, 1600, 1550, 1630],
+  [1505, 1546, 1474, 1596, 1645, 1565, 1516, 1626, 1665, 1585, 1535, 1616]
+]
+// 弹框：各模块与拆分比例
+const processModules = ['造型', '制芯', '清理', '混砂']
+const processModuleRatios = [0.38, 0.27, 0.21, 0.14]
+
+function renderProcess() {
+  charts.process?.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: {
+      data: processSeriesNames, top: 0,
+      textStyle: { color: '#666', fontSize: 10 }, itemWidth: 12, itemHeight: 8
+    },
+    grid: { left: 48, right: 12, top: 32, bottom: 34 },
+    xAxis: {
+      type: 'category', data: months, ...baseAxis, splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 9, rotate: 30 }
+    },
+    yAxis: { type: 'value', name: '数量', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
+    series: processSeriesNames.map((name, i) => ({
+      name, type: 'bar', data: processData[i], barWidth: 7,
+      itemStyle: { color: processSeriesColors[i] }
+    }))
+  }, { notMerge: true })
+  charts.process?.off('click')
+  charts.process?.on('click', (params: any) => openProcessModal(params.name))
 }
-const renderMelt = (key: 'hitRate' | 'anneal' | 'cool') => {
-  charts[key]?.setOption(groupedBarOption(meltX, meltData[key], true), { notMerge: true })
+
+function openProcessModal(monthName: string) {
+  processModalMonth.value = monthName
+  processModalVisible.value = true
 }
+
+watch(processModalVisible, (v) => {
+  if (!v) return
+  nextTick(() => {
+    if (!processModalChartRef.value) return
+    if (processModalChart) processModalChart.dispose()
+    processModalChart = echarts.init(processModalChartRef.value)
+    const idx = months.indexOf(processModalMonth.value)
+    const safeIdx = idx >= 0 ? idx : 0
+    const moduleData = processData.map(row =>
+      processModuleRatios.map(r => Math.round(row[safeIdx] * r))
+    )
+    processModalChart.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      legend: {
+        data: processSeriesNames, top: 0,
+        textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
+      },
+      grid: { left: 58, right: 24, top: 40, bottom: 30 },
+      xAxis: {
+        type: 'category', data: processModules, ...baseAxis,
+        splitLine: { show: false },
+        axisLabel: { ...baseAxis.axisLabel, fontSize: 11 }
+      },
+      yAxis: { type: 'value', name: '数量', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
+      series: processSeriesNames.map((name, i) => ({
+        name, type: 'bar', data: moduleData[i], barWidth: 20,
+        itemStyle: { color: processSeriesColors[i] },
+        label: { show: true, position: 'top', color: '#666', fontSize: 10 }
+      }))
+    }, { notMerge: true })
+  })
+})
+
+// ========== 异常数据分析 ==========
+const abnormalPeriod = ref<'day' | 'week' | 'month'>('day')
+const abnormalLines = [
+  '造型一线大件', '造型一线中件', '造型二线大件',
+  '造型二线中件', '造型三线HWS', '造型三线KW'
+]
+const abnormalData: Record<string, number[]> = {
+  day: [18, 12, 26, 9, 21, 15],
+  week: [126, 88, 174, 62, 143, 105],
+  month: [542, 386, 728, 271, 615, 448]
+}
+
+function renderAbnormal() {
+  const data = abnormalData[abnormalPeriod.value] || abnormalData.day
+  const maxVal = Math.max(...data)
+  charts.abnormal?.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: 48, right: 14, top: 24, bottom: 42 },
+    xAxis: {
+      type: 'category', data: abnormalLines, ...baseAxis, splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 9, rotate: 30 }
+    },
+    yAxis: {
+      type: 'value', max: Math.ceil(maxVal * 1.15),
+      name: '数量', nameTextStyle: { color: '#666', fontSize: 10 },
+      ...baseAxis
+    },
+    series: [{
+      type: 'bar', data, barWidth: 22,
+      itemStyle: { color: '#ed7d31' },
+      label: { show: true, position: 'top', color: '#666', fontSize: 10 }
+    }]
+  }, { notMerge: true })
+}
+
+// ========== 工艺变更分析（验证计划指标） ==========
+const verifyItems = [
+  { label: '验证计划总数量', value: '128', unit: '项' },
+  { label: '进行中数量', value: '32', unit: '项' },
+  { label: '待验证数量', value: '45', unit: '项' },
+  { label: '已封闭数量', value: '51', unit: '项' }
+]
 
 // ========== 初始化 ==========
 const initChart = (el: HTMLElement | undefined, key: string) => {
@@ -289,12 +492,14 @@ const renderAll = () => {
   renderLoss()
   renderRepair()
   renderFault()
-  renderMelt('hitRate')
-  renderMelt('anneal')
-  renderMelt('cool')
+  renderProcess()
+  renderAbnormal()
 }
 
-const handleResize = () => Object.values(charts).forEach(c => c.resize())
+const handleResize = () => {
+  Object.values(charts).forEach(c => c.resize())
+  processModalChart?.resize()
+}
 
 onMounted(async () => {
   await nextTick()
@@ -304,20 +509,23 @@ onMounted(async () => {
   initChart(lossChartRef.value, 'loss')
   initChart(repairChartRef.value, 'repair')
   initChart(faultChartRef.value, 'fault')
-  initChart(hitRateChartRef.value, 'hitRate')
-  initChart(annealChartRef.value, 'anneal')
-  initChart(coolChartRef.value, 'cool')
+  initChart(processChartRef.value, 'process')
+  initChart(abnormalChartRef.value, 'abnormal')
   renderAll()
   window.addEventListener('resize', handleResize)
 })
 
 watch([scrapScope], renderScrap)
+watch([productScrapType], renderProductScrap)
+watch([lossScope], renderLoss)
 watch([repairLine], renderRepair)
 watch([faultMode], renderFault)
+watch([abnormalPeriod], renderAbnormal)
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   Object.values(charts).forEach(c => c.dispose())
+  processModalChart?.dispose()
 })
 </script>
 
@@ -326,8 +534,104 @@ onBeforeUnmount(() => {
   padding: 8px;
   background: #fff;
   min-height: calc(100vh - 90px);
+  min-width: 1180px;
 }
 
+
+/* 数据指标 */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.kpi-box {
+  background: #f7f9fc;
+  border: 1px solid #e8ecf0;
+  border-left: 3px solid #4472c4;
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+
+.kpi-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.kpi-unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: #888;
+  margin-left: 4px;
+}
+
+/* 待生成模块占位 */
+.module-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+  font-size: 12px;
+  letter-spacing: 2px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+/* 工艺变更分析 - 验证计划指标 */
+.verify-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  height: 195px;
+  align-content: center;
+}
+
+.verify-box {
+  background: #f7f9fc;
+  border: 1px solid #e8ecf0;
+  border-left: 3px solid #4472c4;
+  border-radius: 4px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.verify-label {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verify-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.verify-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: #888;
+  margin-left: 4px;
+}
 
 .quality-grid {
   display: grid;
@@ -355,32 +659,6 @@ onBeforeUnmount(() => {
   font-weight: 500;
   color: #333;
   border-radius: 2px;
-}
-
-.legend-dots {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: #666;
-  background: #fff;
-  padding: 1px 6px;
-  border-radius: 2px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  background: #4472c4;
 }
 
 .mini-tabs {
@@ -414,5 +692,58 @@ onBeforeUnmount(() => {
 
 .chart-body {
   height: 195px;
+}
+
+/* 弹框 */
+.q-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.q-modal {
+  background: #fff;
+  border-radius: 6px;
+  width: 780px;
+  max-width: 92vw;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.q-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.q-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.q-modal-close {
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.q-modal-close:hover {
+  color: #333;
+}
+
+.q-modal-chart {
+  height: 400px;
+  padding: 12px;
 }
 </style>

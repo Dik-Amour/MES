@@ -9,10 +9,6 @@
         <div class="chart-card">
           <div class="chart-header">
             <span class="chart-title">产线出入库统计</span>
-            <div class="legend-dots">
-              <span class="legend-item"><i class="dot" style="background:#4472c4"></i>出产</span>
-              <span class="legend-item"><i class="dot" style="background:#3ba8a0"></i>入库</span>
-            </div>
           </div>
           <div ref="lineInOutChartRef" class="chart-body"></div>
         </div>
@@ -111,10 +107,6 @@
               <option value="">产品系列</option>
               <option v-for="s in seriesOptions" :key="s" :value="s">{{ s }}</option>
             </select>
-            <div class="legend-dots">
-              <span class="legend-item"><i class="dot line-dot"></i>2025</span>
-              <span class="legend-item"><i class="dot line-dot2"></i>2026</span>
-            </div>
           </div>
           <div :ref="el => setLineChartRef(line.key, el)" class="chart-body line-body"></div>
         </div>
@@ -245,14 +237,18 @@ const baseAxis = {
 function renderLineInOut() {
   charts.lineInOut?.setOption({
     tooltip: { trigger: 'axis' },
-    grid: { left: 40, right: 10, top: 20, bottom: 24 },
+    legend: {
+      data: ['出产', '入库'], top: 0, right: 0,
+      textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
+    },
+    grid: { left: 40, right: 10, top: 30, bottom: 24 },
     xAxis: { type: 'category', data: lineInOutData.lines, ...baseAxis, splitLine: { show: false } },
     yAxis: { type: 'value', ...baseAxis },
     series: [
       { name: '出产', type: 'bar', data: lineInOutData.prod, itemStyle: { color: '#4472c4' }, barWidth: 14 },
       { name: '入库', type: 'bar', data: lineInOutData.in, itemStyle: { color: '#3ba8a0' }, barWidth: 14 }
     ]
-  })
+  }, { notMerge: true })
 }
 
 function renderFactory() {
@@ -318,7 +314,11 @@ function renderLineDetail(key: string) {
   const wave = seriesFilter ? seriesWave[seriesFilter] : null
   chart.setOption({
     tooltip: { trigger: 'axis' },
-    grid: { left: 40, right: 10, top: 20, bottom: 24 },
+    legend: {
+      data: years, top: 0, right: 0,
+      textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
+    },
+    grid: { left: 40, right: 10, top: 30, bottom: 24 },
     xAxis: { type: 'category', data: months, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
     yAxis: { type: 'value', ...baseAxis },
     series: years.map((y, i) => ({
@@ -426,33 +426,6 @@ onBeforeUnmount(() => {
   color: #333;
   border-radius: 2px;
 }
-
-.legend-dots {
-  display: flex;
-  gap: 10px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: #666;
-  background: #fff;
-  padding: 1px 6px;
-  border-radius: 2px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  background: #4472c4;
-}
-
-.line-dot { background: #4472c4; }
-.line-dot2 { background: #3ba8a0; }
 
 .mini-tabs {
   display: flex;
