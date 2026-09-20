@@ -89,34 +89,84 @@
       </div>
 
       <!-- 右列 -->
-      <div class="col">
-        <div class="chart-card" v-for="line in lineDetailConfigs" :key="line.key">
-          <div class="chart-header">
-            <span class="chart-title">{{ line.title }}</span>
-            <div class="mini-tabs">
-              <button
-                v-for="tab in line.tabs"
-                :key="tab.key"
-                :class="{ active: lineDetailModes[line.key] === tab.key }"
-                @click="lineDetailModes[line.key] = tab.key"
-              >{{ tab.label }}</button>
+      <div class="col right-col">
+        <div class="right-scroll">
+          <div class="chart-card" v-for="line in lineDetailConfigs" :key="line.key">
+            <div class="chart-header">
+              <span class="chart-title">{{ line.title }}</span>
+              <div class="mini-tabs">
+                <button
+                  v-for="tab in line.tabs"
+                  :key="tab.key"
+                  :class="{ active: lineDetailModes[line.key] === tab.key }"
+                  @click="lineDetailModes[line.key] = tab.key"
+                >{{ tab.label }}</button>
+              </div>
             </div>
+            <div class="chart-header sub">
+              <select v-model="lineDetailSeries[line.key]" class="series-select">
+                <option value="">产品系列</option>
+                <option v-for="s in seriesOptions" :key="s" :value="s">{{ s }}</option>
+              </select>
+            </div>
+            <div :ref="el => setLineChartRef(line.key, el)" class="chart-body line-body"></div>
           </div>
-          <div class="chart-header sub">
-            <select v-model="lineDetailSeries[line.key]" class="series-select">
-              <option value="">产品系列</option>
-              <option v-for="s in seriesOptions" :key="s" :value="s">{{ s }}</option>
-            </select>
-          </div>
-          <div :ref="el => setLineChartRef(line.key, el)" class="chart-body line-body"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- 产线出入库详情弹框 -->
+    <div v-if="lineModalVisible" class="p-modal-mask" @click.self="lineModalVisible = false">
+      <div class="p-modal">
+        <div class="p-modal-header">
+          <span class="p-modal-title">{{ lineModalName }}出入库吨位</span>
+          <button class="p-modal-close" @click="lineModalVisible = false">✕</button>
+        </div>
+        <table class="p-modal-table">
+          <thead>
+            <tr>
+              <th>产线</th><th>出产（吨）</th><th>入库（吨）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in lineModalRows" :key="r.line">
+              <td>{{ r.line }}</td>
+              <td>{{ r.prod }}</td>
+              <td>{{ r.inbound }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 年度统计 - 月份厂区详情弹框 -->
+    <div v-if="annualModalVisible" class="p-modal-mask" @click.self="annualModalVisible = false">
+      <div class="p-modal">
+        <div class="p-modal-header">
+          <span class="p-modal-title">{{ annualModalMonth }}{{ annualMode === 'prod' ? '出产' : '入库' }}数据</span>
+          <button class="p-modal-close" @click="annualModalVisible = false">✕</button>
+        </div>
+        <table class="p-modal-table">
+          <thead>
+            <tr>
+              <th>月份</th>
+              <th v-for="f in factorySplit" :key="f.name">{{ f.name }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in annualModalRows" :key="r.label">
+              <td>{{ r.label }}</td>
+              <td v-for="(v, i) in r.values" :key="i">{{ v }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
 import DashboardHeader from './DashboardHeader.vue'
 import castingImg from '@/assets/image/发动机.png'
@@ -140,9 +190,10 @@ const annualMode = ref<'prod' | 'in'>('prod')
 const lineDetailModes = reactive<Record<string, string>>({
   'line1': 'line1-large',
   'line2': 'line2-large',
-  'line3': 'line3-hws'
+  'line3': 'line3-hws',
+  'line4': 'line4-large'
 })
-const lineDetailSeries = reactive<Record<string, string>>({ 'line1': '', 'line2': '', 'line3': '' })
+const lineDetailSeries = reactive<Record<string, string>>({ 'line1': '', 'line2': '', 'line3': '', 'line4': '' })
 
 const lineDetailConfigs = [
   {
@@ -156,6 +207,10 @@ const lineDetailConfigs = [
   {
     key: 'line3', title: '造型三线生产详情',
     tabs: [{ key: 'line3-hws', label: '造型三线HWS' }, { key: 'line3-kw', label: '造型三线KW' }]
+  },
+  {
+    key: 'line4', title: '造型四线生产详情',
+    tabs: [{ key: 'line4-large', label: '造型四线大件' }, { key: 'line4-medium', label: '造型四线中件' }]
   }
 ]
 
@@ -167,6 +222,58 @@ const lineInOutData = {
   lines: ['造型一线', '造型二线', '造型三线', '造型四线'],
   prod: [100, 140, 230, 100],
   in: [150, 100, 205, 145]
+}
+
+// 各产线下的子产线（出产/入库之和等于该产线总量）
+const lineSubData: Record<string, { line: string; prod: number; inbound: number }[]> = {
+  '造型一线': [
+    { line: '造型一线大件', prod: 55, inbound: 85 },
+    { line: '造型一线中件', prod: 45, inbound: 65 }
+  ],
+  '造型二线': [
+    { line: '造型二线大件', prod: 78, inbound: 56 },
+    { line: '造型二线中件', prod: 62, inbound: 44 }
+  ],
+  '造型三线': [
+    { line: '造型三线KW', prod: 120, inbound: 110 },
+    { line: '造型三线HWS', prod: 110, inbound: 95 }
+  ],
+  '造型四线': [
+    { line: '造型四线大件', prod: 58, inbound: 80 },
+    { line: '造型四线中件', prod: 42, inbound: 65 }
+  ]
+}
+
+// 产线出入库详情弹框
+const lineModalVisible = ref(false)
+const lineModalName = ref('')
+const lineModalRows = computed(() => lineSubData[lineModalName.value] ?? [])
+
+function openLineModal(lineName: string) {
+  lineModalName.value = lineName
+  lineModalVisible.value = true
+}
+
+// 年度统计 - 月份厂区明细弹框
+const factorySplit: { name: string; ratio: number }[] = [
+  { name: '安丘厂区', ratio: 0.56 },
+  { name: '寒亭厂区', ratio: 0.44 }
+]
+const annualModalVisible = ref(false)
+const annualModalMonth = ref('')
+const annualModalRows = computed(() => {
+  const mIdx = months.indexOf(annualModalMonth.value)
+  if (mIdx < 0) return []
+  const src = annualMode.value === 'prod' ? annualData.prod : annualData.in
+  return annualData.years.map((y, yIdx) => ({
+    label: `${y}年${annualModalMonth.value}`,
+    values: factorySplit.map(f => Math.round(src[yIdx][mIdx] * f.ratio))
+  }))
+})
+
+function openAnnualModal(monthLabel: string) {
+  annualModalMonth.value = monthLabel
+  annualModalVisible.value = true
 }
 
 // 厂区出入库统计
@@ -236,19 +343,29 @@ const baseAxis = {
 
 function renderLineInOut() {
   charts.lineInOut?.setOption({
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: 'axis', valueFormatter: (v: any) => v + ' 吨' },
     legend: {
       data: ['出产', '入库'], top: 0, right: 0,
       textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
     },
-    grid: { left: 40, right: 10, top: 30, bottom: 24 },
+    grid: { left: 48, right: 10, top: 30, bottom: 24 },
     xAxis: { type: 'category', data: lineInOutData.lines, ...baseAxis, splitLine: { show: false } },
-    yAxis: { type: 'value', ...baseAxis },
+    yAxis: { type: 'value', name: '吨', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
     series: [
-      { name: '出产', type: 'bar', data: lineInOutData.prod, itemStyle: { color: '#4472c4' }, barWidth: 14 },
-      { name: '入库', type: 'bar', data: lineInOutData.in, itemStyle: { color: '#3ba8a0' }, barWidth: 14 }
+      {
+        name: '出产', type: 'bar', data: lineInOutData.prod, itemStyle: { color: '#4472c4' }, barWidth: 14,
+        label: { show: true, position: 'top', color: '#4472c4', fontSize: 9, formatter: (p: any) => p.value ?? '' }
+      },
+      {
+        name: '入库', type: 'bar', data: lineInOutData.in, itemStyle: { color: '#3ba8a0' }, barWidth: 14,
+        label: { show: true, position: 'top', color: '#3ba8a0', fontSize: 9, formatter: (p: any) => p.value ?? '' }
+      }
     ]
   }, { notMerge: true })
+  charts.lineInOut?.off('click')
+  charts.lineInOut?.on('click', (params: any) => {
+    if (params.name) openLineModal(params.name)
+  })
 }
 
 function renderFactory() {
@@ -298,6 +415,10 @@ function renderAnnual() {
       label: { show: true, position: 'top', color: '#999', fontSize: 9 }
     }))
   }, { notMerge: true })
+  charts.annual?.off('click')
+  charts.annual?.on('click', (params: any) => {
+    if (params.name) openAnnualModal(params.name)
+  })
 }
 
 function renderLineDetail(key: string) {
@@ -391,10 +512,125 @@ onBeforeUnmount(() => {
   gap: 8px;
 }
 
+/* 产线出入库详情弹框 */
+.p-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.p-modal {
+  background: #fff;
+  border-radius: 6px;
+  width: 560px;
+  max-width: 92vw;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.p-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.p-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.p-modal-close {
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.p-modal-close:hover {
+  color: #333;
+}
+
+.p-modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.p-modal-table th,
+.p-modal-table td {
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.p-modal-table th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #333;
+}
+
+.p-modal-table tbody tr:last-child td {
+  border-bottom: none;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
 .col {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* 右侧生产详情列：高度跟随其他列，内容超出时内部滚动 */
+.right-col {
+  position: relative;
+  min-height: 0;
+}
+
+.right-scroll {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #b8b8b8 #f2f2f2;
+}
+
+.right-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.right-scroll::-webkit-scrollbar-thumb {
+  background: #b8b8b8;
+  border-radius: 3px;
+}
+
+.right-scroll::-webkit-scrollbar-track {
+  background: #f2f2f2;
+}
+
+.right-scroll .chart-card {
+  flex-shrink: 0;
+}
+
+.right-scroll .chart-card:last-child {
+  margin-bottom: 4px;
 }
 
 .center-col {

@@ -62,7 +62,7 @@
 
       <div class="chart-card">
         <div class="chart-header">
-          <span class="chart-title">返修焊补分析</span>
+          <span class="chart-title">成品检验分析</span>
           <select v-model="repairLine" class="series-select">
             <option v-for="l in repairLineOptions" :key="l" :value="l">{{ l }}</option>
           </select>
@@ -319,7 +319,7 @@ function renderLoss() {
   }, { notMerge: true })
 }
 
-// 返修焊补分析（三条曲线）
+// 成品检验分析（三条曲线）
 const genRepairData = (lineName: string) => {
   const seed = lineName.length + lineName.charCodeAt(0)
   const gen = (base: number, amp: number) => months.map((_, i) =>

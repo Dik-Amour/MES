@@ -2,7 +2,6 @@
   <div class="safety-dashboard">
     <!-- 顶部标题栏 -->
     <DashboardHeader title="材料成型中心工业园区安全环保大屏" />
-    <div class="run-bar">安全生产运行<span class="days">184</span>天</div>
 
     <div class="safety-grid">
       <!-- 左列 -->
@@ -573,20 +572,6 @@ onBeforeUnmount(() => {
   background: #fff;
   min-height: calc(100vh - 90px);
   overflow-x: auto;
-}
-
-.run-bar {
-  text-align: center;
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.run-bar .days {
-  color: #52c41a;
-  font-size: 20px;
-  margin: 0 2px;
 }
 
 .safety-grid {

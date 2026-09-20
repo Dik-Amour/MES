@@ -64,22 +64,6 @@
         <div ref="educationChartRef" class="chart-body"></div>
       </div>
 
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-title">人员产量趋势</span>
-          <div class="mini-tabs">
-            <button :class="{ active: trendMode === '7d' }" @click="trendMode = '7d'">近7天</button>
-            <button :class="{ active: trendMode === '30d' }" @click="trendMode = '30d'">近30天</button>
-          </div>
-        </div>
-        <div ref="trendChartRef" class="chart-body"></div>
-        <div class="trend-footer">
-          <div class="trend-stat"><span class="ts-label">本周均值</span><span class="ts-value">40.2吨</span></div>
-          <div class="trend-stat"><span class="ts-label">上周均值</span><span class="ts-value">40.2吨</span></div>
-          <div class="trend-stat"><span class="ts-label">同比提升</span><span class="ts-value">1%</span></div>
-        </div>
-      </div>
-
       <!-- 第三行 -->
       <div class="chart-card">
         <div class="chart-header">
@@ -96,17 +80,17 @@
           <table class="schedule-table">
             <thead>
               <tr>
-                <th>班组</th><th>排班人</th><th>排班时间</th><th>工位&上机位</th><th>状态</th><th>时长（H）</th>
+                <th>产线</th><th>班组</th><th>子班组</th><th>人数</th><th>已排班</th><th>利用率</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="r in scheduleRows" :key="r.id">
+                <td>{{ r.line }}</td>
                 <td>{{ r.group }}</td>
-                <td>{{ r.person }}</td>
-                <td>{{ r.time }}</td>
-                <td>{{ r.station }}</td>
-                <td>{{ r.status }}</td>
-                <td>{{ r.hours }}</td>
+                <td>{{ r.subGroup }}</td>
+                <td>{{ r.people }}</td>
+                <td>{{ r.scheduled }}</td>
+                <td>{{ r.usage }}</td>
               </tr>
             </tbody>
           </table>
@@ -133,14 +117,11 @@ const categoryChartRef = ref<HTMLElement>()
 const deptChartRef = ref<HTMLElement>()
 const genderAgeChartRef = ref<HTMLElement>()
 const educationChartRef = ref<HTMLElement>()
-const trendChartRef = ref<HTMLElement>()
 const skillChartRef = ref<HTMLElement>()
 const levelChartRef = ref<HTMLElement>()
 const charts: Record<string, echarts.ECharts> = {}
 
 // ========== 状态 ==========
-const trendMode = ref<'7d' | '30d'>('7d')
-
 const indicatorRow1 = [
   { label: '领导干部', value: 19, pct: '0.9%' },
   { label: '管理人员', value: 31, pct: '1.5%' },
@@ -156,19 +137,18 @@ const indicatorRow2 = [
 ]
 
 const scheduleRows = [
-  { id: 1, group: 'KW制芯班', person: '张三', time: '2026-04-07 14:10:29', station: 'B号熔', status: '上机', hours: '1.05' },
-  { id: 2, group: 'KW制芯班', person: '张三', time: '2026-04-07 14:10:29', station: 'B号熔', status: '下机', hours: '1.05' },
-  { id: 3, group: 'KW制芯班', person: '张三', time: '2026-04-07 14:10:29', station: 'B号熔', status: '下机', hours: '1.05' },
-  { id: 4, group: 'KW制芯班', person: '李四', time: '2026-04-07 14:15:30', station: 'C号熔', status: '上机', hours: '0.85' },
-  { id: 5, group: 'KW制芯班', person: '李四', time: '2026-04-07 15:02:10', station: 'C号熔', status: '下机', hours: '0.78' },
-  { id: 6, group: 'HWS造型班', person: '王五', time: '2026-04-07 14:20:05', station: 'A号造', status: '上机', hours: '1.20' },
-  { id: 7, group: 'HWS造型班', person: '王五', time: '2026-04-07 15:35:42', station: 'A号造', status: '下机', hours: '1.26' },
-  { id: 8, group: 'HWS造型班', person: '赵六', time: '2026-04-07 16:05:11', station: 'D号造', status: '上机', hours: '0.95' },
-  { id: 9, group: 'HWS造型班', person: '赵六', time: '2026-04-07 17:10:33', station: 'D号造', status: '下机', hours: '1.09' },
-  { id: 10, group: '大件清理班', person: '孙七', time: '2026-04-07 17:30:20', station: 'E号清', status: '上机', hours: '1.35' },
-  { id: 11, group: '大件清理班', person: '孙七', time: '2026-04-07 18:45:56', station: 'E号清', status: '下机', hours: '1.26' },
-  { id: 12, group: '大件清理班', person: '周八', time: '2026-04-07 19:02:40', station: 'F号清', status: '上机', hours: '0.92' },
-  { id: 13, group: '大件清理班', person: '周八', time: '2026-04-07 20:08:15', station: 'F号清', status: '下机', hours: '1.10' }
+  { id: 1, line: '造型一线', group: '造型大件班', subGroup: '甲班', people: 42, scheduled: 38, usage: '90.5%' },
+  { id: 2, line: '造型一线', group: '造型大件班', subGroup: '乙班', people: 40, scheduled: 36, usage: '90.0%' },
+  { id: 3, line: '造型一线', group: '造型中件班', subGroup: '甲班', people: 38, scheduled: 33, usage: '86.8%' },
+  { id: 4, line: '造型二线', group: '造型大件班', subGroup: '甲班', people: 36, scheduled: 32, usage: '88.9%' },
+  { id: 5, line: '造型二线', group: '造型中件班', subGroup: '乙班', people: 34, scheduled: 30, usage: '88.2%' },
+  { id: 6, line: '造型三线', group: 'KW制芯班', subGroup: '甲班', people: 30, scheduled: 27, usage: '90.0%' },
+  { id: 7, line: '造型三线', group: 'HWS制芯班', subGroup: '乙班', people: 28, scheduled: 24, usage: '85.7%' },
+  { id: 8, line: '造型三线', group: 'HWS造型班', subGroup: '甲班', people: 45, scheduled: 41, usage: '91.1%' },
+  { id: 9, line: '熔炼一线', group: '熔炼班', subGroup: '甲班', people: 26, scheduled: 24, usage: '92.3%' },
+  { id: 10, line: '熔炼二线', group: '熔炼班', subGroup: '乙班', people: 24, scheduled: 21, usage: '87.5%' },
+  { id: 11, line: '清理一线', group: '大件清理班', subGroup: '甲班', people: 52, scheduled: 46, usage: '88.5%' },
+  { id: 12, line: '清理二线', group: '细清班', subGroup: '乙班', people: 38, scheduled: 34, usage: '89.5%' }
 ]
 
 // ========== 通用配置 ==========
@@ -276,36 +256,6 @@ function renderEducation() {
   }, { notMerge: true })
 }
 
-// 人员产量趋势（折线）
-const trend7d = {
-  x: ['3.19', '3.20', '3.21', '3.22', '3.23', '3.24', '3.25'],
-  y: [100, 140, 230, 100, 130, 101, 110]
-}
-const gen30d = () => {
-  const x: string[] = [], y: number[] = []
-  const base = new Date(2026, 2, 1)
-  for (let i = 1; i <= 30; i++) {
-    const d = new Date(base); d.setDate(d.getDate() + i)
-    x.push(`${d.getMonth() + 1}.${d.getDate()}`)
-    y.push(Math.round(110 + Math.sin(i * 0.7) * 60 + Math.cos(i * 0.4) * 25))
-  }
-  return { x, y }
-}
-function renderTrend() {
-  const d = trendMode.value === '7d' ? trend7d : gen30d()
-  charts.trend?.setOption({
-    tooltip: { trigger: 'axis' },
-    grid: { left: 40, right: 14, top: 14, bottom: 24 },
-    xAxis: { type: 'category', data: d.x, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
-    yAxis: { type: 'value', ...baseAxis },
-    series: [{
-      type: 'line', smooth: true, symbol: 'circle', symbolSize: 4,
-      data: d.y, itemStyle: { color: '#4472c4' }, lineStyle: { width: 2 },
-      label: { show: true, color: '#4472c4', fontSize: 9, formatter: (p: any) => p.value ?? '' }
-    }]
-  }, { notMerge: true })
-}
-
 // 技术支持人员/梯队建设（双环形图 + 下方图例）
 const skillLeft = [
   { name: '初级工', value: 167, color: '#4472c4' },
@@ -378,7 +328,6 @@ const renderAll = () => {
   renderDept()
   renderGenderAge()
   renderEducation()
-  renderTrend()
   renderSkill()
   renderLevel()
 }
@@ -391,14 +340,11 @@ onMounted(async () => {
   initChart(deptChartRef.value, 'dept')
   initChart(genderAgeChartRef.value, 'genderAge')
   initChart(educationChartRef.value, 'education')
-  initChart(trendChartRef.value, 'trend')
   initChart(skillChartRef.value, 'skill')
   initChart(levelChartRef.value, 'level')
   renderAll()
   window.addEventListener('resize', handleResize)
 })
-
-watch([trendMode], renderTrend)
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
@@ -535,35 +481,6 @@ onBeforeUnmount(() => {
   font-size: 11px;
   color: #666;
   margin-top: 2px;
-}
-
-/* 产量趋势底部统计 */
-.trend-footer {
-  display: flex;
-  background: #fff;
-  border: 1px solid #e8e8e8;
-  margin-top: 6px;
-}
-
-.trend-stat {
-  flex: 1;
-  text-align: center;
-  padding: 6px 4px;
-  border-right: 1px solid #f0f0f0;
-}
-
-.trend-stat:last-child { border-right: none; }
-
-.ts-label {
-  font-size: 11px;
-  color: #666;
-  margin-right: 6px;
-}
-
-.ts-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #222;
 }
 
 /* 班组排班明细 */
