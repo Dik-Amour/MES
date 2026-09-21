@@ -9,35 +9,37 @@
         <div class="chart-card carousel-card">
           <div class="chart-header">
             <span class="chart-title">冲天炉监测</span>
-            <div class="carousel-dots">
-              <span v-for="(_, i) in furnaceCarouselPages" :key="i"
-                class="c-dot" :class="{ active: furnaceCarouselIdx === i }"
-                @click="furnaceCarouselIdx = i"></span>
-            </div>
+            <span class="more-link" title="查看全部" @click="openCupolaModal">全部</span>
           </div>
-          <div class="sub-label">{{ furnaceCarouselPages[furnaceCarouselIdx] }}</div>
-          <div class="ech-legend-note">
+          <div class="sub-label">{{ cupolaCarouselPages[furnaceCarouselIdx] }}</div>
+          <div class="ech-legend-note centered">
             <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>进出水流量</span>
             <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>温度</span>
           </div>
           <div ref="furnace1ChartRef" class="chart-body fade-chart" :key="furnaceCarouselIdx"></div>
+          <div class="carousel-dots at-bottom">
+            <span v-for="(_, i) in cupolaCarouselPages" :key="i"
+              class="c-dot" :class="{ active: furnaceCarouselIdx === i }"
+              @click="furnaceCarouselIdx = i"></span>
+          </div>
         </div>
 
         <div class="chart-card carousel-card">
           <div class="chart-header">
             <span class="chart-title">电炉监控</span>
-            <div class="carousel-dots">
-              <span v-for="(_, i) in electricCarouselPages" :key="i"
-                class="c-dot" :class="{ active: electricCarouselIdx === i }"
-                @click="electricCarouselIdx = i"></span>
-            </div>
+            <span class="more-link" title="查看全部" @click="openFurnaceModal">全部</span>
           </div>
           <div class="sub-label">{{ electricCarouselPages[electricCarouselIdx] }}</div>
-          <div class="ech-legend-note">
+          <div class="ech-legend-note centered">
             <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>进出水流量</span>
             <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>温度</span>
           </div>
           <div ref="furnace2ChartRef" class="chart-body fade-chart" :key="electricCarouselIdx"></div>
+          <div class="carousel-dots at-bottom">
+            <span v-for="(_, i) in electricCarouselPages" :key="i"
+              class="c-dot" :class="{ active: electricCarouselIdx === i }"
+              @click="electricCarouselIdx = i"></span>
+          </div>
         </div>
 
         <div class="chart-card">
@@ -139,38 +141,39 @@
         <div class="chart-card carousel-card">
           <div class="chart-header">
             <span class="chart-title">有组织排放</span>
-            <div class="carousel-dots">
-              <span v-for="(_, i) in emissionCarouselPages" :key="i"
-                class="c-dot" :class="{ active: emissionCarouselIdx === i }"
-                @click="emissionCarouselIdx = i"></span>
-            </div>
+            <span class="more-link" title="查看全部" @click="openEmissionModal">全部</span>
           </div>
-          <div class="sub-label">{{ emissionCarouselPages[emissionCarouselIdx] }}</div>
-          <div class="ech-legend-note">
-            <template v-if="emissionCarouselIdx < 2">
+          <div class="sub-label">{{ emissionCarouselPages[emissionCarouselIdx].name }}</div>
+          <div class="ech-legend-note centered">
+            <template v-if="emissionCarouselPages[emissionCarouselIdx].type === 'furnace'">
               <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>颗粒物</span>
               <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>二氧化硫</span>
               <span class="legend-item"><i class="line-dot" style="background:#70ad47"></i>氮氧化物</span>
             </template>
+            <template v-else-if="emissionCarouselPages[emissionCarouselIdx].type === 'voc'">
+              <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>VOCs</span>
+            </template>
             <template v-else>
-              <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>一期冲天炉</span>
-              <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>二期冲天炉</span>
+              <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>PM10</span>
+              <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>TSP</span>
             </template>
           </div>
           <div ref="vocChartRef" class="chart-body fade-chart" :key="emissionCarouselIdx"></div>
+          <div class="carousel-dots at-bottom">
+            <span v-for="(_, i) in emissionCarouselPages" :key="i"
+              class="c-dot" :class="{ active: emissionCarouselIdx === i }"
+              @click="emissionCarouselIdx = i"></span>
+          </div>
         </div>
 
         <div class="chart-card">
           <div class="chart-header">
             <span class="chart-title">用电监控</span>
-            <span class="more-link" title="查看明细" @click="openElectricModal">&gt;&gt;&gt;</span>
+            <span class="more-link" title="查看全部" @click="openElectricModal">全部</span>
           </div>
-          <div class="chart-header sub">
-            <span class="sub-label"></span>
-            <div class="ech-legend-note">
-              <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>生产设备 XX</span>
-              <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>治理设备 XX</span>
-            </div>
+          <div class="ech-legend-note centered">
+            <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>生产设备 XX</span>
+            <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>治理设备 XX</span>
           </div>
           <div ref="powerChartRef" class="chart-body"></div>
         </div>
@@ -251,6 +254,101 @@
         </div>
       </div>
     </div>
+    <!-- 有组织排放全部弹框（9 个统计图 + 分页） -->
+    <div v-if="emissionModalVisible" class="s-modal-mask" @click.self="closeEmissionModal">
+      <div class="s-modal s-modal-wide">
+        <div class="s-modal-header">
+          <span class="s-modal-title">有组织排放明细</span>
+          <button class="s-modal-close" @click="closeEmissionModal">✕</button>
+        </div>
+        <div class="s-modal-body wide">
+          <div class="em-grid">
+            <div class="em-cell" v-for="(d, i) in emissionPageDevices" :key="d.name">
+              <div class="em-title">{{ d.name }}</div>
+              <div class="em-legend">
+                <template v-if="d.type === 'furnace'">
+                  <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>颗粒物</span>
+                  <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>二氧化硫</span>
+                  <span class="legend-item"><i class="line-dot" style="background:#70ad47"></i>氮氧化物</span>
+                </template>
+                <template v-else-if="d.type === 'voc'">
+                  <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>VOCs</span>
+                </template>
+                <template v-else>
+                  <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>PM10</span>
+                  <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>TSP</span>
+                </template>
+              </div>
+              <div class="em-chart" :ref="el => setEmissionChartRef(el, i)"></div>
+            </div>
+          </div>
+          <div class="em-pager">
+            <a-pagination
+              v-model:current="emissionModalPage"
+              :page-size="electricPageSize"
+              :total="emissionCarouselPages.length"
+              :show-size-changer="false"
+              size="small"
+              @change="onEmissionPageChange"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 冲天炉监测全部弹框（4 个统计图） -->
+    <div v-if="cupolaModalVisible" class="s-modal-mask" @click.self="closeCupolaModal">
+      <div class="s-modal s-modal-wide">
+        <div class="s-modal-header">
+          <span class="s-modal-title">冲天炉监测明细</span>
+          <button class="s-modal-close" @click="closeCupolaModal">✕</button>
+        </div>
+        <div class="s-modal-body wide">
+          <div class="em-grid">
+            <div class="em-cell" v-for="(d, i) in cupolaDevices" :key="d.name">
+              <div class="em-title">{{ d.name }}</div>
+              <div class="em-legend">
+                <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>进出水流量</span>
+                <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>温度</span>
+              </div>
+              <div class="em-chart" :ref="el => setCupolaChartRef(el, i)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 电炉监控全部弹框（6 个折线图 + 分页） -->
+    <div v-if="furnaceModalVisible" class="s-modal-mask" @click.self="closeFurnaceModal">
+      <div class="s-modal s-modal-wide">
+        <div class="s-modal-header">
+          <span class="s-modal-title">电炉监控明细</span>
+          <button class="s-modal-close" @click="closeFurnaceModal">✕</button>
+        </div>
+        <div class="s-modal-body wide">
+          <div class="em-grid">
+            <div class="em-cell" v-for="(d, i) in furnacePageDevices" :key="d.name">
+              <div class="em-title">{{ d.name }}</div>
+              <div class="em-legend">
+                <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>进出水流量</span>
+                <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>温度</span>
+              </div>
+              <div class="em-chart" :ref="el => setFurnaceChartRef(el, i)"></div>
+            </div>
+          </div>
+          <div class="em-pager">
+            <a-pagination
+              v-model:current="furnaceModalPage"
+              :page-size="electricPageSize"
+              :total="furnaceDevices.length"
+              :show-size-changer="false"
+              size="small"
+              @change="onFurnacePageChange"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -271,11 +369,21 @@ const charts: Record<string, echarts.ECharts> = {}
 // ========== 状态 ==========
 const dangerMode = ref<'week' | 'month' | 'quarter'>('week')
 const furnaceCarouselIdx = ref(0)
-const furnaceCarouselPages = ['一期冲天炉', '二期冲天炉']
+const cupolaCarouselPages = ['一期1#冲天炉', '一期2#冲天炉', '二期1#冲天炉', '二期2#冲天炉']
 const emissionCarouselIdx = ref(0)
-const emissionCarouselPages = ['一期冲天炉', '二期冲天炉', 'VOCs']
+const emissionCarouselPages = [
+  { name: '一期冲天炉', type: 'furnace' },
+  { name: '二期冲天炉', type: 'furnace' },
+  { name: '造型一线大件', type: 'voc' },
+  { name: '造型一线中件', type: 'voc' },
+  { name: '造型二线大件', type: 'voc' },
+  { name: '造型二线中件', type: 'voc' },
+  { name: '造型三线KW', type: 'voc' },
+  { name: '造型三线HWS', type: 'voc' },
+  { name: '扬尘在线', type: 'dust' }
+]
 const electricCarouselIdx = ref(0)
-const electricCarouselPages = ['保温电炉', '熔化电炉']
+const electricCarouselPages = ['1#保温电炉', '2#保温电炉', '3#保温电炉', '4#保温电炉', '1#熔化电炉', '2#熔化电炉', '3#熔化电炉', '4#熔化电炉', '1#精炼电炉', '2#精炼电炉', '3#精炼电炉', '4#精炼电炉']
 
 // 厂区图图片与拖拽状态
 const plantViewportRef = ref<HTMLElement | null>(null)
@@ -386,17 +494,17 @@ const baseAxis = {
 
 const timeX = ['10:45', '11:00', '11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45']
 
-// 冲天炉监测轮播（进出水流量 + 温度，两条曲线）
-const furnaceCarouselData = [
-  { flow: [120, 145, 160, 180, 170, 155, 140, 130, 150], temp: [1500, 1520, 1545, 1560, 1555, 1530, 1510, 1500, 1515] },
-  { flow: [100, 130, 155, 175, 165, 145, 135, 125, 140], temp: [1480, 1500, 1525, 1540, 1535, 1510, 1490, 1480, 1495] }
-]
+// 冲天炉监测轮播：基于轮播页列表生成数据（进出水流量 + 温度）
+const furnaceCarouselData = cupolaCarouselPages.map((_, i) => ({
+  flow: furnaceFlowWave(i * 0.55 + 1.2, 18 + (i % 3) * 6, 140),
+  temp: furnaceTempWave(i * 0.7 + 0.8, 30 + (i % 4) * 7, 1520)
+}))
 function renderFurnace1() {
   const el = furnace1ChartRef.value
   if (!el) return
   if (charts.furnace1) { charts.furnace1.dispose(); charts.furnace1 = null as any }
   charts.furnace1 = echarts.init(el)
-  const d = furnaceCarouselData[furnaceCarouselIdx.value]
+  const d = furnaceCarouselData[furnaceCarouselIdx.value] || furnaceCarouselData[0]
   charts.furnace1?.setOption({
     tooltip: { trigger: 'axis' },
     grid: { left: 36, right: 48, top: 14, bottom: 24 },
@@ -417,13 +525,23 @@ function renderFurnace1() {
     ]
   }, { notMerge: true })
 }
-// 电炉监控轮播数据（进出水流量 + 温度）
-const electricCarouselData = [
-  // 保温电炉
-  { flow: [140, 155, 170, 180, 165, 150, 140, 135, 145], temp: [1480, 1500, 1520, 1530, 1510, 1495, 1485, 1478, 1490] },
-  // 熔化电炉
-  { flow: [120, 140, 160, 175, 160, 145, 130, 125, 135], temp: [1500, 1525, 1545, 1555, 1540, 1518, 1502, 1495, 1510] }
-]
+// 电炉监控轮播数据：基于设备列表生成（进出水流量 + 温度）
+function furnaceFlowWave(seed: number, amp: number, offset: number): number[] {
+  return timeX.map((_, i) => {
+    const v = offset + Math.sin((i / 8) * Math.PI * 2 + seed) * amp + Math.cos(i * 1.1 + seed) * amp * 0.3
+    return Math.max(0, Math.round(v))
+  })
+}
+function furnaceTempWave(seed: number, amp: number, offset: number): number[] {
+  return timeX.map((_, i) => {
+    const v = offset + Math.sin((i / 8) * Math.PI * 2 + seed + 0.6) * amp
+    return Math.round(v)
+  })
+}
+const electricCarouselData = electricCarouselPages.map((name, i) => ({
+  flow: furnaceFlowWave(i * 0.65 + 0.5, 22 + (i % 3) * 5, 145),
+  temp: furnaceTempWave(i * 0.8 + 1.2, 35 + (i % 4) * 8, 1510)
+}))
 function renderFurnace2() {
   const el = furnace2ChartRef.value
   if (!el) return
@@ -451,43 +569,55 @@ function renderFurnace2() {
   }, { notMerge: true })
 }
 
-// 有组织排放轮播数据
-const emissionData = [
-  // 一期冲天炉（颗粒物 / 二氧化硫 / 氮氧化物）
-  {
+// 有组织排放轮播数据（9 项）
+const emissionX = ['10:30', '10:45', '11:00', '11:15', '11:30', '11:45', '12:00']
+const emissionDataMap: Record<string, { unit: string; max?: number; series: { name: string; color: string; data: number[] }[] }>= {
+  furnace: {
+    unit: 'mg/m³', max: 280,
     series: [
       { name: '颗粒物', color: '#4472c4', data: [180, 240, 200, 120, 100, 220, 130] },
       { name: '二氧化硫', color: '#3ba8a0', data: [120, 160, 140, 80, 90, 150, 110] },
       { name: '氮氧化物', color: '#70ad47', data: [90, 130, 120, 70, 80, 140, 100] }
     ]
   },
-  // 二期冲天炉
-  {
+  voc: {
+    unit: 'mg/m³', max: 280,
     series: [
-      { name: '颗粒物', color: '#4472c4', data: [150, 200, 180, 110, 95, 190, 120] },
-      { name: '二氧化硫', color: '#3ba8a0', data: [100, 140, 125, 75, 85, 135, 100] },
-      { name: '氮氧化物', color: '#70ad47', data: [80, 115, 105, 65, 75, 125, 90] }
+      { name: 'VOCs', color: '#4472c4', data: [90, 180, 240, 150, 100, 230, 120] }
     ]
   },
-  // VOCs（一期冲天炉 / 二期冲天炉）
-  {
+  dust: {
+    unit: 'μg/m³', max: 350,
     series: [
-      { name: '一期冲天炉', color: '#4472c4', data: [90, 180, 240, 150, 100, 230, 120] },
-      { name: '二期冲天炉', color: '#3ba8a0', data: [120, 100, 160, 230, 250, 160, 130] }
+      { name: 'PM10', color: '#4472c4', data: [220, 280, 250, 180, 160, 260, 200] },
+      { name: 'TSP', color: '#3ba8a0', data: [150, 200, 190, 130, 120, 210, 160] }
     ]
   }
-]
+}
+// 根据轮播索引生成独立数据（避免同一类型共享数据）
+function getEmissionData(idx: number) {
+  const type = emissionCarouselPages[idx].type
+  const base = emissionDataMap[type]
+  return {
+    unit: base.unit,
+    max: base.max,
+    series: base.series.map((s, si) => ({
+      ...s,
+      data: s.data.map((v, di) => Math.max(0, Math.round(v + Math.sin(idx * 2.3 + si * 1.7 + di * 0.9) * 25)))
+    }))
+  }
+}
 function renderEmission() {
   const el = vocChartRef.value
   if (!el) return
   if (charts.voc) { charts.voc.dispose(); charts.voc = null as any }
   charts.voc = echarts.init(el)
-  const d = emissionData[emissionCarouselIdx.value]
+  const d = getEmissionData(emissionCarouselIdx.value)
   charts.voc?.setOption({
     tooltip: { trigger: 'axis' },
     grid: { left: 60, right: 14, top: 14, bottom: 24 },
-    xAxis: { type: 'category', data: ['10:30', '10:45', '11:00', '11:15', '11:30', '11:45', '12:00'], ...baseAxis, boundaryGap: false, splitLine: { show: false } },
-    yAxis: { type: 'value', max: 280, ...baseAxis, axisLabel: { ...baseAxis.axisLabel, formatter: '{value}mg/m³' } },
+    xAxis: { type: 'category', data: emissionX, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
+    yAxis: { type: 'value', max: d.max, ...baseAxis, axisLabel: { ...baseAxis.axisLabel, formatter: '{value}' + d.unit } },
     series: d.series.map(s => ({
       name: s.name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 4,
       data: s.data, itemStyle: { color: s.color }, lineStyle: { width: 2 }
@@ -543,11 +673,7 @@ function renderDanger() {
     xAxis: { type: 'category', data: d.x, ...baseAxis, splitLine: { show: false }, axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 9 } },
     yAxis: { type: 'value', ...baseAxis },
     series: [
-      { name: '危险作业数量', type: 'bar', data: d.bar, barWidth: 18, itemStyle: { color: '#4472c4' } },
-      {
-        name: '趋势', type: 'line', smooth: true, symbol: 'circle', symbolSize: 4,
-        data: d.line, itemStyle: { color: '#3ba8a0' }, lineStyle: { width: 1.5 }
-      }
+      { name: '危险作业数量', type: 'bar', data: d.bar, barWidth: 18, itemStyle: { color: '#4472c4' } }
     ]
   }, { notMerge: true })
   charts.danger?.off('click')
@@ -715,6 +841,209 @@ watch(electricModalVisible, async v => {
   setTimeout(renderElectricModalCharts, 60)
 })
 
+// ========== 电炉监控全部弹框 ==========
+
+const furnaceDeviceNames = [
+  '1#保温电炉', '2#保温电炉', '3#保温电炉', '4#保温电炉',
+  '1#熔化电炉', '2#熔化电炉', '3#熔化电炉', '4#熔化电炉',
+  '1#精炼电炉', '2#精炼电炉', '3#精炼电炉', '4#精炼电炉'
+]
+
+const furnaceDevices = furnaceDeviceNames.map((name, i) => ({
+  name,
+  flow: furnaceFlowWave(i * 0.65 + 0.5, 22 + (i % 3) * 5, 145),
+  temp: furnaceTempWave(i * 0.8 + 1.2, 35 + (i % 4) * 8, 1510)
+}))
+
+const furnaceModalVisible = ref(false)
+const furnaceModalPage = ref(1)
+const furnaceChartEls: (HTMLElement | null)[] = []
+let furnaceCharts: echarts.ECharts[] = []
+
+const setFurnaceChartRef = (el: any, i: number) => {
+  furnaceChartEls[i] = (el as HTMLElement) || null
+}
+
+const furnacePageDevices = computed(() => {
+  const start = (furnaceModalPage.value - 1) * electricPageSize
+  return furnaceDevices.slice(start, start + electricPageSize)
+})
+
+function renderFurnaceModalCharts() {
+  furnaceCharts.forEach(c => c.dispose())
+  furnaceCharts = []
+  furnacePageDevices.value.forEach((d, i) => {
+    const el = furnaceChartEls[i]
+    if (!el) return
+    const c = echarts.init(el)
+    c.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { left: 34, right: 42, top: 12, bottom: 22 },
+      xAxis: { type: 'category', data: electricTimes, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
+      yAxis: [
+        { type: 'value', ...baseAxis, name: '流量', nameTextStyle: { fontSize: 10, color: '#999' } },
+        { type: 'value', ...baseAxis, name: '℃', nameTextStyle: { fontSize: 10, color: '#999' }, position: 'right', splitLine: { show: false } }
+      ],
+      series: [
+        {
+          name: '进出水流量', type: 'line', smooth: true, symbol: 'circle', symbolSize: 3,
+          data: d.flow, itemStyle: { color: '#4472c4' }, lineStyle: { width: 1.6 }, yAxisIndex: 0
+        },
+        {
+          name: '温度', type: 'line', smooth: true, symbol: 'circle', symbolSize: 3,
+          data: d.temp, itemStyle: { color: '#3ba8a0' }, lineStyle: { width: 1.6 }, yAxisIndex: 1
+        }
+      ]
+    }, { notMerge: true })
+    c.resize()
+    furnaceCharts.push(c)
+  })
+}
+
+// ========== 有组织排放全部弹框 ==========
+const emissionModalVisible = ref(false)
+const emissionModalPage = ref(1)
+const emissionChartEls: (HTMLElement | null)[] = []
+let emissionModalCharts: echarts.ECharts[] = []
+
+const setEmissionChartRef = (el: any, i: number) => {
+  emissionChartEls[i] = (el as HTMLElement) || null
+}
+
+const emissionPageDevices = computed(() => {
+  const start = (emissionModalPage.value - 1) * electricPageSize
+  return emissionCarouselPages.slice(start, start + electricPageSize)
+})
+
+function renderEmissionModalCharts() {
+  emissionModalCharts.forEach(c => c.dispose())
+  emissionModalCharts = []
+  emissionPageDevices.value.forEach((item, i) => {
+    const el = emissionChartEls[i]
+    if (!el) return
+    const c = echarts.init(el)
+    const d = getEmissionData(emissionCarouselPages.indexOf(item))
+    c.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { left: 50, right: 14, top: 12, bottom: 22 },
+      xAxis: { type: 'category', data: emissionX, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
+      yAxis: { type: 'value', max: d.max, ...baseAxis, axisLabel: { ...baseAxis.axisLabel, formatter: '{value}' + d.unit } },
+      series: d.series.map(s => ({
+        name: s.name, type: 'line', smooth: true, symbol: 'circle', symbolSize: 3,
+        data: s.data, itemStyle: { color: s.color }, lineStyle: { width: 1.6 }
+      }))
+    }, { notMerge: true })
+    c.resize()
+    emissionModalCharts.push(c)
+  })
+}
+
+function openEmissionModal() {
+  emissionModalPage.value = 1
+  emissionModalVisible.value = true
+}
+
+function closeEmissionModal() {
+  emissionModalVisible.value = false
+}
+
+function onEmissionPageChange() {
+  nextTick(() => setTimeout(renderEmissionModalCharts, 40))
+}
+
+watch(emissionModalVisible, async v => {
+  if (!v) {
+    emissionModalCharts.forEach(c => c.dispose())
+    emissionModalCharts = []
+    return
+  }
+  await nextTick()
+  setTimeout(renderEmissionModalCharts, 60)
+})
+
+// ========== 冲天炉监测全部弹框 ==========
+const cupolaModalVisible = ref(false)
+const cupolaChartEls: (HTMLElement | null)[] = []
+let cupolaCharts: echarts.ECharts[] = []
+
+const cupolaDevices = cupolaCarouselPages.map((name, i) => ({
+  name,
+  flow: furnaceFlowWave(i * 0.55 + 1.2, 18 + (i % 3) * 6, 140),
+  temp: furnaceTempWave(i * 0.7 + 0.8, 30 + (i % 4) * 7, 1520)
+}))
+
+const setCupolaChartRef = (el: any, i: number) => {
+  cupolaChartEls[i] = (el as HTMLElement) || null
+}
+
+function renderCupolaModalCharts() {
+  cupolaCharts.forEach(c => c.dispose())
+  cupolaCharts = []
+  cupolaDevices.forEach((d, i) => {
+    const el = cupolaChartEls[i]
+    if (!el) return
+    const c = echarts.init(el)
+    c.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { left: 34, right: 42, top: 12, bottom: 22 },
+      xAxis: { type: 'category', data: timeX, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
+      yAxis: [
+        { type: 'value', ...baseAxis, name: '流量', nameTextStyle: { fontSize: 10, color: '#999' } },
+        { type: 'value', ...baseAxis, name: '℃', nameTextStyle: { fontSize: 10, color: '#999' }, position: 'right', splitLine: { show: false } }
+      ],
+      series: [
+        { name: '进出水流量', type: 'line', smooth: true, symbol: 'circle', symbolSize: 3,
+          data: d.flow, itemStyle: { color: '#4472c4' }, lineStyle: { width: 1.6 }, yAxisIndex: 0 },
+        { name: '温度', type: 'line', smooth: true, symbol: 'circle', symbolSize: 3,
+          data: d.temp, itemStyle: { color: '#3ba8a0' }, lineStyle: { width: 1.6 }, yAxisIndex: 1 }
+      ]
+    }, { notMerge: true })
+    c.resize()
+    cupolaCharts.push(c)
+  })
+}
+
+function openCupolaModal() {
+  cupolaModalVisible.value = true
+}
+
+function closeCupolaModal() {
+  cupolaModalVisible.value = false
+}
+
+watch(cupolaModalVisible, async v => {
+  if (!v) {
+    cupolaCharts.forEach(c => c.dispose())
+    cupolaCharts = []
+    return
+  }
+  await nextTick()
+  setTimeout(renderCupolaModalCharts, 60)
+})
+
+function openFurnaceModal() {
+  furnaceModalPage.value = 1
+  furnaceModalVisible.value = true
+}
+
+function closeFurnaceModal() {
+  furnaceModalVisible.value = false
+}
+
+function onFurnacePageChange() {
+  nextTick(() => setTimeout(renderFurnaceModalCharts, 40))
+}
+
+watch(furnaceModalVisible, async v => {
+  if (!v) {
+    furnaceCharts.forEach(c => c.dispose())
+    furnaceCharts = []
+    return
+  }
+  await nextTick()
+  setTimeout(renderFurnaceModalCharts, 60)
+})
+
 // ========== 初始化 ==========
 const initChart = (el: HTMLElement | undefined, key: string) => {
   if (el) charts[key] = echarts.init(el)
@@ -734,7 +1063,7 @@ let emissionTimer: ReturnType<typeof setInterval> | null = null
 let electricTimer: ReturnType<typeof setInterval> | null = null
 function startTimers() {
   furnaceTimer = setInterval(() => {
-    furnaceCarouselIdx.value = (furnaceCarouselIdx.value + 1) % furnaceCarouselPages.length
+    furnaceCarouselIdx.value = (furnaceCarouselIdx.value + 1) % cupolaCarouselPages.length
   }, 4000)
   emissionTimer = setInterval(() => {
     emissionCarouselIdx.value = (emissionCarouselIdx.value + 1) % emissionCarouselPages.length
@@ -752,6 +1081,9 @@ function stopTimers() {
 const handleResize = () => {
   Object.values(charts).forEach(c => c.resize())
   electricCharts.forEach(c => c.resize())
+  furnaceCharts.forEach(c => c.resize())
+  emissionModalCharts.forEach(c => c.resize())
+  cupolaCharts.forEach(c => c.resize())
 }
 
 onMounted(async () => {
@@ -764,7 +1096,7 @@ onMounted(async () => {
 })
 
 watch([dangerMode], renderDanger)
-watch([furnaceCarouselIdx], () => nextTick(renderFurnace1))
+watch(furnaceCarouselIdx, () => nextTick(renderFurnace1))
 watch([emissionCarouselIdx], () => nextTick(renderEmission))
 watch([electricCarouselIdx], () => nextTick(renderFurnace2))
 
@@ -776,6 +1108,12 @@ onBeforeUnmount(() => {
   dangerModalChart = null
   electricCharts.forEach(c => c.dispose())
   electricCharts = []
+  furnaceCharts.forEach(c => c.dispose())
+  furnaceCharts = []
+  emissionModalCharts.forEach(c => c.dispose())
+  emissionModalCharts = []
+  cupolaCharts.forEach(c => c.dispose())
+  cupolaCharts = []
 })
 </script>
 
@@ -941,11 +1279,19 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 
+.sub-label.center {
+  text-align: center;
+}
+
 .ech-legend-note {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.ech-legend-note.centered {
+  justify-content: center;
 }
 
 .legend-item {
@@ -1011,7 +1357,14 @@ onBeforeUnmount(() => {
 
 .carousel-dots {
   display: flex;
-  gap: 6px;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.carousel-dots.at-bottom {
+  justify-content: center;
+  margin-top: 6px;
 }
 
 .c-dot {
