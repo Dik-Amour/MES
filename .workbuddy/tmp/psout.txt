@@ -1,4 +1,0 @@
-﻿Name=生产结算周期配置方案说明.docx
-Attributes=Archive
-Length=482834
-OPEN_OK
