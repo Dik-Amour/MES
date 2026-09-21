@@ -167,6 +167,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/wip/WipMaterialStat.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/wip/settlement-cycle-config',
+    name: 'SettlementCycleConfig',
+    component: () => import('@/views/wip/SettlementCycleConfig.vue'),
+    meta: { requiresAuth: true }
+  },
   // 安灯异常管理路由
   {
     path: '/andon/config',

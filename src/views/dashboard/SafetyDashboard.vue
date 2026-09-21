@@ -208,6 +208,17 @@
         </div>
       </div>
     </div>
+
+    <!-- 危险作业类型详情弹框 -->
+    <div v-if="dangerModalVisible" class="s-modal-mask" @click.self="closeDangerModal">
+      <div class="s-modal">
+        <div class="s-modal-header">
+          <span class="s-modal-title">{{ dangerModalTitle }}</span>
+          <button class="s-modal-close" @click="closeDangerModal">✕</button>
+        </div>
+        <div ref="dangerModalChartRef" class="s-modal-body"></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -507,7 +518,77 @@ function renderDanger() {
       }
     ]
   }, { notMerge: true })
+  charts.danger?.off('click')
+  charts.danger?.on('click', (params: any) => {
+    if (params.seriesType !== 'bar' || typeof params.dataIndex !== 'number') return
+    openDangerModal(d.x[params.dataIndex], params.dataIndex)
+  })
 }
+
+// 八种危险作业类型（弹框横轴）
+const dangerTypes = ['动火作业', '高处作业', '吊装作业', '临时用电作业', '动土作业', '有限空间作业', '盲板抽堵作业', '检维修作业']
+const dangerTypeWeights = [0.22, 0.18, 0.14, 0.12, 0.08, 0.09, 0.05, 0.12]
+
+// 把柱子的总量按权重拆到八个类型上，保证合计等于柱子数值
+const splitDanger = (total: number, seed: number): number[] => {
+  const raw = dangerTypeWeights.map((w, i) =>
+    Math.max(0, Math.round(total * w + Math.sin(seed + i * 1.7) * total * 0.03))
+  )
+  const sum = raw.reduce((s, v) => s + v, 0)
+  raw[0] = Math.max(0, raw[0] + (total - sum))
+  return raw
+}
+
+// 危险作业详情弹框
+const dangerModalVisible = ref(false)
+const dangerModalTitle = ref('')
+const dangerModalValues = ref<number[]>([])
+const dangerModalChartRef = ref<HTMLElement>()
+let dangerModalChart: echarts.ECharts | null = null
+
+function openDangerModal(label: string, index: number) {
+  const d = dangerData[dangerMode.value]
+  dangerModalTitle.value = `${label}危险作业统计`
+  dangerModalValues.value = splitDanger(d.bar[index] ?? 0, index * 3 + 1)
+  dangerModalVisible.value = true
+}
+
+function closeDangerModal() {
+  dangerModalVisible.value = false
+}
+
+function renderDangerModalChart() {
+  const el = dangerModalChartRef.value
+  if (!el) return
+  if (!dangerModalChart || dangerModalChart.getDom() !== el) {
+    dangerModalChart?.dispose()
+    dangerModalChart = echarts.init(el)
+  }
+  dangerModalChart.setOption({
+    tooltip: { trigger: 'axis' },
+    grid: { left: 44, right: 16, top: 24, bottom: 62 },
+    xAxis: {
+      type: 'category', data: dangerTypes, ...baseAxis,
+      splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 10, rotate: 32 }
+    },
+    yAxis: { type: 'value', name: '数量', nameTextStyle: { color: '#666', fontSize: 10 }, ...baseAxis },
+    series: [
+      {
+        name: '数量', type: 'bar', data: dangerModalValues.value, barWidth: 26,
+        itemStyle: { color: '#4472c4' },
+        label: { show: true, position: 'top', color: '#666', fontSize: 10 }
+      }
+    ]
+  }, { notMerge: true })
+  dangerModalChart.resize()
+}
+
+watch(dangerModalVisible, async v => {
+  if (!v) return
+  await nextTick()
+  setTimeout(renderDangerModalChart, 60)
+})
 
 // ========== 初始化 ==========
 const initChart = (el: HTMLElement | undefined, key: string) => {
@@ -563,6 +644,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   stopTimers()
   Object.values(charts).forEach(c => c.dispose())
+  dangerModalChart?.dispose()
+  dangerModalChart = null
 })
 </script>
 
@@ -572,6 +655,60 @@ onBeforeUnmount(() => {
   background: #fff;
   min-height: calc(100vh - 90px);
   overflow-x: auto;
+}
+
+/* 危险作业类型弹框 */
+.s-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s-modal {
+  background: #fff;
+  border-radius: 6px;
+  width: 880px;
+  max-width: 94vw;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.s-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.s-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.s-modal-close {
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.s-modal-close:hover {
+  color: #333;
+}
+
+.s-modal-body {
+  height: 360px;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .safety-grid {

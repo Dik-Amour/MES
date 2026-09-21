@@ -58,6 +58,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/wip/monthly-report': { title: '生产月度统计', path: '/wip/monthly-report', icon: InboxOutlined },
     '/wip/annual-report': { title: '生产年度统计', path: '/wip/annual-report', icon: InboxOutlined },
     '/wip/material-stat': { title: '毛坯材质生产统计', path: '/wip/material-stat', icon: InboxOutlined },
+    '/wip/settlement-cycle-config': { title: '生产结算周期配置', path: '/wip/settlement-cycle-config', icon: InboxOutlined },
     // 清理生产记录路径
     '/cleaning-production': { title: '清理生产记录', path: '/cleaning-production/manipulator', icon: CalendarOutlined },
     '/cleaning-production/manipulator': { title: '机械手', path: '/cleaning-production/manipulator', icon: CalendarOutlined },

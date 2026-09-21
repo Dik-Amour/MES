@@ -80,6 +80,7 @@
             <a-menu-item key="/wip/monthly-report">生产月度统计</a-menu-item>
             <a-menu-item key="/wip/annual-report">生产年度统计</a-menu-item>
             <a-menu-item key="/wip/material-stat">毛坯材质生产统计</a-menu-item>
+            <a-menu-item key="/wip/settlement-cycle-config">生产结算周期配置</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="visualization">

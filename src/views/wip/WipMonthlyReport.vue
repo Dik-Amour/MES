@@ -31,12 +31,7 @@
             </a-form-item>
           </a-form>
         </a-col>
-        <a-col>
-          <a-button type="primary" ghost @click="openSettlementModal">
-            <CalendarOutlined />
-            生产结算周期配置
-          </a-button>
-        </a-col>
+
       </a-row>
     </a-card>
 
@@ -70,62 +65,13 @@
       </a-table>
     </a-card>
 
-    <!-- 生产结算周期配置弹框 -->
-    <a-modal
-      v-model:open="settlementModalVisible"
-      title="生产结算周期配置"
-      :width="520"
-      @ok="handleSettlementOk"
-      @cancel="handleSettlementCancel"
-    >
-      <a-form
-        ref="settlementFormRef"
-        :model="settlementForm"
-        :rules="settlementRules"
-        :label-col="{ span: 6 }"
-        :wrapper-col="{ span: 18 }"
-      >
-        <a-form-item label="年份月份" name="periodMonth">
-          <a-date-picker
-            v-model:value="settlementForm.periodMonth"
-            picker="month"
-            :allow-clear="false"
-            format="YYYY年MM月"
-            style="width: 100%"
-            @change="handlePeriodMonthChange"
-          />
-        </a-form-item>
-        <a-form-item label="起始日期" name="startDate">
-          <a-date-picker
-            v-model:value="settlementForm.startDate"
-            :allow-clear="false"
-            format="YYYY-MM-DD"
-            style="width: 100%"
-          />
-        </a-form-item>
-        <a-form-item label="结算日期" name="endDate">
-          <a-date-picker
-            v-model:value="settlementForm.endDate"
-            :allow-clear="false"
-            format="YYYY-MM-DD"
-            style="width: 100%"
-          />
-        </a-form-item>
-      </a-form>
-    </a-modal>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
-import type { FormInstance } from 'ant-design-vue'
-import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
-import 'dayjs/locale/zh-cn'
-import { SearchOutlined, ReloadOutlined, CalendarOutlined } from '@ant-design/icons-vue'
-
-dayjs.locale('zh-cn')
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 
 interface MetricStat {
   name: string
@@ -317,53 +263,7 @@ const handleReset = () => {
   handleSearch()
 }
 
-// 生产结算周期配置弹框
-const settlementModalVisible = ref(false)
-const settlementFormRef = ref<FormInstance>()
-const settlementForm = reactive<{
-  periodMonth: Dayjs
-  startDate: Dayjs
-  endDate: Dayjs
-}>({
-  periodMonth: dayjs(),
-  startDate: dayjs().startOf('month'),
-  endDate: dayjs().endOf('month')
-})
-const settlementRules = {
-  periodMonth: [{ required: true, message: '请选择年份月份', trigger: 'change' }],
-  startDate: [{ required: true, message: '请选择起始日期', trigger: 'change' }],
-  endDate: [{ required: true, message: '请选择结算日期', trigger: 'change' }]
-}
 
-const openSettlementModal = () => {
-  // 打开时默认当前月份
-  settlementForm.periodMonth = dayjs()
-  settlementForm.startDate = dayjs().startOf('month')
-  settlementForm.endDate = dayjs().endOf('month')
-  settlementModalVisible.value = true
-}
-
-// 年份月份变更时联动更新起始/结算日期（当月第一天/最后一天）
-const handlePeriodMonthChange = () => {
-  settlementForm.startDate = settlementForm.periodMonth.startOf('month')
-  settlementForm.endDate = settlementForm.periodMonth.endOf('month')
-}
-
-const handleSettlementOk = async () => {
-  try {
-    await settlementFormRef.value?.validate()
-  } catch {
-    return
-  }
-  message.success(
-    `生产结算周期已配置：${settlementForm.periodMonth.format('YYYY年MM月')}（${settlementForm.startDate.format('YYYY-MM-DD')} 至 ${settlementForm.endDate.format('YYYY-MM-DD')}）`
-  )
-  settlementModalVisible.value = false
-}
-
-const handleSettlementCancel = () => {
-  settlementModalVisible.value = false
-}
 </script>
 
 <style scoped>
