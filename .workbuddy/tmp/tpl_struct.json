@@ -1,0 +1,747 @@
+{
+ "effective_mode": "full",
+ "effective_text_preview_length": 200,
+ "nodes": [
+  {
+   "end_index": 4,
+   "paragraph_index": 1,
+   "start_index": 0,
+   "text_preview": "设备大屏",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 9,
+   "paragraph_index": 2,
+   "start_index": 5,
+   "text_preview": "页面原型",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 11,
+   "paragraph_index": 3,
+   "start_index": 10,
+   "text_preview": "[Image]",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 16,
+   "paragraph_index": 4,
+   "start_index": 12,
+   "text_preview": "业务需求",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 185,
+   "paragraph_index": 5,
+   "start_index": 17,
+   "text_preview": "面向设备管理与生产保障人员，将设备资产规模、运行可靠性、维修成本与备件资金占用等核心指标集中呈现于一块大屏，形成设备运行全景视图。通",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 192,
+   "paragraph_index": 6,
+   "start_index": 186,
+   "text_preview": "页面功能描述",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 237,
+   "paragraph_index": 7,
+   "start_index": 193,
+   "text_preview": "页面布局：大屏采用“标题栏 + 指标卡 + 趋势图表 + 重点设备概况”的纵向分段布局。",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 414,
+   "paragraph_index": 8,
+   "start_index": 238,
+   "text_preview": "顶部为标题栏（材料成型中心工业园区设备监控大屏），左侧显示实时时间、日期与天气，右侧为 LOGO 位；第一行为设备运维成本指标、设备总览、设",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 436,
+   "paragraph_index": 9,
+   "start_index": 415,
+   "text_preview": "大屏标题：材料成型中心工业园区设备监控大屏",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 444,
+   "paragraph_index": 10,
+   "start_index": 437,
+   "text_preview": "页面区块说明：",
+   "type": "Paragraph"
+  },
+  {
+   "col_count": 4,
+   "end_index": 1442,
+   "first_row_texts": [
+    "序号",
+    "区块",
+    "展示内容",
+    "说明"
+   ],
+   "paragraph_index": 11,
+   "row_count": 11,
+   "start_index": 445,
+   "table_end": 1442,
+   "table_id": "39lls12d",
+   "table_index": 0,
+   "table_rows": [
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 448,
+       "row": 1,
+       "start_index": 446,
+       "text_preview": "序号"
+      },
+      {
+       "col": 2,
+       "end_index": 452,
+       "row": 1,
+       "start_index": 450,
+       "text_preview": "区块"
+      },
+      {
+       "col": 3,
+       "end_index": 458,
+       "row": 1,
+       "start_index": 454,
+       "text_preview": "展示内容"
+      },
+      {
+       "col": 4,
+       "end_index": 462,
+       "row": 1,
+       "start_index": 460,
+       "text_preview": "说明"
+      }
+     ],
+     "row": 1
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 466,
+       "row": 2,
+       "start_index": 465,
+       "text_preview": "1"
+      },
+      {
+       "col": 2,
+       "end_index": 471,
+       "row": 2,
+       "start_index": 468,
+       "text_preview": "标题栏"
+      },
+      {
+       "col": 3,
+       "end_index": 513,
+       "row": 2,
+       "start_index": 473,
+       "text_preview": "实时时间、日期、天气"
+      },
+      {
+       "col": 4,
+       "end_index": 542,
+       "row": 2,
+       "start_index": 515,
+       "text_preview": "时间每秒刷新；标题居"
+      }
+     ],
+     "row": 2
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 546,
+       "row": 3,
+       "start_index": 545,
+       "text_preview": "2"
+      },
+      {
+       "col": 2,
+       "end_index": 556,
+       "row": 3,
+       "start_index": 548,
+       "text_preview": "设备运维成本指标"
+      },
+      {
+       "col": 3,
+       "end_index": 618,
+       "row": 3,
+       "start_index": 558,
+       "text_preview": "吨均设备维修费用（元"
+      },
+      {
+       "col": 4,
+       "end_index": 647,
+       "row": 3,
+       "start_index": 620,
+       "text_preview": "一行三列指标卡，集中"
+      }
+     ],
+     "row": 3
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 651,
+       "row": 4,
+       "start_index": 650,
+       "text_preview": "3"
+      },
+      {
+       "col": 2,
+       "end_index": 657,
+       "row": 4,
+       "start_index": 653,
+       "text_preview": "设备总览"
+      },
+      {
+       "col": 3,
+       "end_index": 719,
+       "row": 4,
+       "start_index": 659,
+       "text_preview": "设备数量（台/套，示"
+      },
+      {
+       "col": 4,
+       "end_index": 742,
+       "row": 4,
+       "start_index": 721,
+       "text_preview": "一行三列指标卡，反映"
+      }
+     ],
+     "row": 4
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 746,
+       "row": 5,
+       "start_index": 745,
+       "text_preview": "4"
+      },
+      {
+       "col": 2,
+       "end_index": 754,
+       "row": 5,
+       "start_index": 748,
+       "text_preview": "设备运行指标"
+      },
+      {
+       "col": 3,
+       "end_index": 822,
+       "row": 5,
+       "start_index": 756,
+       "text_preview": "MTTR（分钟，示例 68.5）"
+      },
+      {
+       "col": 4,
+       "end_index": 848,
+       "row": 5,
+       "start_index": 824,
+       "text_preview": "两行两列指标卡，反映"
+      }
+     ],
+     "row": 5
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 852,
+       "row": 6,
+       "start_index": 851,
+       "text_preview": "5"
+      },
+      {
+       "col": 2,
+       "end_index": 864,
+       "row": 6,
+       "start_index": 854,
+       "text_preview": "吨均设备维修费用分析"
+      },
+      {
+       "col": 3,
+       "end_index": 900,
+       "row": 6,
+       "start_index": 866,
+       "text_preview": "折线图；支持“分厂年"
+      },
+      {
+       "col": 4,
+       "end_index": 996,
+       "row": 6,
+       "start_index": 902,
+       "text_preview": "分厂年度趋势为 2020～2"
+      }
+     ],
+     "row": 6
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1000,
+       "row": 7,
+       "start_index": 999,
+       "text_preview": "6"
+      },
+      {
+       "col": 2,
+       "end_index": 1011,
+       "row": 7,
+       "start_index": 1002,
+       "text_preview": "各产线备件库存资金"
+      },
+      {
+       "col": 3,
+       "end_index": 1030,
+       "row": 7,
+       "start_index": 1013,
+       "text_preview": "柱状图；X 轴为产线，Y"
+      },
+      {
+       "col": 4,
+       "end_index": 1063,
+       "row": 7,
+       "start_index": 1032,
+       "text_preview": "按 9 条产线展示备件库"
+      }
+     ],
+     "row": 7
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1067,
+       "row": 8,
+       "start_index": 1066,
+       "text_preview": "7"
+      },
+      {
+       "col": 2,
+       "end_index": 1074,
+       "row": 8,
+       "start_index": 1069,
+       "text_preview": "设备可动率"
+      },
+      {
+       "col": 3,
+       "end_index": 1110,
+       "row": 8,
+       "start_index": 1076,
+       "text_preview": "折线图（百分比）；支"
+      },
+      {
+       "col": 4,
+       "end_index": 1159,
+       "row": 8,
+       "start_index": 1112,
+       "text_preview": "分厂年度为 2020～2026 "
+      }
+     ],
+     "row": 8
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1163,
+       "row": 9,
+       "start_index": 1162,
+       "text_preview": "8"
+      },
+      {
+       "col": 2,
+       "end_index": 1178,
+       "row": 9,
+       "start_index": 1165,
+       "text_preview": "重点设备概况-设备类"
+      },
+      {
+       "col": 3,
+       "end_index": 1218,
+       "row": 9,
+       "start_index": 1180,
+       "text_preview": "机器人、熔炼设备、三"
+      },
+      {
+       "col": 4,
+       "end_index": 1249,
+       "row": 9,
+       "start_index": 1220,
+       "text_preview": "默认选中“视觉”；切"
+      }
+     ],
+     "row": 9
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1253,
+       "row": 10,
+       "start_index": 1252,
+       "text_preview": "9"
+      },
+      {
+       "col": 2,
+       "end_index": 1267,
+       "row": 10,
+       "start_index": 1255,
+       "text_preview": "重点设备概况-产线统"
+      },
+      {
+       "col": 3,
+       "end_index": 1297,
+       "row": 10,
+       "start_index": 1269,
+       "text_preview": "行为合计与 10 个产线/"
+      },
+      {
+       "col": 4,
+       "end_index": 1338,
+       "row": 10,
+       "start_index": 1299,
+       "text_preview": "视觉类型的细分列为相"
+      }
+     ],
+     "row": 10
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1343,
+       "row": 11,
+       "start_index": 1341,
+       "text_preview": "10"
+      },
+      {
+       "col": 2,
+       "end_index": 1356,
+       "row": 11,
+       "start_index": 1345,
+       "text_preview": "重点设备概况-品牌分"
+      },
+      {
+       "col": 3,
+       "end_index": 1416,
+       "row": 11,
+       "start_index": 1358,
+       "text_preview": "列为应用设备类型、品"
+      },
+      {
+       "col": 4,
+       "end_index": 1439,
+       "row": 11,
+       "start_index": 1418,
+       "text_preview": "按应用设备类型分组展"
+      }
+     ],
+     "row": 11
+    }
+   ],
+   "table_start": 445,
+   "type": "Table"
+  },
+  {
+   "end_index": 1521,
+   "paragraph_index": 12,
+   "start_index": 1443,
+   "text_preview": "交互说明：吨均设备维修费用分析、设备可动率、重点设备概况的设备类型页签与品牌分布页签均为区块内联动，切换后图表与表格即时刷新；所有图",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 1531,
+   "paragraph_index": 13,
+   "start_index": 1522,
+   "text_preview": "数据来源与采集逻辑",
+   "type": "Paragraph"
+  },
+  {
+   "end_index": 1532,
+   "paragraph_index": 14,
+   "start_index": 1532,
+   "type": "Paragraph"
+  },
+  {
+   "col_count": 3,
+   "end_index": 2128,
+   "first_row_texts": [
+    "区块",
+    "来源",
+    "说明"
+   ],
+   "paragraph_index": 15,
+   "row_count": 9,
+   "start_index": 1533,
+   "table_end": 2128,
+   "table_id": "r26qvcr1",
+   "table_index": 1,
+   "table_rows": [
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1536,
+       "row": 1,
+       "start_index": 1534,
+       "text_preview": "区块"
+      },
+      {
+       "col": 2,
+       "end_index": 1540,
+       "row": 1,
+       "start_index": 1538,
+       "text_preview": "来源"
+      },
+      {
+       "col": 3,
+       "end_index": 1544,
+       "row": 1,
+       "start_index": 1542,
+       "text_preview": "说明"
+      }
+     ],
+     "row": 1
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1550,
+       "row": 2,
+       "start_index": 1547,
+       "text_preview": "标题栏"
+      },
+      {
+       "col": 2,
+       "end_index": 1558,
+       "row": 2,
+       "start_index": 1552,
+       "text_preview": "系统运行环境"
+      },
+      {
+       "col": 3,
+       "end_index": 1586,
+       "row": 2,
+       "start_index": 1560,
+       "text_preview": "时间、日期按服务器时"
+      }
+     ],
+     "row": 2
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1597,
+       "row": 3,
+       "start_index": 1589,
+       "text_preview": "设备运维成本指标"
+      },
+      {
+       "col": 2,
+       "end_index": 1619,
+       "row": 3,
+       "start_index": 1599,
+       "text_preview": "设备管理模块（维修工"
+      },
+      {
+       "col": 3,
+       "end_index": 1679,
+       "row": 3,
+       "start_index": 1621,
+       "text_preview": "吨均设备维修费用 = 设"
+      }
+     ],
+     "row": 3
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1686,
+       "row": 4,
+       "start_index": 1682,
+       "text_preview": "设备总览"
+      },
+      {
+       "col": 2,
+       "end_index": 1707,
+       "row": 4,
+       "start_index": 1688,
+       "text_preview": "设备管理模块（设备台"
+      },
+      {
+       "col": 3,
+       "end_index": 1743,
+       "row": 4,
+       "start_index": 1709,
+       "text_preview": "按设备台账统计设备数"
+      }
+     ],
+     "row": 4
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1752,
+       "row": 5,
+       "start_index": 1746,
+       "text_preview": "设备运行指标"
+      },
+      {
+       "col": 2,
+       "end_index": 1779,
+       "row": 5,
+       "start_index": 1754,
+       "text_preview": "设备管理模块（故障与"
+      },
+      {
+       "col": 3,
+       "end_index": 1862,
+       "row": 5,
+       "start_index": 1781,
+       "text_preview": "MTBF = 累计运行时间 ÷ "
+      }
+     ],
+     "row": 5
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1875,
+       "row": 6,
+       "start_index": 1865,
+       "text_preview": "吨均设备维修费用分析"
+      },
+      {
+       "col": 2,
+       "end_index": 1892,
+       "row": 6,
+       "start_index": 1877,
+       "text_preview": "设备维修工单 + 生产产"
+      },
+      {
+       "col": 3,
+       "end_index": 1944,
+       "row": 6,
+       "start_index": 1894,
+       "text_preview": "按厂区、年份、月份及"
+      }
+     ],
+     "row": 6
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1956,
+       "row": 7,
+       "start_index": 1947,
+       "text_preview": "各产线备件库存资金"
+      },
+      {
+       "col": 2,
+       "end_index": 1964,
+       "row": 7,
+       "start_index": 1958,
+       "text_preview": "备件库存台账"
+      },
+      {
+       "col": 3,
+       "end_index": 1982,
+       "row": 7,
+       "start_index": 1966,
+       "text_preview": "按产线归集备件库存金"
+      }
+     ],
+     "row": 7
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 1990,
+       "row": 8,
+       "start_index": 1985,
+       "text_preview": "设备可动率"
+      },
+      {
+       "col": 2,
+       "end_index": 2007,
+       "row": 8,
+       "start_index": 1992,
+       "text_preview": "设备状态监测数据 + 设"
+      },
+      {
+       "col": 3,
+       "end_index": 2033,
+       "row": 8,
+       "start_index": 2009,
+       "text_preview": "按厂区年份、厂区月份"
+      }
+     ],
+     "row": 8
+    },
+    {
+     "cells": [
+      {
+       "col": 1,
+       "end_index": 2042,
+       "row": 9,
+       "start_index": 2036,
+       "text_preview": "重点设备概况"
+      },
+      {
+       "col": 2,
+       "end_index": 2056,
+       "row": 9,
+       "start_index": 2044,
+       "text_preview": "设备台账（设备管理模"
+      },
+      {
+       "col": 3,
+       "end_index": 2125,
+       "row": 9,
+       "start_index": 2058,
+       "text_preview": "按产线/车间与设备类"
+      }
+     ],
+     "row": 9
+    }
+   ],
+   "table_start": 1533,
+   "type": "Table"
+  }
+ ],
+ "numbering_list_summaries": [],
+ "pagination": {
+  "has_more": false,
+  "limit": 0,
+  "offset": 0,
+  "returned_nodes": 15,
+  "total_nodes": 15
+ },
+ "stats": {
+  "total_headings": 0,
+  "total_numbering_lists": 0,
+  "total_paragraphs": 13,
+  "total_tables": 2
+ },
+ "version": 0
+}

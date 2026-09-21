@@ -1,0 +1,403 @@
+{
+ "1": {
+  "text": "设备大屏",
+  "range": [
+   0,
+   4
+  ],
+  "para": {
+   "alignment": "left",
+   "idx": 0,
+   "line_spacing": 1.5,
+   "line_spacing_rule": "auto",
+   "outline_lvl": 2,
+   "p_style": "潍柴文档标题3",
+   "paragraph_style": "潍柴文档标题3",
+   "spacing": {
+    "after_pt": 0.0,
+    "before_pt": 0.0,
+    "line": 1.5,
+    "line_rule": "auto"
+   },
+   "spacing_after": 0.0,
+   "spacing_before": 0.0,
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 0,
+   "version": 0
+  }
+ },
+ "2": {
+  "text": "页面原型",
+  "range": [
+   5,
+   9
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 2.0,
+   "idx": 5,
+   "indent": {
+    "first_line_pt": 2.0
+   },
+   "keep_together": true,
+   "keep_with_next": true,
+   "line_spacing": 1.55,
+   "line_spacing_rule": "auto",
+   "outline_lvl": 3,
+   "p_style": "潍柴文档标题4",
+   "paragraph_style": "潍柴文档标题4",
+   "spacing": {
+    "after_pt": 14.5,
+    "before_pt": 14.0,
+    "line": 1.55,
+    "line_rule": "auto"
+   },
+   "spacing_after": 14.5,
+   "spacing_before": 14.0,
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 5,
+   "version": 0
+  }
+ },
+ "3": {
+  "text": "[Image]",
+  "range": [
+   10,
+   11
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 10.0,
+   "first_line_indent_chars": 2.0,
+   "idx": 10,
+   "indent": {
+    "first_line_chars": 2.0,
+    "first_line_pt": 10.0
+   },
+   "line_spacing": 1.5,
+   "line_spacing_rule": "auto",
+   "p_style": "潍柴文档正文",
+   "paragraph_style": "潍柴文档正文",
+   "spacing": {
+    "line": 1.5,
+    "line_rule": "auto"
+   },
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 10,
+   "version": 0
+  }
+ },
+ "4": {
+  "text": "业务需求",
+  "range": [
+   12,
+   16
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 2.0,
+   "idx": 12,
+   "indent": {
+    "first_line_pt": 2.0
+   },
+   "keep_together": true,
+   "keep_with_next": true,
+   "line_spacing": 1.55,
+   "line_spacing_rule": "auto",
+   "outline_lvl": 3,
+   "p_style": "潍柴文档标题4",
+   "paragraph_style": "潍柴文档标题4",
+   "spacing": {
+    "after_pt": 14.5,
+    "before_pt": 14.0,
+    "line": 1.55,
+    "line_rule": "auto"
+   },
+   "spacing_after": 14.5,
+   "spacing_before": 14.0,
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 12,
+   "version": 0
+  }
+ },
+ "5": {
+  "text": "面向设备管理与生产保障人员，将设备资产规模、运行可靠性、维修成本与备件资金占用等核心指标集中呈现于一块大屏，形成设备运行全景视图。通",
+  "range": [
+   17,
+   185
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 10.0,
+   "first_line_indent_chars": 2.0,
+   "idx": 17,
+   "indent": {
+    "first_line_chars": 2.0,
+    "first_line_pt": 10.0
+   },
+   "line_spacing": 1.5,
+   "line_spacing_rule": "auto",
+   "p_style": "潍柴文档正文",
+   "paragraph_style": "潍柴文档正文",
+   "spacing": {
+    "line": 1.5,
+    "line_rule": "auto"
+   },
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 17,
+   "version": 0
+  }
+ },
+ "6": {
+  "text": "页面功能描述",
+  "range": [
+   186,
+   192
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 2.0,
+   "idx": 186,
+   "indent": {
+    "first_line_pt": 2.0
+   },
+   "keep_together": true,
+   "keep_with_next": true,
+   "line_spacing": 1.55,
+   "line_spacing_rule": "auto",
+   "outline_lvl": 3,
+   "p_style": "潍柴文档标题4",
+   "paragraph_style": "潍柴文档标题4",
+   "spacing": {
+    "after_pt": 14.5,
+    "before_pt": 14.0,
+    "line": 1.55,
+    "line_rule": "auto"
+   },
+   "spacing_after": 14.5,
+   "spacing_before": 14.0,
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 186,
+   "version": 0
+  }
+ },
+ "7": {
+  "text": "页面布局：大屏采用“标题栏 + 指标卡 + 趋势图表 + 重点设备概况”的纵向分段布局。",
+  "range": [
+   193,
+   237
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 10.0,
+   "first_line_indent_chars": 2.0,
+   "idx": 193,
+   "indent": {
+    "first_line_chars": 2.0,
+    "first_line_pt": 10.0
+   },
+   "line_spacing": 1.5,
+   "line_spacing_rule": "auto",
+   "p_style": "潍柴文档正文",
+   "paragraph_style": "潍柴文档正文",
+   "spacing": {
+    "line": 1.5,
+    "line_rule": "auto"
+   },
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 193,
+   "version": 0
+  }
+ },
+ "8": {
+  "text": "顶部为标题栏（材料成型中心工业园区设备监控大屏），左侧显示实时时间、日期与天气，右侧为 LOGO 位；第一行为设备运维成本指标、设备总览、设",
+  "range": [
+   238,
+   414
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 10.0,
+   "first_line_indent_chars": 2.0,
+   "idx": 238,
+   "indent": {
+    "first_line_chars": 2.0,
+    "first_line_pt": 10.0
+   },
+   "line_spacing": 1.5,
+   "line_spacing_rule": "auto",
+   "p_style": "潍柴文档正文",
+   "paragraph_style": "潍柴文档正文",
+   "spacing": {
+    "line": 1.5,
+    "line_rule": "auto"
+   },
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 238,
+   "version": 0
+  }
+ },
+ "9": {
+  "text": "大屏标题：材料成型中心工业园区设备监控大屏",
+  "range": [
+   415,
+   436
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 10.0,
+   "first_line_indent_chars": 2.0,
+   "idx": 415,
+   "indent": {
+    "first_line_chars": 2.0,
+    "first_line_pt": 10.0
+   },
+   "line_spacing": 1.5,
+   "line_spacing_rule": "auto",
+   "p_style": "潍柴文档正文",
+   "paragraph_style": "潍柴文档正文",
+   "spacing": {
+    "line": 1.5,
+    "line_rule": "auto"
+   },
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 415,
+   "version": 0
+  }
+ },
+ "10": {
+  "text": "页面区块说明：",
+  "range": [
+   437,
+   444
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 10.0,
+   "first_line_indent_chars": 2.0,
+   "idx": 437,
+   "indent": {
+    "first_line_chars": 2.0,
+    "first_line_pt": 10.0
+   },
+   "line_spacing": 1.5,
+   "line_spacing_rule": "auto",
+   "p_style": "潍柴文档正文",
+   "paragraph_style": "潍柴文档正文",
+   "spacing": {
+    "line": 1.5,
+    "line_rule": "auto"
+   },
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 437,
+   "version": 0
+  }
+ },
+ "12": {
+  "text": "交互说明：吨均设备维修费用分析、设备可动率、重点设备概况的设备类型页签与品牌分布页签均为区块内联动，切换后图表与表格即时刷新；所有图",
+  "range": [
+   1443,
+   1521
+  ],
+  "para": {
+   "idx": 1443,
+   "version": 0
+  },
+  "txt": {
+   "idx": 1443,
+   "version": 0
+  }
+ },
+ "13": {
+  "text": "数据来源与采集逻辑",
+  "range": [
+   1522,
+   1531
+  ],
+  "para": {
+   "alignment": "both",
+   "first_line_indent": 2.0,
+   "idx": 1522,
+   "indent": {
+    "first_line_pt": 2.0
+   },
+   "keep_together": true,
+   "keep_with_next": true,
+   "line_spacing": 1.55,
+   "line_spacing_rule": "auto",
+   "outline_lvl": 3,
+   "p_style": "潍柴文档标题4",
+   "paragraph_style": "潍柴文档标题4",
+   "spacing": {
+    "after_pt": 14.5,
+    "before_pt": 14.0,
+    "line": 1.55,
+    "line_rule": "auto"
+   },
+   "spacing_after": 14.5,
+   "spacing_before": 14.0,
+   "version": 0,
+   "widow_control": false
+  },
+  "txt": {
+   "idx": 1522,
+   "version": 0
+  }
+ },
+ "14": {
+  "text": null,
+  "range": [
+   1532,
+   1532
+  ],
+  "para": {
+   "idx": 1532,
+   "version": 0
+  },
+  "txt": null
+ },
+ "section": {
+  "different_first_page_header_footer": false,
+  "orientation": "portrait",
+  "page_height": 842.0,
+  "page_width": 595.25,
+  "range": {
+   "end": 2130,
+   "start": 0
+  },
+  "section_count": 1,
+  "section_index": 0,
+  "start_type": "new_page",
+  "version": 0
+ }
+}

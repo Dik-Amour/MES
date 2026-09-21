@@ -116,7 +116,7 @@
             <table class="alarm-table">
               <thead>
                 <tr>
-                  <th>序号</th><th>报警时间</th><th>所在区域</th><th>点位名称</th><th>报警类型</th><th>实测值</th>
+                  <th>序号</th><th>报警时间</th><th>所在区域</th><th>点位名称</th><th>异常类型</th><th>实测值</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,7 +163,7 @@
         <div class="chart-card">
           <div class="chart-header">
             <span class="chart-title">用电监控</span>
-            <span class="more-link">&gt;&gt;&gt;</span>
+            <span class="more-link" title="查看明细" @click="openElectricModal">&gt;&gt;&gt;</span>
           </div>
           <div class="chart-header sub">
             <span class="sub-label"></span>
@@ -217,6 +217,38 @@
           <button class="s-modal-close" @click="closeDangerModal">✕</button>
         </div>
         <div ref="dangerModalChartRef" class="s-modal-body"></div>
+      </div>
+    </div>
+
+    <!-- 用电监控明细弹框（6 个折线图 + 分页） -->
+    <div v-if="electricModalVisible" class="s-modal-mask" @click.self="closeElectricModal">
+      <div class="s-modal s-modal-wide">
+        <div class="s-modal-header">
+          <span class="s-modal-title">用电监控明细</span>
+          <button class="s-modal-close" @click="closeElectricModal">✕</button>
+        </div>
+        <div class="s-modal-body wide">
+          <div class="em-grid">
+            <div class="em-cell" v-for="(d, i) in electricPageDevices" :key="d.name">
+              <div class="em-title">{{ d.name }}</div>
+              <div class="em-legend">
+                <span class="legend-item"><i class="line-dot" style="background:#4472c4"></i>生产设备 XX</span>
+                <span class="legend-item"><i class="line-dot" style="background:#3ba8a0"></i>治理设备 XX</span>
+              </div>
+              <div class="em-chart" :ref="el => setElectricChartRef(el, i)"></div>
+            </div>
+          </div>
+          <div class="em-pager">
+            <a-pagination
+              v-model:current="electricModalPage"
+              :page-size="electricPageSize"
+              :total="electricDevices.length"
+              :show-size-changer="false"
+              size="small"
+              @change="onElectricPageChange"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -590,6 +622,99 @@ watch(dangerModalVisible, async v => {
   setTimeout(renderDangerModalChart, 60)
 })
 
+// ========== 用电监控明细弹框 ==========
+const electricTimes = ['12:00', '12:15', '12:30', '12:45', '13:00', '13:15', '13:30', '13:45', '14:00']
+
+// 生成某设备的电能曲线（生产设备 / 治理设备）
+function powerWave(seed: number, amp: number, offset: number): number[] {
+  return electricTimes.map((_, i) => {
+    const v = offset + Math.sin((i / 8) * Math.PI * 2 + seed) * amp + Math.cos(i * 1.3 + seed) * amp * 0.25
+    return Math.max(0, Math.round(v))
+  })
+}
+
+const electricDeviceNames = [
+  '造型一线 混砂机', '造型一线 造型机', '造型一线 浇注机',
+  '造型二线 造型机', '造型二线 落砂机', '造型二线 抛丸机',
+  '熔炼车间 保温电炉', '熔炼车间 熔化电炉', '熔炼车间 冲天炉',
+  '清理车间 抛丸机', '清理车间 打磨机', '清理车间 除尘风机',
+  '热处理 淬火炉', '热处理 回火炉', '热处理 冷却塔',
+  '砂处理 混砂机', '砂处理 输送机', '砂处理 除尘设备'
+]
+
+const electricDevices = electricDeviceNames.map((name, i) => ({
+  name,
+  prod: powerWave(i * 0.7 + 0.4, 60 + (i % 3) * 10, 165),
+  treat: powerWave(i * 0.9 + 2.1, 45 + (i % 4) * 8, 140)
+}))
+
+const electricModalVisible = ref(false)
+const electricModalPage = ref(1)
+const electricPageSize = 6
+const electricChartEls: (HTMLElement | null)[] = []
+let electricCharts: echarts.ECharts[] = []
+
+const setElectricChartRef = (el: any, i: number) => {
+  electricChartEls[i] = (el as HTMLElement) || null
+}
+
+// 当前页的设备（每页 6 个）
+const electricPageDevices = computed(() => {
+  const start = (electricModalPage.value - 1) * electricPageSize
+  return electricDevices.slice(start, start + electricPageSize)
+})
+
+function renderElectricModalCharts() {
+  electricCharts.forEach(c => c.dispose())
+  electricCharts = []
+  electricPageDevices.value.forEach((d, i) => {
+    const el = electricChartEls[i]
+    if (!el) return
+    const c = echarts.init(el)
+    c.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { left: 34, right: 12, top: 12, bottom: 22 },
+      xAxis: { type: 'category', data: electricTimes, ...baseAxis, boundaryGap: false, splitLine: { show: false } },
+      yAxis: { type: 'value', ...baseAxis },
+      series: [
+        {
+          name: '生产设备 XX', type: 'line', smooth: true, symbol: 'circle', symbolSize: 3,
+          data: d.prod, itemStyle: { color: '#4472c4' }, lineStyle: { width: 1.6 }
+        },
+        {
+          name: '治理设备 XX', type: 'line', smooth: true, symbol: 'circle', symbolSize: 3,
+          data: d.treat, itemStyle: { color: '#3ba8a0' }, lineStyle: { width: 1.6 }
+        }
+      ]
+    }, { notMerge: true })
+    c.resize()
+    electricCharts.push(c)
+  })
+}
+
+function openElectricModal() {
+  electricModalPage.value = 1
+  electricModalVisible.value = true
+}
+
+function closeElectricModal() {
+  electricModalVisible.value = false
+}
+
+function onElectricPageChange() {
+  nextTick(() => setTimeout(renderElectricModalCharts, 40))
+}
+
+watch(electricModalVisible, async v => {
+  if (!v) {
+    electricCharts.forEach(c => c.dispose())
+    electricCharts = []
+    return
+  }
+  await nextTick()
+  setTimeout(renderElectricModalCharts, 60)
+})
+
 // ========== 初始化 ==========
 const initChart = (el: HTMLElement | undefined, key: string) => {
   if (el) charts[key] = echarts.init(el)
@@ -624,7 +749,10 @@ function stopTimers() {
   if (electricTimer) clearInterval(electricTimer)
 }
 
-const handleResize = () => Object.values(charts).forEach(c => c.resize())
+const handleResize = () => {
+  Object.values(charts).forEach(c => c.resize())
+  electricCharts.forEach(c => c.resize())
+}
 
 onMounted(async () => {
   await nextTick()
@@ -646,6 +774,8 @@ onBeforeUnmount(() => {
   Object.values(charts).forEach(c => c.dispose())
   dangerModalChart?.dispose()
   dangerModalChart = null
+  electricCharts.forEach(c => c.dispose())
+  electricCharts = []
 })
 </script>
 
@@ -709,6 +839,56 @@ onBeforeUnmount(() => {
   height: 360px;
   padding: 8px;
   box-sizing: border-box;
+}
+
+/* 用电监控明细弹框 */
+.s-modal-wide {
+  width: 1180px;
+  max-width: 96vw;
+}
+
+.s-modal-body.wide {
+  height: auto;
+  max-height: 78vh;
+  overflow-y: auto;
+  padding: 14px 18px 6px;
+}
+
+.em-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 16px;
+}
+
+.em-cell {
+  min-width: 0;
+}
+
+.em-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.em-legend {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.em-chart {
+  height: 200px;
+}
+
+.em-pager {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 6px;
 }
 
 .safety-grid {

@@ -127,12 +127,22 @@
     >
       <a-form
         :model="addForm"
-        :label-col="{ span: 6 }"
+        :label-col="{ span: 8 }"
         :wrapper-col="{ span: 16 }"
         class="add-form"
       >
-        <a-row :gutter="24">
-          <a-col :span="8">
+        <a-row :gutter="16">
+          <a-col :span="6">
+            <a-form-item label="产线">
+              <a-select
+                v-model:value="addForm.productionLine"
+                placeholder="请选择产线"
+                allow-clear
+                :options="productionLineOptions"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
             <a-form-item label="排产日期">
               <a-date-picker
                 v-model:value="addForm.scheduleDate"
@@ -141,7 +151,7 @@
               />
             </a-form-item>
           </a-col>
-          <a-col :span="8">
+          <a-col :span="6">
             <a-form-item label="产品系列">
               <a-select
                 v-model:value="addForm.productSeries"
@@ -153,7 +163,7 @@
               </a-select>
             </a-form-item>
           </a-col>
-          <a-col :span="8">
+          <a-col :span="6">
             <a-form-item label="毛坯件号">
               <a-select
                 v-model:value="addForm.partNo"
@@ -167,6 +177,35 @@
         </a-row>
       </a-form>
 
+      <!-- 验证单据 -->
+      <div class="verification-section">
+        <a-divider orientation="left" plain>验证单据</a-divider>
+        <a-row :gutter="16">
+          <a-col :span="6">
+            <a-form-item label="工艺参数变更" :label-col="{ span: 12 }" :wrapper-col="{ span: 12 }">
+              <a-input-number
+                v-model:value="addForm.processParamChange"
+                :min="0"
+                :precision="0"
+                disabled
+                style="width: 100%"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item label="工艺验证" :label-col="{ span: 12 }" :wrapper-col="{ span: 12 }">
+              <a-input-number
+                v-model:value="addForm.processVerification"
+                :min="0"
+                :precision="0"
+                disabled
+                style="width: 100%"
+              />
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </div>
+
       <!-- 排产明细表格 -->
       <a-table
         :columns="detailColumns"
@@ -175,7 +214,84 @@
         :scroll="{ x: 1100 }"
         bordered
         size="small"
+        row-key="_rowKey"
+        :expanded-row-keys="expandedRowKeys"
+        @expand="handleExpand"
       >
+        <!-- 展开行内容 -->
+        <template #expandedRowRender="{ record }">
+          <div class="expanded-content">
+            <!-- 参数变更计划 -->
+            <div class="expand-row">
+              <div class="expand-label">
+                <span class="expand-title">参数变更计划</span>
+                <a-switch
+                  v-model:checked="record.paramChange.enabled"
+                  checked-children="开"
+                  un-checked-children="关"
+                />
+              </div>
+              <div class="expand-field">
+                <span class="field-label">参数变更数量</span>
+                <a-input-number
+                  v-model:value="record.paramChange.quantity"
+                  :min="0"
+                  :precision="0"
+                  :disabled="!record.paramChange.enabled"
+                  style="width: 100px"
+                />
+              </div>
+              <div class="expand-field expand-field-wide">
+                <span class="field-label">参数变更单</span>
+                <a-select
+                  v-model:value="record.paramChange.docId"
+                  placeholder="请选择参数变更历史单据"
+                  show-search
+                  allow-clear
+                  :disabled="!record.paramChange.enabled"
+                  :options="paramChangeDocOptions"
+                  style="width: 280px"
+                  :dropdown-match-select-width="false"
+                />
+              </div>
+            </div>
+
+            <!-- 验证计划 -->
+            <div class="expand-row">
+              <div class="expand-label">
+                <span class="expand-title">验证计划</span>
+                <a-switch
+                  v-model:checked="record.verification.enabled"
+                  checked-children="开"
+                  un-checked-children="关"
+                />
+              </div>
+              <div class="expand-field">
+                <span class="field-label">验证数量</span>
+                <a-input-number
+                  v-model:value="record.verification.quantity"
+                  :min="0"
+                  :precision="0"
+                  :disabled="!record.verification.enabled"
+                  style="width: 100px"
+                />
+              </div>
+              <div class="expand-field expand-field-wide">
+                <span class="field-label">验证单</span>
+                <a-select
+                  v-model:value="record.verification.docId"
+                  placeholder="请选择验证单"
+                  show-search
+                  allow-clear
+                  :disabled="!record.verification.enabled"
+                  :options="verificationDocOptions"
+                  style="width: 280px"
+                  :dropdown-match-select-width="false"
+                />
+              </div>
+            </div>
+          </div>
+        </template>
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'coreName'">
             <a-select
@@ -279,11 +395,219 @@
         <a-button type="primary" @click="handleConfirmAdd">确定</a-button>
       </div>
     </a-modal>
+
+    <!-- 制芯排产信息弹窗（拖拽砂芯后弹出） -->
+    <a-modal
+      v-model:open="scheduleModalVisible"
+      title="制芯排产信息"
+      width="920px"
+      :mask-closable="false"
+      @cancel="handleCancelSchedule"
+    >
+      <a-form
+        :model="scheduleForm"
+        :label-col="{ span: 6 }"
+        :wrapper-col="{ span: 18 }"
+        class="schedule-form"
+      >
+        <a-row :gutter="24">
+          <a-col :span="12">
+            <a-form-item label="产线">
+              <a-select
+                v-model:value="scheduleForm.productionLine"
+                placeholder="请选择产线"
+                disabled
+                :options="productionLineOptions"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="毛坯件号">
+              <a-select
+                v-model:value="scheduleForm.partNo"
+                placeholder="请选择毛坯件号"
+                show-search
+                disabled
+                :options="partNoOptions"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="排产日期">
+              <a-date-picker
+                v-model:value="scheduleForm.scheduleDate"
+                format="YYYY-MM-DD"
+                disabled
+                style="width: 100%"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="排产区域">
+              <a-select
+                v-model:value="scheduleForm.area"
+                placeholder="请选择排产区域"
+                disabled
+                :options="areaOptions"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="排产设备">
+              <a-input
+                v-model:value="scheduleForm.equipment"
+                placeholder="请输入排产设备"
+                disabled
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="生产班次">
+              <a-input
+                v-model:value="scheduleForm.shift"
+                placeholder="请输入生产班次"
+                disabled
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
+            <a-form-item label="排产芯盒" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }">
+              <a-select
+                v-model:value="scheduleForm.coreBox"
+                placeholder="请选择排产芯盒"
+                show-search
+                allow-clear
+                :options="scheduleCoreBoxOptions"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="生产模数">
+              <a-input-number
+                v-model:value="scheduleForm.moldCount"
+                :min="1"
+                :precision="0"
+                style="width: 100%"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="生产颗数">
+              <a-input-number
+                v-model:value="scheduleForm.quantity"
+                :min="1"
+                :precision="0"
+                style="width: 100%"
+              />
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
+
+      <!-- 参数变更计划 & 验证计划 -->
+      <div class="schedule-plan-section">
+        <a-divider orientation="left" plain style="margin: 8px 0 12px">验证计划</a-divider>
+        <div class="plan-row">
+          <div class="plan-label-group">
+            <span class="plan-title">参数变更计划</span>
+            <a-switch
+              v-model:checked="scheduleForm.paramChange.enabled"
+              checked-children="开"
+              un-checked-children="关"
+            />
+          </div>
+          <div class="plan-field">
+            <span class="plan-field-label">参数变更数量</span>
+            <a-input-number
+              v-model:value="scheduleForm.paramChange.quantity"
+              :min="0"
+              :precision="0"
+              :disabled="!scheduleForm.paramChange.enabled"
+              style="width: 120px"
+            />
+          </div>
+          <div class="plan-field plan-field-wide">
+            <span class="plan-field-label">参数变更单</span>
+            <a-select
+              v-model:value="scheduleForm.paramChange.docId"
+              placeholder="请选择参数变更单"
+              show-search
+              allow-clear
+              :disabled="!scheduleForm.paramChange.enabled"
+              :options="paramChangeDocOptions"
+              style="width: 260px"
+              :dropdown-match-select-width="false"
+            />
+          </div>
+        </div>
+        <div class="plan-row">
+          <div class="plan-label-group">
+            <span class="plan-title">验证计划</span>
+            <a-switch
+              v-model:checked="scheduleForm.verification.enabled"
+              checked-children="开"
+              un-checked-children="关"
+            />
+          </div>
+          <div class="plan-field">
+            <span class="plan-field-label">验证数量</span>
+            <a-input-number
+              v-model:value="scheduleForm.verification.quantity"
+              :min="0"
+              :precision="0"
+              :disabled="!scheduleForm.verification.enabled"
+              style="width: 120px"
+            />
+          </div>
+          <div class="plan-field plan-field-wide">
+            <span class="plan-field-label">验证单</span>
+            <a-select
+              v-model:value="scheduleForm.verification.docId"
+              placeholder="请选择验证单"
+              show-search
+              allow-clear
+              :disabled="!scheduleForm.verification.enabled"
+              :options="verificationDocOptions"
+              style="width: 260px"
+              :dropdown-match-select-width="false"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 提示信息 -->
+      <div class="schedule-alert">
+        <div class="alert-title">提示：</div>
+        <ul class="alert-list">
+          <li>
+            当前砂芯需求数为 <b>{{ scheduleAlert.demand }}</b> 颗，已排产
+            <b>{{ scheduleAlert.produced }}</b> 颗，剩余 <b>{{ scheduleAlert.remaining }}</b> 颗
+          </li>
+          <li>库存数量 <b>{{ scheduleAlert.stock }}</b> 颗</li>
+          <li>该设备当前班次最大排产数量 <b>{{ scheduleAlert.maxPerShift }}</b> 颗</li>
+        </ul>
+        <div v-if="scheduleAlert.paramChangeCount > 0 || scheduleAlert.verificationCount > 0" class="alert-divider"></div>
+        <div v-if="scheduleAlert.paramChangeCount > 0 || scheduleAlert.verificationCount > 0" class="alert-section-title">验证单据</div>
+        <ul v-if="scheduleAlert.paramChangeCount > 0 || scheduleAlert.verificationCount > 0" class="alert-list">
+          <li v-if="scheduleAlert.paramChangeCount > 0">
+            工艺参数变更 <b>{{ scheduleAlert.paramChangeCount }}</b> 条
+          </li>
+          <li v-if="scheduleAlert.verificationCount > 0">
+            工艺验证 <b>{{ scheduleAlert.verificationCount }}</b> 条
+          </li>
+        </ul>
+      </div>
+
+      <template #footer>
+        <a-button @click="handleCancelSchedule">取消</a-button>
+        <a-button type="primary" @click="handleConfirmSchedule">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
@@ -298,12 +622,15 @@ interface SandCoreItem {
   stock: number
   produced: number
   demand: number
+  paramChangeCount: number
+  verificationCount: number
 }
 
 // 设备数据类型
 interface EquipmentItem {
   id: string
   name: string
+  machineType: string
   scheduledItems: SandCoreItem[]
 }
 
@@ -328,7 +655,9 @@ const sandCoreList = ref<SandCoreItem[]>([
     boxName: '',
     stock: 0,
     produced: 0,
-    demand: 4704
+    demand: 4704,
+    paramChangeCount: 2,
+    verificationCount: 1
   },
   {
     id: '2',
@@ -337,7 +666,9 @@ const sandCoreList = ref<SandCoreItem[]>([
     boxName: '',
     stock: 0,
     produced: 0,
-    demand: 14112
+    demand: 14112,
+    paramChangeCount: 3,
+    verificationCount: 2
   },
   {
     id: '3',
@@ -346,7 +677,9 @@ const sandCoreList = ref<SandCoreItem[]>([
     boxName: '',
     stock: 0,
     produced: 0,
-    demand: 2352
+    demand: 2352,
+    paramChangeCount: 1,
+    verificationCount: 1
   },
   {
     id: '4',
@@ -355,7 +688,9 @@ const sandCoreList = ref<SandCoreItem[]>([
     boxName: '',
     stock: 0,
     produced: 0,
-    demand: 2352
+    demand: 2352,
+    paramChangeCount: 0,
+    verificationCount: 0
   },
   {
     id: '5',
@@ -364,7 +699,9 @@ const sandCoreList = ref<SandCoreItem[]>([
     boxName: '',
     stock: 0,
     produced: 0,
-    demand: 2352
+    demand: 2352,
+    paramChangeCount: 1,
+    verificationCount: 1
   },
   {
     id: '6',
@@ -373,7 +710,9 @@ const sandCoreList = ref<SandCoreItem[]>([
     boxName: '',
     stock: 0,
     produced: 0,
-    demand: 2352
+    demand: 2352,
+    paramChangeCount: 2,
+    verificationCount: 1
   }
 ])
 
@@ -382,31 +721,51 @@ const equipmentList = ref<EquipmentItem[]>([
   {
     id: 'L40',
     name: 'L40',
+    machineType: '冷芯盒射芯机',
     scheduledItems: []
   },
   {
     id: '二手40',
     name: '二手40',
+    machineType: '冷芯盒射芯机',
     scheduledItems: []
   }
 ])
 
 // 排产明细类型
 interface DetailItem {
+  _rowKey: string
   coreName: string | undefined
   area: string | undefined
   equipment: string | undefined
   shift: string | undefined
   coreBox: string | undefined
-  quantity: number | null
+  quantity: number
+  paramChange: {
+    enabled: boolean
+    quantity: number
+    docId: string | undefined
+  }
+  verification: {
+    enabled: boolean
+    quantity: number
+    docId: string | undefined
+  }
 }
 
 // 新增弹窗是否可见
 const addModalVisible = ref(false)
 
+// 产线下拉选项
+const productionLineOptions = [
+  { label: '一线', value: '一线' },
+  { label: '二线', value: '二线' },
+  { label: '三线', value: '三线' },
+  { label: '四线', value: '四线' }
+]
+
 // 毛坯件号下拉选项
-const partNoOptions = [
-  { label: '1000978236R', value: '1000978236R' },
+const partNoOptions = [  { label: '1000978236R', value: '1000978236R' },
   { label: '1000978237R', value: '1000978237R' },
   { label: '1000978238R', value: '1000978238R' },
   { label: '1000978239R', value: '1000978239R' },
@@ -440,12 +799,49 @@ const getMoldCount = (record: DetailItem) => {
   return Math.ceil(record.quantity / coresPerMold)
 }
 
+// 展开行控制
+const expandedRowKeys = ref<string[]>([])
+
+// 参数变更单下拉选项
+const paramChangeDocOptions = ref([
+  { label: 'KW线浇注温度参数变更', value: 'PC20260101001' },
+  { label: 'HW线砂芯配比参数变更', value: 'PC20260102002' }
+])
+
+// 验证单下拉选项
+const verificationDocOptions = ref([
+  { label: 'KW线浇注温度工艺验证', value: 'PV20260101001' },
+  { label: 'HW线砂芯强度工艺验证', value: 'PV20260102002' }
+])
+
+// 展开/收起行
+const handleExpand = (expanded: boolean, record: DetailItem) => {
+  if (expanded) {
+    expandedRowKeys.value.push(record._rowKey)
+  } else {
+    expandedRowKeys.value = expandedRowKeys.value.filter(key => key !== record._rowKey)
+  }
+}
+
 // 新增表单数据
-const addForm = reactive({
-  scheduleDate: null as Dayjs | null,
-  productSeries: undefined as string | undefined,
-  partNo: undefined as string | undefined,
-  details: [] as DetailItem[]
+interface AddForm {
+  productionLine: string | undefined
+  scheduleDate: Dayjs | null
+  productSeries: string | undefined
+  partNo: string | undefined
+  processParamChange: number
+  processVerification: number
+  details: DetailItem[]
+}
+
+const addForm = reactive<AddForm>({
+  productionLine: undefined,
+  scheduleDate: null,
+  productSeries: undefined,
+  partNo: undefined,
+  processParamChange: 0,
+  processVerification: 0,
+  details: []
 })
 
 // 表格列定义
@@ -503,6 +899,94 @@ const detailColumns = [
 // 拖拽数据
 let draggedItem: SandCoreItem | null = null
 
+// 制芯排产信息弹窗
+const scheduleModalVisible = ref(false)
+
+// 待排产的设备与砂芯
+const pendingEquipment = ref<EquipmentItem | null>(null)
+const pendingCore = ref<SandCoreItem | null>(null)
+
+// 排产区域选项
+const areaOptions = [
+  { label: '机体制芯', value: '机体制芯' },
+  { label: '曲轴制芯', value: '曲轴制芯' },
+  { label: '大机制芯', value: '大机制芯' }
+]
+
+// 制芯类型 -> 排产区域
+const areaByTab: Record<string, string> = {
+  engine: '机体制芯',
+  crankshaft: '曲轴制芯',
+  large: '大机制芯'
+}
+
+// 排产芯盒下拉选项（名称 + 编号）
+const scheduleCoreBoxOptions = [
+  { label: '1#3#大缸芯盒(1802540001)', value: '1802540001' },
+  { label: '2#大缸芯盒(1802540002)', value: '1802540002' },
+  { label: '前端下半芯盒(1802540003)', value: '1802540003' },
+  { label: '前端上半芯盒(1802540004)', value: '1802540004' },
+  { label: '后端上半芯盒(1802540005)', value: '1802540005' },
+  { label: '左侧观察窗芯盒(1802540006)', value: '1802540006' }
+]
+
+// 制芯排产信息表单
+interface ScheduleForm {
+  productionLine: string | undefined
+  partNo: string | undefined
+  scheduleDate: Dayjs | null
+  area: string
+  equipment: string
+  shift: string
+  coreBox: string | undefined
+  moldCount: number
+  quantity: number
+  paramChange: {
+    enabled: boolean
+    quantity: number
+    docId: string | undefined
+  }
+  verification: {
+    enabled: boolean
+    quantity: number
+    docId: string | undefined
+  }
+}
+
+const scheduleForm = reactive<ScheduleForm>({
+  productionLine: undefined,
+  partNo: undefined,
+  scheduleDate: null,
+  area: '',
+  equipment: '',
+  shift: '',
+  coreBox: undefined,
+  moldCount: 1,
+  quantity: 1,
+  paramChange: { enabled: false, quantity: 0, docId: undefined },
+  verification: { enabled: false, quantity: 0, docId: undefined }
+})
+
+// 提示信息（根据砂芯需求计算）
+const scheduleAlert = computed(() => {
+  const core = pendingCore.value
+  if (!core) {
+    return {
+      demand: 0, produced: 0, remaining: 0, stock: 0, maxPerShift: 500,
+      paramChangeCount: 0, verificationCount: 0
+    }
+  }
+  return {
+    demand: core.demand,
+    produced: core.produced,
+    remaining: core.demand - core.produced,
+    stock: core.stock,
+    maxPerShift: 500,
+    paramChangeCount: core.paramChangeCount,
+    verificationCount: core.verificationCount
+  }
+})
+
 // 处理产品切换
 const handleProductChange = (value: string) => {
   console.log('产品切换:', value)
@@ -547,14 +1031,99 @@ const handleDragStart = (event: DragEvent, item: SandCoreItem) => {
   }
 }
 
-// 拖拽放下
+// 拖拽放下：弹出制芯排产信息弹框
 const handleDrop = (event: DragEvent, equipment: EquipmentItem) => {
   event.preventDefault()
-  if (draggedItem && !equipment.scheduledItems.find(i => i.id === draggedItem!.id)) {
-    equipment.scheduledItems.push({ ...draggedItem })
-    console.log(`已将 ${draggedItem.name} 排产到 ${equipment.name}`)
-  }
+  if (!draggedItem) return
+
+  pendingEquipment.value = equipment
+  pendingCore.value = draggedItem
+
+  scheduleForm.productionLine = '一线'
+  scheduleForm.partNo = selectedProduct.value
+  scheduleForm.scheduleDate = selectedDate.value
+  scheduleForm.area = areaByTab[activeTab.value] || '机体制芯'
+  scheduleForm.equipment = equipment.machineType
+  scheduleForm.shift = currentShift.value === 'morning' ? '早（白）班' : '晚（夜）班'
+  scheduleForm.coreBox = undefined
+  scheduleForm.moldCount = 1
+  scheduleForm.quantity = 1
+  scheduleForm.paramChange = { enabled: false, quantity: 0, docId: undefined }
+  scheduleForm.verification = { enabled: false, quantity: 0, docId: undefined }
+
+  scheduleModalVisible.value = true
   draggedItem = null
+}
+
+// 取消排产
+const handleCancelSchedule = () => {
+  scheduleModalVisible.value = false
+  pendingEquipment.value = null
+  pendingCore.value = null
+}
+
+// 确认排产
+const handleConfirmSchedule = () => {
+  if (!scheduleForm.partNo) {
+    message.warning('请选择毛坯件号')
+    return
+  }
+  if (!scheduleForm.scheduleDate) {
+    message.warning('请选择排产日期')
+    return
+  }
+  if (!scheduleForm.area) {
+    message.warning('请选择排产区域')
+    return
+  }
+  if (!scheduleForm.equipment) {
+    message.warning('请输入排产设备')
+    return
+  }
+  if (!scheduleForm.shift) {
+    message.warning('请输入生产班次')
+    return
+  }
+  if (!scheduleForm.coreBox) {
+    message.warning('请选择排产芯盒')
+    return
+  }
+  if (!scheduleForm.moldCount) {
+    message.warning('请输入生产模数')
+    return
+  }
+  if (!scheduleForm.quantity) {
+    message.warning('请输入生产颗数')
+    return
+  }
+  if (scheduleForm.quantity > scheduleAlert.value.remaining) {
+    message.warning(`生产颗数不能大于剩余需求数 ${scheduleAlert.value.remaining} 颗`)
+    return
+  }
+
+  const equipment = pendingEquipment.value
+  const core = pendingCore.value
+  if (equipment && core) {
+    equipment.scheduledItems.push({ ...core })
+    console.log('排产成功:', {
+      equipment: equipment.name,
+      core: core.name,
+      productionLine: scheduleForm.productionLine,
+      partNo: scheduleForm.partNo,
+      scheduleDate: scheduleForm.scheduleDate.format('YYYY-MM-DD'),
+      area: scheduleForm.area,
+      machineType: scheduleForm.equipment,
+      shift: scheduleForm.shift,
+      coreBox: scheduleForm.coreBox,
+      moldCount: scheduleForm.moldCount,
+      quantity: scheduleForm.quantity,
+      paramChange: scheduleForm.paramChange,
+      verification: scheduleForm.verification
+    })
+  }
+
+  message.success('排产成功')
+  handleCancelSchedule()
 }
 
 // 清空排产
@@ -572,17 +1141,24 @@ const handleDispatch = () => {
 
 // 显示新增弹窗
 const showAddModal = () => {
+  addForm.productionLine = undefined
   addForm.scheduleDate = dayjs()
   addForm.productSeries = undefined
   addForm.partNo = undefined
+  addForm.processParamChange = 0
+  addForm.processVerification = 0
+  expandedRowKeys.value = []
   addForm.details = [
     {
+      _rowKey: '1',
       coreName: undefined,
       area: undefined,
       equipment: undefined,
       shift: undefined,
       coreBox: undefined,
-      quantity: null
+      quantity: 0,
+      paramChange: { enabled: false, quantity: 0, docId: undefined },
+      verification: { enabled: false, quantity: 0, docId: undefined }
     }
   ]
   addModalVisible.value = true
@@ -594,14 +1170,19 @@ const handleCancelAdd = () => {
 }
 
 // 添加明细行
+let detailRowSeq = 1
 const addDetailRow = () => {
+  const rowKey = String(++detailRowSeq)
   addForm.details.push({
+    _rowKey: rowKey,
     coreName: undefined,
     area: undefined,
     equipment: undefined,
     shift: undefined,
     coreBox: undefined,
-    quantity: null
+    quantity: 0,
+    paramChange: { enabled: false, quantity: 0, docId: undefined },
+    verification: { enabled: false, quantity: 0, docId: undefined }
   })
 }
 
@@ -612,6 +1193,10 @@ const removeDetailRow = (index: number) => {
 
 // 确认新增
 const handleConfirmAdd = () => {
+  if (!addForm.productionLine) {
+    message.warning('请选择产线')
+    return
+  }
   if (!addForm.scheduleDate) {
     message.warning('请选择排产日期')
     return
@@ -652,9 +1237,12 @@ const handleConfirmAdd = () => {
     }
   }
   console.log('新增排产数据:', {
+    productionLine: addForm.productionLine,
     scheduleDate: addForm.scheduleDate.format('YYYY-MM-DD'),
     productSeries: addForm.productSeries,
     partNo: addForm.partNo,
+    processParamChange: addForm.processParamChange,
+    processVerification: addForm.processVerification,
     details: addForm.details
   })
   message.success('新增排产成功')
@@ -854,7 +1442,15 @@ const handleConfirmAdd = () => {
 
 /* 新增弹窗样式 */
 .add-form {
-  margin-bottom: 16px;
+  margin-bottom: 0;
+}
+
+.verification-section {
+  padding: 0 4px;
+}
+
+.verification-section :deep(.ant-form-item) {
+  margin-bottom: 0;
 }
 
 .modal-footer {
@@ -869,6 +1465,131 @@ const handleConfirmAdd = () => {
 .mold-count {
   color: #1890ff;
   font-weight: 500;
+}
+
+/* 展开行样式 */
+.expanded-content {
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.expand-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.expand-row:last-child {
+  border-bottom: none;
+}
+
+.expand-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.expand-title {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.expand-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expand-field-wide {
+  flex: 1;
+}
+
+.field-label {
+  white-space: nowrap;
+  color: #666;
+}
+
+/* 制芯排产信息弹框样式 */
+.schedule-form :deep(.ant-form-item) {
+  margin-bottom: 16px;
+}
+
+.schedule-alert {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+
+.alert-title {
+  color: #fa8c16;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.alert-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #d48806;
+  font-size: 13px;
+  line-height: 2;
+}
+
+.alert-divider {
+  height: 1px;
+  background: #ffe58f;
+  margin: 8px 0;
+}
+
+.alert-section-title {
+  font-size: 13px;
+  color: #d48806;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+/* 验证计划行样式 */
+.schedule-plan-section {
+  padding: 0 4px;
+}
+
+.plan-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.plan-label-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 170px;
+}
+
+.plan-title {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.plan-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-field-wide {
+  flex: 1;
+}
+
+.plan-field-label {
+  white-space: nowrap;
+  color: #666;
+  font-size: 13px;
 }
 
 /* 已排产项目 */

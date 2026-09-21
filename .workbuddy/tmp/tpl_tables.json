@@ -1,0 +1,766 @@
+{
+ "39lls12d": {
+  "block": {
+   "block_index": 10,
+   "end_idx": 1443,
+   "id": "39lls12d",
+   "idx": 445,
+   "table": {
+    "borders": {
+     "bottom": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "inside_h": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "inside_v": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "left": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "right": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "top": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     }
+    },
+    "cell_margin": {
+     "bottom": 0.0,
+     "left": 108.0,
+     "right": 108.0,
+     "top": 0.0
+    },
+    "cells": [
+     {
+      "col": 1,
+      "row": 1,
+      "text": "序号",
+      "text_property": {
+       "bold": true,
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 1,
+      "text": "区块",
+      "text_property": {
+       "bold": true,
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 1,
+      "text": "展示内容",
+      "text_property": {
+       "bold": true,
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 1,
+      "text": "说明",
+      "text_property": {
+       "bold": true,
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 2,
+      "text": "1",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 2,
+      "text": "标题栏",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 2,
+      "text": "实时时间、日期、天气、大屏标题（材料成型中心工业园区设备监控大屏）、LOGO 位",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 2,
+      "text": "时间每秒刷新；标题居中显示，LOGO 位预留给厂区标识",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 3,
+      "text": "2",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 3,
+      "text": "设备运维成本指标",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 3,
+      "text": "吨均设备维修费用（元/吨，示例 125.8）、大修费用（万元，示例 1,850）、备件库存金额（万元，示例 3,260）",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 3,
+      "text": "一行三列指标卡，集中反映设备维修成本与备件资金占用规模",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 4,
+      "text": "3",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 4,
+      "text": "设备总览",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 4,
+      "text": "设备数量（台/套，示例 1,248）、主要生产设备（台/套，示例 856）、净值/原值（亿元，示例 2.85/3.42）",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 4,
+      "text": "一行三列指标卡，反映设备资产规模与价值构成",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 5,
+      "text": "4",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 5,
+      "text": "设备运行指标",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 5,
+      "text": "MTTR（分钟，示例 68.5）、MTBF（小时，示例 5,280）、设备可动率（%，示例 98.5）、OEE（%，示例 65.2）",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 5,
+      "text": "两行两列指标卡，反映设备可靠性、可动率与综合效率",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 6,
+      "text": "5",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 6,
+      "text": "吨均设备维修费用分析",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 6,
+      "text": "折线图；支持“分厂年度趋势”“分厂月度趋势”“产线月度趋势”三个页签",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 6,
+      "text": "分厂年度趋势为 2020～2027 年单折线并标注数值；产线月度趋势覆盖熔炼一/二/三线、造型一线大件与中件、造型二线大件与中件、造型三线 HWS/KW 共 9 条产线，按月份展示多条折线",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 7,
+      "text": "6",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 7,
+      "text": "各产线备件库存资金",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 7,
+      "text": "柱状图；X 轴为产线，Y 轴为万元",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 7,
+      "text": "按 9 条产线展示备件库存资金，柱顶标注数值，产线名称倾斜显示",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 8,
+      "text": "7",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 8,
+      "text": "设备可动率",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 8,
+      "text": "折线图（百分比）；支持“分厂年度”“分厂月度”“各产线月度”三个页签",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 8,
+      "text": "分厂年度为 2020～2026 年；各产线月度为 9 条产线多折线，纵轴范围 95%～100%",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 9,
+      "text": "8",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 9,
+      "text": "重点设备概况-设备类型页签",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 9,
+      "text": "机器人、熔炼设备、三坐标、叉车、视觉、AGV和RGV、PLC 共 7 个页签",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 9,
+      "text": "默认选中“视觉”；切换页签后左侧产线统计表的分类列同步变化",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 10,
+      "text": "9",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 10,
+      "text": "重点设备概况-产线统计表",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 10,
+      "text": "行为合计与 10 个产线/车间，列为设备类型细分项与合计",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 10,
+      "text": "视觉类型的细分列为相机、光学、红外、激光、其他、合计；合计行加粗并以浅底色区分",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 11,
+      "text": "10",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 11,
+      "text": "重点设备概况-品牌分布",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 11,
+      "text": "列为应用设备类型、品牌、数量；支持“品牌-视觉类型分布”“品牌-应用设备类型分布”“应用设备类型-品牌分布”三个页签",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 4,
+      "row": 11,
+      "text": "按应用设备类型分组展示各品牌数量并给出小计",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     }
+    ],
+    "col_count": 4,
+    "row_count": 11,
+    "style": "Normal Table",
+    "width_pct": 100.0
+   },
+   "type": "table"
+  },
+  "resolved_idx": 445,
+  "table_end_index": 1443,
+  "table_start_index": 445,
+  "version": 0
+ },
+ "r26qvcr1": {
+  "block": {
+   "block_index": 14,
+   "end_idx": 2129,
+   "id": "r26qvcr1",
+   "idx": 1533,
+   "table": {
+    "borders": {
+     "bottom": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "inside_h": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "inside_v": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "left": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "right": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     },
+     "top": {
+      "color": "808080",
+      "sz_eighth_pt": 4,
+      "val": "single"
+     }
+    },
+    "cell_margin": {
+     "bottom": 0.0,
+     "left": 108.0,
+     "right": 108.0,
+     "top": 0.0
+    },
+    "cells": [
+     {
+      "col": 1,
+      "row": 1,
+      "text": "区块",
+      "text_property": {
+       "bold": true,
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 1,
+      "text": "来源",
+      "text_property": {
+       "bold": true,
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 1,
+      "text": "说明",
+      "text_property": {
+       "bold": true,
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 2,
+      "text": "标题栏",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 2,
+      "text": "系统运行环境",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 2,
+      "text": "时间、日期按服务器时间每秒刷新；天气读取本地配置数据",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 3,
+      "text": "设备运维成本指标",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 3,
+      "text": "设备管理模块（维修工单、备件出入库台账）",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 3,
+      "text": "吨均设备维修费用 = 设备维修费用 ÷ 同期产量；大修费用按年度归集大修工单费用；备件库存金额取备件库存台账期末余额",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 4,
+      "text": "设备总览",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 4,
+      "text": "设备管理模块（设备台账、固定资产台账）",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 4,
+      "text": "按设备台账统计设备数量与主要生产设备数量；净值、原值取自固定资产台账",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 5,
+      "text": "设备运行指标",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 5,
+      "text": "设备管理模块（故障与维修记录）+ 设备状态监测数据",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 5,
+      "text": "MTBF = 累计运行时间 ÷ 故障次数；MTTR = 累计维修时间 ÷ 维修次数；可动率 = 设备可动时间 ÷ 日历时间；OEE 由设备运行、性能与质量数据计算",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 6,
+      "text": "吨均设备维修费用分析",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 6,
+      "text": "设备维修工单 + 生产产量数据",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 6,
+      "text": "按厂区、年份、月份及产线归集维修费用后除以对应产量；分厂年度与分厂月度按厂区汇总，产线月度按产线归集",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 7,
+      "text": "各产线备件库存资金",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 7,
+      "text": "备件库存台账",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 7,
+      "text": "按产线归集备件库存金额，单位万元",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 8,
+      "text": "设备可动率",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 8,
+      "text": "设备状态监测数据 + 设备台账",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 8,
+      "text": "按厂区年份、厂区月份及各产线统计设备可动时间占比",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 1,
+      "row": 9,
+      "text": "重点设备概况",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 2,
+      "row": 9,
+      "text": "设备台账（设备管理模块）",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     },
+     {
+      "col": 3,
+      "row": 9,
+      "text": "按产线/车间与设备类型（机器人、熔炼设备、三坐标、叉车、视觉、AGV和RGV、PLC）交叉统计设备数量，并按应用设备类型汇总各品牌数量",
+      "text_property": {
+       "font_family": "宋体",
+       "font_size_pt": 10.5
+      }
+     }
+    ],
+    "col_count": 3,
+    "row_count": 9,
+    "style": "Normal Table",
+    "width_pct": 100.0
+   },
+   "type": "table"
+  },
+  "resolved_idx": 1533,
+  "table_end_index": 2129,
+  "table_start_index": 1533,
+  "version": 0
+ }
+}
