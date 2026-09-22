@@ -758,10 +758,9 @@ const addModalVisible = ref(false)
 
 // 产线下拉选项
 const productionLineOptions = [
-  { label: '一线', value: '一线' },
-  { label: '二线', value: '二线' },
-  { label: '三线', value: '三线' },
-  { label: '四线', value: '四线' }
+  { label: '制芯一线', value: '制芯一线' },
+  { label: '制芯二线', value: '制芯二线' },
+  { label: '制芯三线', value: '制芯三线' }
 ]
 
 // 毛坯件号下拉选项
@@ -1039,7 +1038,7 @@ const handleDrop = (event: DragEvent, equipment: EquipmentItem) => {
   pendingEquipment.value = equipment
   pendingCore.value = draggedItem
 
-  scheduleForm.productionLine = '一线'
+  scheduleForm.productionLine = '制芯一线'
   scheduleForm.partNo = selectedProduct.value
   scheduleForm.scheduleDate = selectedDate.value
   scheduleForm.area = areaByTab[activeTab.value] || '机体制芯'
