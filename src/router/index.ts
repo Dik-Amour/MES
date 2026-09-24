@@ -242,6 +242,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/dashboard/VirtualLine.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/dashboard/plant-virtual-line',
+    name: 'PlantVirtualLine',
+    component: () => import('@/views/dashboard/PlantVirtualLine.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/dashboard/plant-virtual-kw',
+    name: 'PlantVirtualKw',
+    component: () => import('@/views/dashboard/PlantVirtualKw.vue'),
+    meta: { requiresAuth: true }
+  },
   // 大屏数据管理路由
   {
     path: '/screen-data/equipment',

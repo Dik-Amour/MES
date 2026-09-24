@@ -95,7 +95,9 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/dashboard/personnel': { title: '人员大屏', path: '/dashboard/personnel', icon: InboxOutlined },
     '/dashboard/safety': { title: '安环大屏', path: '/dashboard/safety', icon: InboxOutlined },
     '/dashboard/plant': { title: '厂区大屏', path: '/dashboard/plant', icon: InboxOutlined },
-    '/dashboard/virtual-line': { title: '虚拟产线', path: '/dashboard/virtual-line', icon: InboxOutlined },
+    '/dashboard/virtual-line': { title: '设备弹框', path: '/dashboard/virtual-line', icon: InboxOutlined },
+    '/dashboard/plant-virtual-line': { title: '厂区虚拟产线大屏', path: '/dashboard/plant-virtual-line', icon: InboxOutlined },
+    '/dashboard/plant-virtual-kw': { title: '造型三线KW', path: '/dashboard/plant-virtual-kw', icon: InboxOutlined },
     // 现场管理路径
     '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
     '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },

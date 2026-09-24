@@ -94,7 +94,9 @@
             <a-menu-item key="/dashboard/personnel">人员大屏</a-menu-item>
             <a-menu-item key="/dashboard/safety">安环大屏</a-menu-item>
             <a-menu-item key="/dashboard/plant">厂区大屏</a-menu-item>
-            <a-menu-item key="/dashboard/virtual-line">虚拟产线</a-menu-item>
+            <a-menu-item key="/dashboard/virtual-line">设备弹框</a-menu-item>
+            <a-menu-item key="/dashboard/plant-virtual-line">厂区虚拟产线大屏</a-menu-item>
+            <a-menu-item key="/dashboard/plant-virtual-kw">造型三线KW</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="screen-data">

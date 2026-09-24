@@ -5,7 +5,7 @@
     width="860px"
     :footer="null"
     centered
-    @update:open="v => emit('update:open', v)"
+    @update:open="(v: boolean) => emit('update:open', v)"
   >
     <div class="core-modal-body">
       <!-- 状态徽章（独立于设备基础信息之外，右上方展示） -->
@@ -82,7 +82,7 @@
           <a-table
             :columns="paramColumns"
             :data-source="paramRows"
-            :pagination="false"
+            :pagination="{ pageSize: 5, size: 'small', showSizeChanger: false }"
             size="small"
             row-key="seq"
           />
@@ -92,7 +92,7 @@
           <a-table
             :columns="operatorColumns"
             :data-source="operatorRows"
-            :pagination="false"
+            :pagination="{ pageSize: 5, size: 'small', showSizeChanger: false }"
             size="small"
             row-key="seq"
           />

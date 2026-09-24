@@ -37,7 +37,8 @@ const devices = [
   '抛丸机',
   '振芯机',
   '打磨中心',
-  '喷粉烘干炉'
+  '喷粉烘干炉',
+  '冲天炉'
 ]
 
 const activeDevice = ref('')
