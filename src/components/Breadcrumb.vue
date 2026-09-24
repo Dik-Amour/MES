@@ -82,7 +82,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     // 生产报表路径
     '/molding': { title: '生产报表', path: '/molding/monthly-storage', icon: CalendarOutlined },
     '/molding/monthly-storage': { title: '月度生产入库', path: '/molding/monthly-storage', icon: CalendarOutlined },
-    '/molding/daily-stats': { title: '产品日报统计', path: '/molding/daily-stats', icon: CalendarOutlined },
+    '/molding/daily-stats': { title: '产品日生产数据', path: '/molding/daily-stats', icon: CalendarOutlined },
     // PDA操作路径
     '/pda': { title: 'PDA操作', path: '/pda/sand-core-inbound', icon: CalendarOutlined },
     '/pda/sand-core-inbound': { title: '砂芯入库', path: '/pda/sand-core-inbound', icon: CalendarOutlined },

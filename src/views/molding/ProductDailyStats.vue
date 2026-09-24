@@ -68,7 +68,7 @@
                 <div class="stat-label">实际生产颗数</div>
               </div>
               <div class="stat-item">
-                <div class="stat-value stat-blue">80%</div>
+                <div class="stat-value stat-blue">80</div>
                 <div class="stat-label">生产效率</div>
               </div>
               <div class="stat-item">
@@ -105,10 +105,10 @@
               </div>
               <div class="stat-item">
                 <div class="stat-value stat-blue">400</div>
-                <div class="stat-label">生产数量</div>
+                <div class="stat-label">报工数量</div>
               </div>
               <div class="stat-item">
-                <div class="stat-value stat-blue">47.06颗/小时</div>
+                <div class="stat-value stat-blue">47.06</div>
                 <div class="stat-label">生产效率</div>
               </div>
               <div class="stat-item">
@@ -118,6 +118,10 @@
               <div class="stat-item">
                 <div class="stat-value stat-blue">16:30:00</div>
                 <div class="stat-label">关闭时间</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">8.5</div>
+                <div class="stat-label">运行时长</div>
               </div>
             </div>
           </div>
@@ -144,7 +148,7 @@
                 <div class="stat-label">实际生产颗数</div>
               </div>
               <div class="stat-item">
-                <div class="stat-value stat-blue">93.33%</div>
+                <div class="stat-value stat-blue">93.33</div>
                 <div class="stat-label">生产效率</div>
               </div>
               <div class="stat-item">
@@ -181,10 +185,10 @@
               </div>
               <div class="stat-item">
                 <div class="stat-value stat-blue">280</div>
-                <div class="stat-label">生产数量</div>
+                <div class="stat-label">报工数量</div>
               </div>
               <div class="stat-item">
-                <div class="stat-value stat-blue">32.94颗/小时</div>
+                <div class="stat-value stat-blue">32.94</div>
                 <div class="stat-label">生产效率</div>
               </div>
               <div class="stat-item">
@@ -194,6 +198,10 @@
               <div class="stat-item">
                 <div class="stat-value stat-blue">15:30:00</div>
                 <div class="stat-label">关闭时间</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">8.5</div>
+                <div class="stat-label">运行时长</div>
               </div>
             </div>
           </div>
@@ -209,10 +217,10 @@
               </div>
               <div class="stat-item">
                 <div class="stat-value stat-blue">350</div>
-                <div class="stat-label">生产数量</div>
+                <div class="stat-label">报工数量</div>
               </div>
               <div class="stat-item">
-                <div class="stat-value stat-blue">41.18颗/小时</div>
+                <div class="stat-value stat-blue">41.18</div>
                 <div class="stat-label">生产效率</div>
               </div>
               <div class="stat-item">
@@ -222,6 +230,10 @@
               <div class="stat-item">
                 <div class="stat-value stat-blue">16:30:00</div>
                 <div class="stat-label">关闭时间</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value stat-blue">8.5</div>
+                <div class="stat-label">运行时长</div>
               </div>
             </div>
           </div>
@@ -249,15 +261,19 @@
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">16:30:00</div>
-                  <div class="stat-label">结束时间</div>
+                  <div class="stat-label">关闭时间</div>
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">350</div>
-                  <div class="stat-label">生产数量</div>
+                  <div class="stat-label">报工数量</div>
                 </div>
                 <div class="stat-item">
-                  <div class="stat-value stat-blue">91.67%</div>
+                  <div class="stat-value stat-blue">91.67</div>
                   <div class="stat-label">生产效率</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value stat-blue">8.5</div>
+                  <div class="stat-label">运行时长</div>
                 </div>
               </div>
             </div>
@@ -280,15 +296,19 @@
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">15:45:00</div>
-                  <div class="stat-label">结束时间</div>
+                  <div class="stat-label">关闭时间</div>
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">400</div>
-                  <div class="stat-label">生产数量</div>
+                  <div class="stat-label">报工数量</div>
                 </div>
                 <div class="stat-item">
-                  <div class="stat-value stat-blue">88.50%</div>
+                  <div class="stat-value stat-blue">88.50</div>
                   <div class="stat-label">生产效率</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value stat-blue">7.25</div>
+                  <div class="stat-label">运行时长</div>
                 </div>
               </div>
             </div>
@@ -308,15 +328,19 @@
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">16:00:00</div>
-                  <div class="stat-label">结束时间</div>
+                  <div class="stat-label">关闭时间</div>
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">380</div>
-                  <div class="stat-label">生产数量</div>
+                  <div class="stat-label">报工数量</div>
                 </div>
                 <div class="stat-item">
-                  <div class="stat-value stat-blue">85.20%</div>
+                  <div class="stat-value stat-blue">85.20</div>
                   <div class="stat-label">生产效率</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value stat-blue">7</div>
+                  <div class="stat-label">运行时长</div>
                 </div>
               </div>
             </div>
@@ -336,11 +360,15 @@
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">16:30:00</div>
-                  <div class="stat-label">结束时间</div>
+                  <div class="stat-label">关闭时间</div>
                 </div>
                 <div class="stat-item">
                   <div class="stat-value stat-blue">360</div>
-                  <div class="stat-label">生产数量</div>
+                  <div class="stat-label">报工数量</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value stat-blue">7</div>
+                  <div class="stat-label">运行时长</div>
                 </div>
               </div>
             </div>
@@ -414,7 +442,7 @@ const mockMoldingData: Record<string, any> = {
   },
   'line1-medium': {
     planBoxes: 120, moldingBoxes: 115, actualPourBoxes: 110, totalRunTime: 8.5,
-    outputTonnage: '12.5', efficiency: '91.67%', firstPourTime: '2026-06-11 08:00:00', lastPourTime: '2026-06-11 16:30:00',
+    outputTonnage: '12.5', efficiency: '91.67', firstPourTime: '2026-06-11 08:00:00', lastPourTime: '2026-06-11 16:30:00',
     items: [
       { key: '1', series: 'WP12', partNo: 'WP12-001', name: '发动机缸体', planBoxes: 60, moldingBoxes: 58, pourBoxes: 55, status: '进行中' },
       { key: '2', series: 'WP12', partNo: 'WP12-002', name: '发动机缸盖', planBoxes: 60, moldingBoxes: 57, pourBoxes: 55, status: '进行中' }
@@ -422,7 +450,7 @@ const mockMoldingData: Record<string, any> = {
   },
   'line2-medium': {
     planBoxes: 100, moldingBoxes: 95, actualPourBoxes: 90, totalRunTime: 7.2,
-    outputTonnage: '10.8', efficiency: '90.00%', firstPourTime: '2026-06-11 08:15:00', lastPourTime: '2026-06-11 15:45:00',
+    outputTonnage: '10.8', efficiency: '90.00', firstPourTime: '2026-06-11 08:15:00', lastPourTime: '2026-06-11 15:45:00',
     items: [
       { key: '1', series: 'WP13', partNo: 'WP13-001', name: '变速箱壳体', planBoxes: 50, moldingBoxes: 48, pourBoxes: 45, status: '进行中' },
       { key: '2', series: 'WP13', partNo: 'WP13-002', name: '离合器壳体', planBoxes: 50, moldingBoxes: 47, pourBoxes: 45, status: '进行中' }
@@ -430,7 +458,7 @@ const mockMoldingData: Record<string, any> = {
   },
   'line2-large': {
     planBoxes: 80, moldingBoxes: 75, actualPourBoxes: 70, totalRunTime: 6.8,
-    outputTonnage: '15.2', efficiency: '87.50%', firstPourTime: '2026-06-11 08:30:00', lastPourTime: '2026-06-11 15:15:00',
+    outputTonnage: '15.2', efficiency: '87.50', firstPourTime: '2026-06-11 08:30:00', lastPourTime: '2026-06-11 15:15:00',
     items: [
       { key: '1', series: 'WP12', partNo: 'WP12-010', name: '大型支架', planBoxes: 40, moldingBoxes: 38, pourBoxes: 35, status: '进行中' },
       { key: '2', series: 'WP12', partNo: 'WP12-011', name: '重型底座', planBoxes: 40, moldingBoxes: 37, pourBoxes: 35, status: '进行中' }
@@ -438,7 +466,7 @@ const mockMoldingData: Record<string, any> = {
   },
   'line3-hws': {
     planBoxes: 150, moldingBoxes: 145, actualPourBoxes: 140, totalRunTime: 9.2,
-    outputTonnage: '18.5', efficiency: '93.33%', firstPourTime: '2026-06-11 07:45:00', lastPourTime: '2026-06-11 17:00:00',
+    outputTonnage: '18.5', efficiency: '93.33', firstPourTime: '2026-06-11 07:45:00', lastPourTime: '2026-06-11 17:00:00',
     items: [
       { key: '1', series: 'WP14', partNo: 'WP14-001', name: '液压阀体', planBoxes: 75, moldingBoxes: 73, pourBoxes: 70, status: '进行中' },
       { key: '2', series: 'WP14', partNo: 'WP14-002', name: '液压缸体', planBoxes: 75, moldingBoxes: 72, pourBoxes: 70, status: '进行中' }
