@@ -66,6 +66,10 @@
     <!-- 功能操作区 -->
     <a-card :bordered="false" class="action-card">
       <a-space :size="8" wrap>
+        <a-button type="primary" @click="handleAdd">
+          <PlusOutlined />
+          新增
+        </a-button>
         <a-button type="primary" @click="handleDownloadTemplate">
           <DownloadOutlined />
           模板下载
@@ -120,28 +124,22 @@
       </template>
 
       <a-table
-        :columns="currentColumns"
+        :columns="tableColumns"
         :data-source="dataSource"
         :loading="loading"
         :pagination="pagination"
-        :scroll="{ x: 1600 }"
+        :scroll="{ x: 1700 }"
         @change="handleTableChange"
       >
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'productSeries'">
-            <span>{{ record.productSeries }}</span>
+          <template v-if="column.key === 'weight'">
+            <span>{{ formatNumber(record.weight) }}</span>
           </template>
           <template v-else-if="column.key === 'planTonnage'">
             <span>{{ formatNumber(record.planTonnage) }}</span>
           </template>
           <template v-else-if="column.key === 'deliveryTonnage'">
             <span>{{ formatNumber(record.deliveryTonnage) }}</span>
-          </template>
-          <template v-else-if="column.key === 'completionRate'">
-            <span>{{ record.completionRate.toFixed(2) }}%</span>
-          </template>
-          <template v-else-if="column.key === 'planDate' && viewType !== 'daily'">
-            <span>{{ getDateRangeLabel() }}</span>
           </template>
         </template>
       </a-table>
@@ -172,6 +170,101 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <!-- 新增弹窗 -->
+    <a-modal
+      v-model:open="addModalVisible"
+      title="新增投料排产"
+      :width="600"
+      @ok="handleAddConfirm"
+      @cancel="handleAddCancel"
+    >
+      <a-form :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+        <a-form-item label="产品系列" required>
+          <a-select
+            v-model:value="addFormData.productSeries"
+            placeholder="请选择产品系列"
+            style="width: 100%"
+            @change="handleAddProductSeriesChange"
+          >
+            <a-select-option
+              v-for="series in seriesOptions"
+              :key="series"
+              :value="series"
+            >
+              {{ series }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="毛坯件号" required>
+          <a-select
+            v-model:value="addFormData.partNo"
+            placeholder="请先选择产品系列，再选择毛坯件号"
+            style="width: 100%"
+            show-search
+            :filter-option="filterOption"
+            :disabled="!addFormData.productSeries"
+            @change="handleAddPartNoChange"
+          >
+            <a-select-option
+              v-for="part in addPartOptions"
+              :key="part.partNo"
+              :value="part.partNo"
+            >
+              {{ part.partNo }} - {{ part.blankName }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="毛坯名称">
+          <a-input
+            v-model:value="addFormData.blankName"
+            placeholder="选择件号后自动同步"
+            disabled
+          />
+        </a-form-item>
+        <a-form-item label="计划数量" required>
+          <a-input-number
+            v-model:value="addFormData.planQuantity"
+            placeholder="请输入计划数量"
+            :min="1"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="交付开始时间" required>
+          <a-date-picker
+            v-model:value="addFormData.deliveryStartDate"
+            placeholder="请选择交付开始时间"
+            format="YYYY-MM-DD"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="交付结束时间" required>
+          <a-date-picker
+            v-model:value="addFormData.deliveryEndDate"
+            placeholder="请选择交付结束时间"
+            format="YYYY-MM-DD"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="交付单位" required>
+          <a-select
+            v-model:value="addFormData.deliveryUnit"
+            placeholder="请选择交付单位"
+            style="width: 100%"
+            show-search
+            :filter-option="filterOption"
+          >
+            <a-select-option
+              v-for="unit in deliveryUnitOptions"
+              :key="unit"
+              :value="unit"
+            >
+              {{ unit }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -180,17 +273,18 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
+import * as XLSX from 'xlsx'
 import {
   SearchOutlined,
   ReloadOutlined,
   DownloadOutlined,
   UploadOutlined,
-  ExportOutlined
+  ExportOutlined,
+  PlusOutlined
 } from '@ant-design/icons-vue'
 
 interface FeedingScheduleData {
   key: string
-  planDate: string
   productSeries: string
   partNo: string
   blankName: string
@@ -199,10 +293,52 @@ interface FeedingScheduleData {
   weight: number
   planQuantity: number
   planTonnage: number
+  deliveryStartDate: string
+  deliveryEndDate: string
+  deliveryUnit: string
   deliveryQuantity: number
   deliveryTonnage: number
-  completionRate: number
 }
+
+interface PartOption {
+  partNo: string
+  blankName: string
+  productSeries: string
+  specification: string
+  materialGrade: string
+  unitWeight: number
+}
+
+interface AddFormData {
+  productSeries: string
+  partNo: string
+  blankName: string
+  planQuantity: number | null
+  deliveryStartDate: Dayjs | null
+  deliveryEndDate: Dayjs | null
+  deliveryUnit: string | null
+}
+
+// 产品系列选项
+const seriesOptions = ['A系列', 'B系列', 'C系列']
+
+// 交付单位选项
+const deliveryUnitOptions = ['一车间', '二车间', '三车间', '成品库', '外协单位']
+
+// 毛坯件号基础数据
+const partOptions: PartOption[] = [
+  { partNo: 'FD-0001', blankName: '投料件-1', productSeries: 'A系列', specification: 'φ200×300', materialGrade: 'QT450-10', unitWeight: 12.5 },
+  { partNo: 'FD-0002', blankName: '投料件-2', productSeries: 'B系列', specification: 'φ150×250', materialGrade: 'HT250', unitWeight: 8.3 },
+  { partNo: 'FD-0003', blankName: '投料件-3', productSeries: 'C系列', specification: 'φ180×280', materialGrade: 'QT500-7', unitWeight: 15.7 },
+  { partNo: 'FD-0004', blankName: '投料件-4', productSeries: 'A系列', specification: 'φ220×350', materialGrade: 'HT300', unitWeight: 10.2 },
+  { partNo: 'FD-0005', blankName: '投料件-5', productSeries: 'B系列', specification: 'φ200×300', materialGrade: 'QT450-10', unitWeight: 9.8 },
+  { partNo: 'FD-0006', blankName: '投料件-6', productSeries: 'C系列', specification: 'φ150×250', materialGrade: 'HT250', unitWeight: 11.4 },
+  { partNo: 'FD-0007', blankName: '投料件-7', productSeries: 'A系列', specification: 'φ180×280', materialGrade: 'QT500-7', unitWeight: 13.6 },
+  { partNo: 'FD-0008', blankName: '投料件-8', productSeries: 'B系列', specification: 'φ220×350', materialGrade: 'HT300', unitWeight: 7.9 }
+]
+
+// 导入模板表头
+const IMPORT_TEMPLATE_HEADERS = ['毛坯件号', '毛坯名称', '计划数量', '交付开始时间', '交付结束时间', '交付单位']
 
 const selectedDateRange = ref<[Dayjs, Dayjs]>([dayjs().startOf('month'), dayjs()])
 const viewType = ref<'daily' | 'weekly' | 'monthly'>('daily')
@@ -220,15 +356,8 @@ const pagination = reactive({
   showTotal: (total: number) => `共 ${total} 条记录`
 })
 
-// 日明细视图列定义
-const dailyColumns = [
-  {
-    title: '计划日期',
-    dataIndex: 'planDate',
-    key: 'planDate',
-    width: 120,
-    fixed: 'left'
-  },
+// 表格列定义
+const tableColumns = [
   {
     title: '产品系列',
     dataIndex: 'productSeries',
@@ -251,7 +380,7 @@ const dailyColumns = [
     title: '规格型号',
     dataIndex: 'specification',
     key: 'specification',
-    width: 120
+    width: 130
   },
   {
     title: '牌号材质',
@@ -263,14 +392,14 @@ const dailyColumns = [
     title: '铸件重量（kg）',
     dataIndex: 'weight',
     key: 'weight',
-    width: 140,
+    width: 130,
     align: 'right'
   },
   {
     title: '计划数量',
     dataIndex: 'planQuantity',
     key: 'planQuantity',
-    width: 120,
+    width: 110,
     align: 'right'
   },
   {
@@ -281,205 +410,40 @@ const dailyColumns = [
     align: 'right'
   },
   {
-    title: '当日交付数量',
+    title: '交付开始时间',
+    dataIndex: 'deliveryStartDate',
+    key: 'deliveryStartDate',
+    width: 130,
+    align: 'center'
+  },
+  {
+    title: '交付结束时间',
+    dataIndex: 'deliveryEndDate',
+    key: 'deliveryEndDate',
+    width: 130,
+    align: 'center'
+  },
+  {
+    title: '交付单位',
+    dataIndex: 'deliveryUnit',
+    key: 'deliveryUnit',
+    width: 130
+  },
+  {
+    title: '已交付数量',
     dataIndex: 'deliveryQuantity',
     key: 'deliveryQuantity',
-    width: 140,
+    width: 120,
     align: 'right'
   },
   {
-    title: '当日交付吨位',
+    title: '已交付吨位',
     dataIndex: 'deliveryTonnage',
     key: 'deliveryTonnage',
-    width: 140,
+    width: 120,
     align: 'right'
-  },
-  {
-    title: '当日计划完成率',
-    dataIndex: 'completionRate',
-    key: 'completionRate',
-    width: 180,
-    align: 'center'
   }
 ]
-
-// 周汇总视图列定义
-const weeklyColumns = [
-  {
-    title: '周次',
-    dataIndex: 'planDate',
-    key: 'planDate',
-    width: 120,
-    fixed: 'left'
-  },
-  {
-    title: '产品系列',
-    dataIndex: 'productSeries',
-    key: 'productSeries',
-    width: 120
-  },
-  {
-    title: '毛坯件号',
-    dataIndex: 'partNo',
-    key: 'partNo',
-    width: 150
-  },
-  {
-    title: '毛坯名称',
-    dataIndex: 'blankName',
-    key: 'blankName',
-    width: 180
-  },
-  {
-    title: '规格型号',
-    dataIndex: 'specification',
-    key: 'specification',
-    width: 120
-  },
-  {
-    title: '牌号材质',
-    dataIndex: 'materialGrade',
-    key: 'materialGrade',
-    width: 120
-  },
-  {
-    title: '铸件重量（kg）',
-    dataIndex: 'weight',
-    key: 'weight',
-    width: 140,
-    align: 'right'
-  },
-  {
-    title: '周计划数量',
-    dataIndex: 'planQuantity',
-    key: 'planQuantity',
-    width: 120,
-    align: 'right'
-  },
-  {
-    title: '周计划吨位',
-    dataIndex: 'planTonnage',
-    key: 'planTonnage',
-    width: 120,
-    align: 'right'
-  },
-  {
-    title: '周累计交付数量',
-    dataIndex: 'deliveryQuantity',
-    key: 'deliveryQuantity',
-    width: 140,
-    align: 'right'
-  },
-  {
-    title: '周累计交付吨位',
-    dataIndex: 'deliveryTonnage',
-    key: 'deliveryTonnage',
-    width: 140,
-    align: 'right'
-  },
-  {
-    title: '周整体完成率',
-    dataIndex: 'completionRate',
-    key: 'completionRate',
-    width: 180,
-    align: 'center'
-  }
-]
-
-// 月汇总视图列定义
-const monthlyColumns = [
-  {
-    title: '月份',
-    dataIndex: 'planDate',
-    key: 'planDate',
-    width: 120,
-    fixed: 'left'
-  },
-  {
-    title: '产品系列',
-    dataIndex: 'productSeries',
-    key: 'productSeries',
-    width: 120
-  },
-  {
-    title: '毛坯件号',
-    dataIndex: 'partNo',
-    key: 'partNo',
-    width: 150
-  },
-  {
-    title: '毛坯名称',
-    dataIndex: 'blankName',
-    key: 'blankName',
-    width: 180
-  },
-  {
-    title: '规格型号',
-    dataIndex: 'specification',
-    key: 'specification',
-    width: 120
-  },
-  {
-    title: '牌号材质',
-    dataIndex: 'materialGrade',
-    key: 'materialGrade',
-    width: 120
-  },
-  {
-    title: '铸件重量（kg）',
-    dataIndex: 'weight',
-    key: 'weight',
-    width: 140,
-    align: 'right'
-  },
-  {
-    title: '月计划数量',
-    dataIndex: 'planQuantity',
-    key: 'planQuantity',
-    width: 120,
-    align: 'right'
-  },
-  {
-    title: '月计划吨位',
-    dataIndex: 'planTonnage',
-    key: 'planTonnage',
-    width: 120,
-    align: 'right'
-  },
-  {
-    title: '月累计交付数量',
-    dataIndex: 'deliveryQuantity',
-    key: 'deliveryQuantity',
-    width: 140,
-    align: 'right'
-  },
-  {
-    title: '月累计交付吨位',
-    dataIndex: 'deliveryTonnage',
-    key: 'deliveryTonnage',
-    width: 140,
-    align: 'right'
-  },
-  {
-    title: '月整体完成率',
-    dataIndex: 'completionRate',
-    key: 'completionRate',
-    width: 180,
-    align: 'center'
-  }
-]
-
-// 当前视图列
-const currentColumns = computed(() => {
-  switch (viewType.value) {
-    case 'daily':
-      return dailyColumns
-    case 'weekly':
-      return weeklyColumns
-    case 'monthly':
-      return monthlyColumns
-  }
-})
 
 // 当前视图标题
 const viewTitle = computed(() => {
@@ -496,6 +460,29 @@ const viewTitle = computed(() => {
 // 导入相关
 const importModalVisible = ref(false)
 const fileList = ref<any[]>([])
+
+// 新增弹窗相关
+const addModalVisible = ref(false)
+const addFormData = reactive<AddFormData>({
+  productSeries: '',
+  partNo: '',
+  blankName: '',
+  planQuantity: null,
+  deliveryStartDate: null,
+  deliveryEndDate: null,
+  deliveryUnit: null
+})
+
+// 新增弹窗：按产品系列过滤件号选项
+const addPartOptions = computed(() => {
+  if (!addFormData.productSeries) return []
+  return partOptions.filter(part => part.productSeries === addFormData.productSeries)
+})
+
+// 下拉搜索过滤
+const filterOption = (input: string, option: any) => {
+  return String(option.value ?? '').toLowerCase().includes(input.toLowerCase())
+}
 
 // 总计统计
 const totalStats = computed(() => {
@@ -570,38 +557,33 @@ const handleTableChange = (pag: any) => {
 // 生成模拟数据
 const generateMockData = () => {
   const mockData: FeedingScheduleData[] = []
-  const seriesList = ['A系列', 'B系列', 'C系列']
-  const materialList = ['QT450-10', 'HT250', 'QT500-7', 'HT300']
-  const specificationList = ['φ200×300', 'φ150×250', 'φ180×280', 'φ220×350']
-  
   const startDate = selectedDateRange.value[0]
-  const planDate = viewType.value === 'monthly'
-    ? startDate.format('YYYY-MM')
-    : startDate.format('YYYY-MM-DD')
-  
   const rowCount = viewType.value === 'daily' ? 20 : (viewType.value === 'weekly' ? 15 : 10)
   const quantityBase = viewType.value === 'daily' ? 100 : (viewType.value === 'weekly' ? 500 : 2000)
-  
+
   // 日明细 / 周汇总 / 月汇总数据
   for (let i = 1; i <= rowCount; i++) {
+    const part = partOptions[(i - 1) % partOptions.length]
     const planQuantity = Math.floor(Math.random() * quantityBase) + Math.floor(quantityBase / 2)
     const deliveryQuantity = Math.floor(Math.random() * planQuantity)
-    const weight = Math.floor(Math.random() * 50) + 10
-    
+    const deliveryStart = startDate.add(i - 1, 'day')
+    const deliveryEnd = deliveryStart.add(2, 'day')
+
     mockData.push({
       key: String(i),
-      planDate: planDate,
-      productSeries: seriesList[Math.floor(Math.random() * seriesList.length)],
-      partNo: `FD-${String(i).padStart(4, '0')}`,
-      blankName: `投料件-${i}`,
-      specification: specificationList[Math.floor(Math.random() * specificationList.length)],
-      materialGrade: materialList[Math.floor(Math.random() * materialList.length)],
-      weight: weight,
+      productSeries: part.productSeries,
+      partNo: part.partNo,
+      blankName: part.blankName,
+      specification: part.specification,
+      materialGrade: part.materialGrade,
+      weight: part.unitWeight,
       planQuantity: planQuantity,
-      planTonnage: (planQuantity * weight) / 1000,
+      planTonnage: (planQuantity * part.unitWeight) / 1000,
+      deliveryStartDate: deliveryStart.format('YYYY-MM-DD'),
+      deliveryEndDate: deliveryEnd.format('YYYY-MM-DD'),
+      deliveryUnit: deliveryUnitOptions[(i - 1) % deliveryUnitOptions.length],
       deliveryQuantity: deliveryQuantity,
-      deliveryTonnage: (deliveryQuantity * weight) / 1000,
-      completionRate: planQuantity > 0 ? (deliveryQuantity / planQuantity) * 100 : 0
+      deliveryTonnage: (deliveryQuantity * part.unitWeight) / 1000
     })
   }
   
@@ -622,8 +604,105 @@ const generateMockData = () => {
   pagination.total = dataSource.value.length
 }
 
+// 新增弹窗
+const handleAdd = () => {
+  addFormData.productSeries = ''
+  addFormData.partNo = ''
+  addFormData.blankName = ''
+  addFormData.planQuantity = null
+  addFormData.deliveryStartDate = null
+  addFormData.deliveryEndDate = null
+  addFormData.deliveryUnit = null
+  addModalVisible.value = true
+}
+
+// 新增弹窗：产品系列变更时清空件号及毛坯名称
+const handleAddProductSeriesChange = () => {
+  addFormData.partNo = ''
+  addFormData.blankName = ''
+}
+
+// 新增弹窗：选择件号后自动同步毛坯名称
+const handleAddPartNoChange = (value: string) => {
+  const selectedPart = partOptions.find(part => part.partNo === value)
+  addFormData.blankName = selectedPart ? selectedPart.blankName : ''
+}
+
+// 新增确认
+const handleAddConfirm = () => {
+  const { productSeries, partNo, planQuantity, deliveryStartDate, deliveryEndDate, deliveryUnit } = addFormData
+
+  if (!productSeries) {
+    message.warning('请选择产品系列')
+    return
+  }
+  if (!partNo) {
+    message.warning('请选择毛坯件号')
+    return
+  }
+  if (!planQuantity || planQuantity <= 0) {
+    message.warning('请输入有效的计划数量')
+    return
+  }
+  if (!deliveryStartDate) {
+    message.warning('请选择交付开始时间')
+    return
+  }
+  if (!deliveryEndDate) {
+    message.warning('请选择交付结束时间')
+    return
+  }
+  if (deliveryEndDate.isBefore(deliveryStartDate, 'day')) {
+    message.warning('交付结束时间不能早于交付开始时间')
+    return
+  }
+  if (!deliveryUnit) {
+    message.warning('请选择交付单位')
+    return
+  }
+
+  const selectedPart = partOptions.find(part => part.partNo === partNo)
+  if (!selectedPart) {
+    message.warning('未找到对应的毛坯件号')
+    return
+  }
+
+  const weight = selectedPart.unitWeight
+  dataSource.value.unshift({
+    key: `new-${Date.now()}`,
+    productSeries,
+    partNo: selectedPart.partNo,
+    blankName: selectedPart.blankName,
+    specification: selectedPart.specification,
+    materialGrade: selectedPart.materialGrade,
+    weight,
+    planQuantity,
+    planTonnage: (planQuantity * weight) / 1000,
+    deliveryStartDate: deliveryStartDate.format('YYYY-MM-DD'),
+    deliveryEndDate: deliveryEndDate.format('YYYY-MM-DD'),
+    deliveryUnit,
+    deliveryQuantity: 0,
+    deliveryTonnage: 0
+  })
+  pagination.total = dataSource.value.length
+  addModalVisible.value = false
+  message.success('投料排产新增成功')
+}
+
+// 新增取消
+const handleAddCancel = () => {
+  addModalVisible.value = false
+}
+
 // 模板下载
 const handleDownloadTemplate = () => {
+  const worksheet = XLSX.utils.aoa_to_sheet([IMPORT_TEMPLATE_HEADERS])
+  worksheet['!cols'] = IMPORT_TEMPLATE_HEADERS.map(title => ({
+    wch: title === '毛坯名称' ? 24 : 18
+  }))
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, '投料排产')
+  XLSX.writeFile(workbook, '投料排产导入模板.xlsx')
   message.success('模板下载成功')
 }
 
@@ -633,20 +712,105 @@ const handleImport = () => {
   fileList.value = []
 }
 
+// 解析导入文件中的日期
+const formatImportedDate = (value: any): string => {
+  if (!value) return ''
+  if (value instanceof Date) return dayjs(value).format('YYYY-MM-DD')
+  const parsed = dayjs(value)
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : ''
+}
+
 // 导入确认
 const handleImportConfirm = () => {
   if (fileList.value.length === 0) {
     message.error('请选择要导入的文件')
     return
   }
-  
+
   loading.value = true
-  setTimeout(() => {
-    generateMockData()
-    loading.value = false
-    importModalVisible.value = false
-    message.success('导入成功')
-  }, 1000)
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const workbook = XLSX.read(e.target?.result, { type: 'array', cellDates: true })
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
+      const rows: any[] = XLSX.utils.sheet_to_json(firstSheet, { defval: '' })
+
+      if (rows.length === 0) {
+        message.error('导入文件内容为空')
+        return
+      }
+
+      const newRecords: FeedingScheduleData[] = []
+      const errorRows: string[] = []
+
+      rows.forEach((row, index) => {
+        const line = index + 2 // 第 1 行为表头
+        const partNo = String(row['毛坯件号'] ?? '').trim()
+        const blankName = String(row['毛坯名称'] ?? '').trim()
+        const planQuantity = Number(row['计划数量'])
+        const deliveryStartDate = formatImportedDate(row['交付开始时间'])
+        const deliveryEndDate = formatImportedDate(row['交付结束时间'])
+        const deliveryUnit = String(row['交付单位'] ?? '').trim()
+
+        if (!partNo) {
+          errorRows.push(`第${line}行：毛坯件号不能为空`)
+          return
+        }
+        if (!planQuantity || planQuantity <= 0 || Number.isNaN(planQuantity)) {
+          errorRows.push(`第${line}行：计划数量无效`)
+          return
+        }
+        if (!deliveryStartDate || !deliveryEndDate) {
+          errorRows.push(`第${line}行：交付开始/结束时间不能为空`)
+          return
+        }
+        if (!deliveryUnit) {
+          errorRows.push(`第${line}行：交付单位不能为空`)
+          return
+        }
+
+        const part = partOptions.find(item => item.partNo === partNo)
+        const weight = part ? part.unitWeight : 0
+        newRecords.push({
+          key: `import-${Date.now()}-${index}`,
+          productSeries: part ? part.productSeries : '',
+          partNo,
+          blankName: part ? part.blankName : blankName,
+          specification: part ? part.specification : '',
+          materialGrade: part ? part.materialGrade : '',
+          weight,
+          planQuantity,
+          planTonnage: (planQuantity * weight) / 1000,
+          deliveryStartDate,
+          deliveryEndDate,
+          deliveryUnit,
+          deliveryQuantity: 0,
+          deliveryTonnage: 0
+        })
+      })
+
+      if (newRecords.length === 0) {
+        message.error(`导入失败：${errorRows.slice(0, 3).join('；')}`)
+        return
+      }
+
+      dataSource.value = [...newRecords, ...dataSource.value]
+      pagination.total = dataSource.value.length
+      importModalVisible.value = false
+      fileList.value = []
+
+      if (errorRows.length > 0) {
+        message.warning(`已导入 ${newRecords.length} 条，跳过 ${errorRows.length} 条错误数据：${errorRows.slice(0, 3).join('；')}`)
+      } else {
+        message.success(`导入成功，共导入 ${newRecords.length} 条数据`)
+      }
+    } catch (error) {
+      message.error('文件解析失败，请检查导入模板格式')
+    } finally {
+      loading.value = false
+    }
+  }
+  reader.readAsArrayBuffer(fileList.value[0])
 }
 
 // 导入取消

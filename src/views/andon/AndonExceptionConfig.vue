@@ -194,6 +194,26 @@
                 </a-form-item>
               </a-col>
             </a-row>
+            <a-row :gutter="24">
+              <a-col :span="8">
+                <a-form-item>
+                  <template #label>毛坯件号：</template>
+                  <a-input v-model:value="triggerForm.blankPartNo" placeholder="请输入毛坯件号" allow-clear />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item>
+                  <template #label>每日生效时间：</template>
+                  <a-time-picker
+                    v-model:value="triggerForm.dailyEffectiveTime"
+                    format="HH:mm"
+                    value-format="HH:mm"
+                    placeholder="请选择生效时间"
+                    style="width: 100%"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
 
             <!-- 阈值类：实时值与设定上下限比较，越限触发 -->
             <template v-if="triggerForm.monitorType === 'threshold'">
@@ -633,6 +653,8 @@ const triggerForm = reactive({
   station: undefined as string | undefined,
   equipment: '',
   dataPoint: undefined as string | undefined,
+  blankPartNo: '', // 毛坯件号
+  dailyEffectiveTime: undefined as string | undefined, // 每日生效时间（HH:mm）
   monitorType: 'threshold',
   operator: undefined as string | undefined,
   minValue: undefined as number | undefined,
@@ -716,6 +738,8 @@ const handleMonitorTypeChange = () => {
 const handleTriggerTypeChange = () => {
   triggerForm.station = undefined
   triggerForm.dataPoint = undefined
+  triggerForm.blankPartNo = ''
+  triggerForm.dailyEffectiveTime = undefined
   triggerForm.monitorType = 'threshold'
   Object.assign(triggerForm, monitorFieldDefaults)
   triggerForm.condition = ''
@@ -779,7 +803,7 @@ const handleAddPushRow = () => {
 
 const resetForm = () => {
   Object.assign(formData, { exceptionType: undefined, exceptionName: '', productionLine: undefined, businessType: undefined, exceptionDesc: '', enabled: true, remark: '' })
-  Object.assign(triggerForm, { triggerType: 'plc', station: undefined, equipment: '', dataPoint: undefined, monitorType: 'threshold', condition: '', delayTime: undefined, remark: '' }, monitorFieldDefaults)
+  Object.assign(triggerForm, { triggerType: 'plc', station: undefined, equipment: '', dataPoint: undefined, blankPartNo: '', dailyEffectiveTime: undefined, monitorType: 'threshold', condition: '', delayTime: undefined, remark: '' }, monitorFieldDefaults)
   pushRowKey = 0
   pushData.value = [
     { key: String(++pushRowKey), level: '1级人员', pushTime: '', pushRole: undefined, responseRole: undefined },
