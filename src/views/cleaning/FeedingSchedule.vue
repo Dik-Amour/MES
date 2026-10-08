@@ -128,7 +128,7 @@
         :data-source="dataSource"
         :loading="loading"
         :pagination="pagination"
-        :scroll="{ x: 1700 }"
+        :scroll="{ x: 1840 }"
         @change="handleTableChange"
       >
         <template #bodyCell="{ column, record }">
@@ -140,6 +140,9 @@
           </template>
           <template v-else-if="column.key === 'deliveryTonnage'">
             <span>{{ formatNumber(record.deliveryTonnage) }}</span>
+          </template>
+          <template v-else-if="column.key === 'completionRate'">
+            <span>{{ getCompletionRate(record) }}</span>
           </template>
         </template>
       </a-table>
@@ -442,6 +445,13 @@ const tableColumns = [
     key: 'deliveryTonnage',
     width: 120,
     align: 'right'
+  },
+  {
+    title: '计划完成率',
+    dataIndex: 'completionRate',
+    key: 'completionRate',
+    width: 120,
+    align: 'center'
   }
 ]
 
@@ -516,6 +526,12 @@ const getDateRangeLabel = () => {
 // 格式化数字
 const formatNumber = (num: number) => {
   return num.toFixed(2)
+}
+
+// 计划完成率 = 已交付数量 / 计划数量
+const getCompletionRate = (record: FeedingScheduleData) => {
+  if (!record.planQuantity) return '0.00%'
+  return `${((record.deliveryQuantity / record.planQuantity) * 100).toFixed(2)}%`
 }
 
 // 日期变化

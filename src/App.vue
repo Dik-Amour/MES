@@ -132,6 +132,7 @@
             <template #title>PDA操作</template>
             <a-menu-item key="/pda/sand-core-inbound">砂芯入库</a-menu-item>
             <a-menu-item key="/pda/sand-core-outbound">砂芯出库</a-menu-item>
+            <a-menu-item key="/pda/exception-handle">异常处理</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="core-making">

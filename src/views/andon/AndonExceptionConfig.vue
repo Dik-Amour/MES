@@ -3,6 +3,11 @@
     <!-- 筛选卡片 -->
     <a-card :bordered="false" class="filter-card">
       <a-form layout="inline" :model="searchForm">
+        <a-form-item label="产线">
+          <a-select v-model:value="searchForm.productionLine" placeholder="请选择" allow-clear style="width: 180px">
+            <a-select-option v-for="l in productionLineOptions" :key="l" :value="l">{{ l }}</a-select-option>
+          </a-select>
+        </a-form-item>
         <a-form-item label="异常类型">
           <a-select v-model:value="searchForm.exceptionType" placeholder="请选择" allow-clear style="width: 180px">
             <a-select-option v-for="t in exceptionTypeOptions" :key="t" :value="t">{{ t }}</a-select-option>
@@ -10,11 +15,6 @@
         </a-form-item>
         <a-form-item label="异常名称">
           <a-input v-model:value="searchForm.exceptionName" placeholder="请输入" allow-clear style="width: 180px" />
-        </a-form-item>
-        <a-form-item label="产线">
-          <a-select v-model:value="searchForm.productionLine" placeholder="请选择" allow-clear style="width: 180px">
-            <a-select-option v-for="l in productionLineOptions" :key="l" :value="l">{{ l }}</a-select-option>
-          </a-select>
         </a-form-item>
         <a-form-item label="业务类型">
           <a-select v-model:value="searchForm.businessType" placeholder="请选择" allow-clear style="width: 180px">
@@ -157,7 +157,6 @@
                 <a-radio-group v-model:value="triggerForm.triggerType" @change="handleTriggerTypeChange">
                   <a-radio value="plc">PLC数采</a-radio>
                   <a-radio value="business">业务逻辑</a-radio>
-                  <a-radio value="other">其他</a-radio>
                 </a-radio-group>
               </a-form-item>
             </a-col>
@@ -182,7 +181,7 @@
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item>
+                <a-form-item required>
                   <template #label>监测值类型：</template>
                   <a-select v-model:value="triggerForm.monitorType" placeholder="请选择" @change="handleMonitorTypeChange">
                     <a-select-option value="threshold">阈值类（数值超限）</a-select-option>
@@ -197,18 +196,26 @@
             <a-row :gutter="24">
               <a-col :span="8">
                 <a-form-item>
+                  <template #label>产品系列：</template>
+                  <a-select v-model:value="triggerForm.productSeries" placeholder="请选择" allow-clear>
+                    <a-select-option v-for="s in seriesOptions" :key="s" :value="s">{{ s }}</a-select-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item>
                   <template #label>毛坯件号：</template>
                   <a-input v-model:value="triggerForm.blankPartNo" placeholder="请输入毛坯件号" allow-clear />
                 </a-form-item>
               </a-col>
               <a-col :span="8">
-                <a-form-item>
-                  <template #label>每日生效时间：</template>
-                  <a-time-picker
-                    v-model:value="triggerForm.dailyEffectiveTime"
+                <a-form-item required>
+                  <template #label>每日监控时间：</template>
+                  <a-time-range-picker
+                    v-model:value="triggerForm.dailyMonitorTime"
                     format="HH:mm"
                     value-format="HH:mm"
-                    placeholder="请选择生效时间"
+                    :placeholder="['开始时间', '结束时间']"
                     style="width: 100%"
                   />
                 </a-form-item>
@@ -386,36 +393,73 @@
 
           <!-- 业务逻辑 配置 -->
           <template v-if="triggerForm.triggerType === 'business'">
-            <a-row :gutter="24">
-              <a-col :span="8">
-                <a-form-item required>
-                  <template #label>工位/子工位：</template>
-                  <a-select v-model:value="triggerForm.station" placeholder="请选择">
-                    <a-select-option v-for="s in stationOptions" :key="s" :value="s">{{ s }}</a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-col>
-              <a-col :span="16">
-                <a-form-item required>
-                  <template #label>触发条件：</template>
-                  <a-input v-model:value="triggerForm.condition" placeholder="请输入业务逻辑触发条件" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-row :gutter="24">
-              <a-col :span="8">
-                <a-form-item>
-                  <template #label>延迟时间（s）：</template>
-                  <a-input-number v-model:value="triggerForm.delayTime" placeholder="请输入" :min="0" style="width: 100%" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="16">
-                <a-form-item>
-                  <template #label>备注：</template>
-                  <a-input v-model:value="triggerForm.remark" placeholder="请输入备注信息" />
-                </a-form-item>
-              </a-col>
-            </a-row>
+            <!-- 二级联动：异常类型为「质量异常」时，展示检验相关字段 -->
+            <template v-if="isQualityBusiness">
+              <a-row :gutter="24">
+                <a-col :span="8">
+                  <a-form-item required>
+                    <template #label>检验类型：</template>
+                    <a-select v-model:value="triggerForm.inspectType" placeholder="请选择" @change="handleInspectTypeChange">
+                      <a-select-option v-for="t in inspectTypeOptions" :key="t" :value="t">{{ t }}</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item required>
+                    <template #label>检验模板：</template>
+                    <a-select v-model:value="triggerForm.inspectTemplate" placeholder="请先选择检验类型" :disabled="!triggerForm.inspectType">
+                      <a-select-option v-for="m in inspectTemplateOptions" :key="m" :value="m">{{ m }}</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item required>
+                    <template #label>检验结果：</template>
+                    <a-select v-model:value="triggerForm.inspectResult" placeholder="请选择">
+                      <a-select-option v-for="r in inspectResultOptions" :key="r" :value="r">{{ r }}</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+              <a-row :gutter="24">
+                <a-col :span="24">
+                  <div class="monitor-tip">典型场景：质量异常由检验单驱动，检验结果为「不合格」时触发安灯推送（如熔炼成分不合格、铸件外观不合格）</div>
+                </a-col>
+              </a-row>
+            </template>
+
+            <template v-else>
+              <a-row :gutter="24">
+                <a-col :span="8">
+                  <a-form-item required>
+                    <template #label>工位/子工位：</template>
+                    <a-select v-model:value="triggerForm.station" placeholder="请选择">
+                      <a-select-option v-for="s in stationOptions" :key="s" :value="s">{{ s }}</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+                <a-col :span="16">
+                  <a-form-item required>
+                    <template #label>触发条件：</template>
+                    <a-input v-model:value="triggerForm.condition" placeholder="请输入业务逻辑触发条件" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+              <a-row :gutter="24">
+                <a-col :span="8">
+                  <a-form-item>
+                    <template #label>延迟时间（s）：</template>
+                    <a-input-number v-model:value="triggerForm.delayTime" placeholder="请输入" :min="0" style="width: 100%" />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="16">
+                  <a-form-item>
+                    <template #label>备注：</template>
+                    <a-input v-model:value="triggerForm.remark" placeholder="请输入备注信息" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </template>
           </template>
 
           <!-- 其他 配置 -->
@@ -570,9 +614,10 @@ interface PushConfigItem {
 }
 
 // ---------- 选项 ----------
-const exceptionTypeOptions = ['生产异常', '设备异常', '物料异常', '质量异常', '安全异常', '工艺异常']
+const exceptionTypeOptions = ['生产异常', '质量异常', '安全异常', '工艺异常']
 const productionLineOptions = ['造型三线HWS造型', '造型一线HWS造型', '造型二线HWS造型', '制芯线', '浇注线', '机体线']
 const businessTypeOptions = ['通知类', '处置类']
+const seriesOptions = ['A系列', 'B系列', 'C系列']
 const stationOptions = ['造型工位', '浇注工位', '制芯工位', '清理工位', '砂处理工位']
 const dataPointOptions = ['温度传感器', '压力传感器', '液位传感器', '流量传感器', '振动传感器', '急停信号', '安全光幕信号', '阀门到位信号', 'PLC心跳信号']
 
@@ -590,9 +635,9 @@ const selectedRowKeys = ref<Array<string | number>>([])
 
 const columns = [
   { title: '序号', key: 'seq', width: 80 },
+  { title: '产线', dataIndex: 'productionLine', key: 'productionLine', width: 200 },
   { title: '异常类型', dataIndex: 'exceptionType', key: 'exceptionType', width: 130 },
   { title: '异常名称', dataIndex: 'exceptionName', key: 'exceptionName', width: 150 },
-  { title: '产线', dataIndex: 'productionLine', key: 'productionLine', width: 200 },
   { title: '业务类型', dataIndex: 'businessType', key: 'businessType', width: 120 },
   { title: '启用', key: 'enabled', width: 100 },
   { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 180 },
@@ -603,9 +648,9 @@ const columns = [
 const dataSource = ref<AndonConfigRecord[]>([
   { id: 1, exceptionType: '生产异常', exceptionName: '浇注机异常', productionLine: '造型三线HWS造型', businessType: '通知类', enabled: true, createTime: '2026-07-20 14:56', creator: '张三', remark: '' },
   { id: 2, exceptionType: '生产异常', exceptionName: '造型线异常', productionLine: '造型三线HWS造型', businessType: '处置类', enabled: true, createTime: '2026-07-20 15:30', creator: '张三', remark: '' },
-  { id: 3, exceptionType: '设备异常', exceptionName: '制芯机故障', productionLine: '制芯线', businessType: '处置类', enabled: true, createTime: '2026-07-18 09:10', creator: '李四', remark: '' },
+  { id: 3, exceptionType: '生产异常', exceptionName: '制芯机故障', productionLine: '制芯线', businessType: '处置类', enabled: true, createTime: '2026-07-18 09:10', creator: '李四', remark: '' },
   { id: 4, exceptionType: '质量异常', exceptionName: '尺寸超差', productionLine: '机体线', businessType: '通知类', enabled: false, createTime: '2026-07-15 11:20', creator: '王五', remark: '' },
-  { id: 5, exceptionType: '物料异常', exceptionName: '砂芯短缺', productionLine: '造型一线HWS造型', businessType: '处置类', enabled: true, createTime: '2026-07-12 08:45', creator: '赵六', remark: '' },
+  { id: 5, exceptionType: '生产异常', exceptionName: '砂芯短缺', productionLine: '造型一线HWS造型', businessType: '处置类', enabled: true, createTime: '2026-07-12 08:45', creator: '赵六', remark: '' },
   { id: 6, exceptionType: '安全异常', exceptionName: '消防通道堵塞', productionLine: '造型二线HWS造型', businessType: '通知类', enabled: true, createTime: '2026-07-10 16:00', creator: '张三', remark: '' },
   { id: 7, exceptionType: '工艺异常', exceptionName: '浇注温度偏差', productionLine: '浇注线', businessType: '处置类', enabled: false, createTime: '2026-07-08 10:30', creator: '李四', remark: '' }
 ])
@@ -653,8 +698,9 @@ const triggerForm = reactive({
   station: undefined as string | undefined,
   equipment: '',
   dataPoint: undefined as string | undefined,
-  blankPartNo: '', // 毛坯件号
-  dailyEffectiveTime: undefined as string | undefined, // 每日生效时间（HH:mm）
+  productSeries: undefined as string | undefined, // 产品系列（非必填）
+  blankPartNo: '', // 毛坯件号（非必填）
+  dailyMonitorTime: undefined as string[] | undefined, // 每日监控时间区间（[HH:mm, HH:mm]）
   monitorType: 'threshold',
   operator: undefined as string | undefined,
   minValue: undefined as number | undefined,
@@ -677,7 +723,11 @@ const triggerForm = reactive({
   resetCycle: undefined as string | undefined, // shift班次/day日/week周/month月
   condition: '',
   delayTime: undefined as number | undefined,
-  remark: ''
+  remark: '',
+  // 质量异常（业务逻辑）：检验联动字段
+  inspectType: undefined as string | undefined, // 检验类型
+  inspectTemplate: undefined as string | undefined, // 检验模板
+  inspectResult: undefined as string | undefined // 检验结果 合格/不合格
 })
 
 // 各监测值类型专属字段默认值（切换类型/重置时统一还原）
@@ -698,6 +748,40 @@ const monitorFieldDefaults = {
   accumulateLimit: undefined as number | undefined,
   resetCycle: undefined as string | undefined
 }
+
+// ---------- 质量异常 × 业务逻辑 二级联动 ----------
+const inspectTypeOptions = ['熔炼检验', '造型检验', '制芯检验', '混砂检验', '清理检验']
+const inspectResultOptions = ['合格', '不合格']
+
+// 检验模板随检验类型联动
+const inspectTemplateMap: Record<string, string[]> = {
+  '熔炼检验': ['铁液成分光谱检验模板', '铁液温度检验模板', '炉前金相检验模板'],
+  '造型检验': ['砂型硬度检验模板', '型腔尺寸检验模板', '合箱检查检验模板'],
+  '制芯检验': ['砂芯强度检验模板', '砂芯尺寸检验模板', '砂芯固化检验模板'],
+  '混砂检验': ['型砂水分检验模板', '型砂强度检验模板', '型砂透气性检验模板'],
+  '清理检验': ['铸件外观检验模板', '铸件尺寸检验模板', '铸件抛丸检验模板']
+}
+
+const inspectTemplateOptions = computed(() => inspectTemplateMap[triggerForm.inspectType || ''] || [])
+
+// 异常类型为质量异常且触发类型为业务逻辑时，展示检验字段
+const isQualityBusiness = computed(() =>
+  formData.exceptionType === '质量异常' && triggerForm.triggerType === 'business'
+)
+
+// 切换检验类型时清空检验模板
+const handleInspectTypeChange = () => {
+  triggerForm.inspectTemplate = undefined
+}
+
+// 异常类型切出「质量异常」时清空检验字段
+watch(() => formData.exceptionType, (val) => {
+  if (val !== '质量异常') {
+    triggerForm.inspectType = undefined
+    triggerForm.inspectTemplate = undefined
+    triggerForm.inspectResult = undefined
+  }
+})
 
 // 运算符联动：控制最小值/最大值的显示
 const showMinValue = computed(() => {
@@ -738,13 +822,17 @@ const handleMonitorTypeChange = () => {
 const handleTriggerTypeChange = () => {
   triggerForm.station = undefined
   triggerForm.dataPoint = undefined
+  triggerForm.productSeries = undefined
   triggerForm.blankPartNo = ''
-  triggerForm.dailyEffectiveTime = undefined
+  triggerForm.dailyMonitorTime = undefined
   triggerForm.monitorType = 'threshold'
   Object.assign(triggerForm, monitorFieldDefaults)
   triggerForm.condition = ''
   triggerForm.delayTime = undefined
   triggerForm.remark = ''
+  triggerForm.inspectType = undefined
+  triggerForm.inspectTemplate = undefined
+  triggerForm.inspectResult = undefined
 }
 
 // 运算符切换时清空不适用的值
@@ -803,7 +891,7 @@ const handleAddPushRow = () => {
 
 const resetForm = () => {
   Object.assign(formData, { exceptionType: undefined, exceptionName: '', productionLine: undefined, businessType: undefined, exceptionDesc: '', enabled: true, remark: '' })
-  Object.assign(triggerForm, { triggerType: 'plc', station: undefined, equipment: '', dataPoint: undefined, blankPartNo: '', dailyEffectiveTime: undefined, monitorType: 'threshold', condition: '', delayTime: undefined, remark: '' }, monitorFieldDefaults)
+  Object.assign(triggerForm, { triggerType: 'plc', station: undefined, equipment: '', dataPoint: undefined, productSeries: undefined, blankPartNo: '', dailyMonitorTime: undefined, monitorType: 'threshold', condition: '', delayTime: undefined, remark: '', inspectType: undefined, inspectTemplate: undefined, inspectResult: undefined }, monitorFieldDefaults)
   pushRowKey = 0
   pushData.value = [
     { key: String(++pushRowKey), level: '1级人员', pushTime: '', pushRole: undefined, responseRole: undefined },
@@ -854,6 +942,10 @@ const handleBatchDelete = () => {
 const handleModalOk = () => {
   if (!formData.exceptionType || !formData.exceptionName || !formData.productionLine || !formData.businessType) {
     message.warning('请填写所有必填项')
+    return
+  }
+  if (isQualityBusiness.value && (!triggerForm.inspectType || !triggerForm.inspectTemplate || !triggerForm.inspectResult)) {
+    message.warning('请选择检验类型、检验模板、检验结果')
     return
   }
   if (isEdit.value) {
@@ -970,14 +1062,15 @@ const handleTableChange = (pag: any) => {
 }
 
 .inline-label-form :deep(.ant-form-item-label > label::before) {
+  content: none;
+}
+
+/* 仅必填项显示 *（ant-design-vue 4 把 ant-form-item-required 类加在 label 上） */
+.inline-label-form :deep(.ant-form-item-label > label.ant-form-item-required::before) {
   content: '*';
   color: #ff4d4f;
   margin-right: 4px;
   font-size: 13px;
-}
-
-.inline-label-form :deep(.ant-form-item:not([class*="ant-form-item-required"]) > .ant-form-item-label > label::before) {
-  display: none;
 }
 
 .inline-label-form :deep(.ant-form-item-control) {

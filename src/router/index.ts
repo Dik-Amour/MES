@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const routes: RouteRecordRaw[] = [
@@ -274,6 +274,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/pda/SandCoreOutbound.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/pda/exception-handle',
+    name: 'ExceptionHandle',
+    component: () => import('@/views/pda/ExceptionHandle.vue'),
+    meta: { requiresAuth: true }
+  },
   // 制芯计划路由
   {
     path: '/core-making/binhai-scheduling',
@@ -322,7 +328,8 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/MES/'),
+  // file:// 协议下没有服务器做 URL 重写，必须使用 hash 模式
+  history: createWebHashHistory(),
   routes
 })
 
