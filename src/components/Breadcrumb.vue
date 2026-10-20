@@ -89,7 +89,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/pda/sand-core-outbound': { title: '砂芯出库', path: '/pda/sand-core-outbound', icon: CalendarOutlined },
     '/pda/exception-handle': { title: '异常处理', path: '/pda/exception-handle', icon: CalendarOutlined },
     // 可视化路径
-    '/dashboard': { title: '可视化', path: '/dashboard/production', icon: InboxOutlined },
+    '/dashboard': { title: '寒亭可视化', path: '/dashboard/production', icon: InboxOutlined },
     '/dashboard/production': { title: '生产大屏', path: '/dashboard/production', icon: InboxOutlined },
     '/dashboard/equipment': { title: '设备大屏', path: '/dashboard/equipment', icon: InboxOutlined },
     '/dashboard/quality': { title: '质量大屏', path: '/dashboard/quality', icon: InboxOutlined },

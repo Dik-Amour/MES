@@ -85,8 +85,13 @@ export default defineConfig({
     host: true,
     open: true,
     watch: {
-      // 忽略静态图片目录，避免文件被其他程序占用时触发 EBUSY 导致 dev server 崩溃
-      ignored: ['**/src/assets/image/**']
+      // 忽略静态图片目录与构建产物/压缩包，避免文件被其他程序占用时触发 EBUSY 导致 dev server 崩溃
+      ignored: [
+        '**/src/assets/image/**',
+        '**/dist/**',
+        '**/*.rar',
+        '**/*.zip'
+      ]
     }
   }
 })

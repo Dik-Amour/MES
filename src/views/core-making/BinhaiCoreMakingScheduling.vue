@@ -177,35 +177,6 @@
         </a-row>
       </a-form>
 
-      <!-- 验证单据 -->
-      <div class="verification-section">
-        <a-divider orientation="left" plain>验证单据</a-divider>
-        <a-row :gutter="16">
-          <a-col :span="6">
-            <a-form-item label="工艺参数变更" :label-col="{ span: 12 }" :wrapper-col="{ span: 12 }">
-              <a-input-number
-                v-model:value="addForm.processParamChange"
-                :min="0"
-                :precision="0"
-                disabled
-                style="width: 100%"
-              />
-            </a-form-item>
-          </a-col>
-          <a-col :span="6">
-            <a-form-item label="工艺验证" :label-col="{ span: 12 }" :wrapper-col="{ span: 12 }">
-              <a-input-number
-                v-model:value="addForm.processVerification"
-                :min="0"
-                :precision="0"
-                disabled
-                style="width: 100%"
-              />
-            </a-form-item>
-          </a-col>
-        </a-row>
-      </div>
-
       <!-- 排产明细表格 -->
       <a-table
         :columns="detailColumns"
@@ -231,16 +202,6 @@
                   un-checked-children="关"
                 />
               </div>
-              <div class="expand-field">
-                <span class="field-label">参数变更数量</span>
-                <a-input-number
-                  v-model:value="record.paramChange.quantity"
-                  :min="0"
-                  :precision="0"
-                  :disabled="!record.paramChange.enabled"
-                  style="width: 100px"
-                />
-              </div>
               <div class="expand-field expand-field-wide">
                 <span class="field-label">参数变更单</span>
                 <a-select
@@ -264,16 +225,6 @@
                   v-model:checked="record.verification.enabled"
                   checked-children="开"
                   un-checked-children="关"
-                />
-              </div>
-              <div class="expand-field">
-                <span class="field-label">验证数量</span>
-                <a-input-number
-                  v-model:value="record.verification.quantity"
-                  :min="0"
-                  :precision="0"
-                  :disabled="!record.verification.enabled"
-                  style="width: 100px"
                 />
               </div>
               <div class="expand-field expand-field-wide">
@@ -514,16 +465,7 @@
               v-model:checked="scheduleForm.paramChange.enabled"
               checked-children="开"
               un-checked-children="关"
-            />
-          </div>
-          <div class="plan-field">
-            <span class="plan-field-label">参数变更数量</span>
-            <a-input-number
-              v-model:value="scheduleForm.paramChange.quantity"
-              :min="0"
-              :precision="0"
-              :disabled="!scheduleForm.paramChange.enabled"
-              style="width: 120px"
+              @change="handleParamChangeToggle"
             />
           </div>
           <div class="plan-field plan-field-wide">
@@ -547,16 +489,7 @@
               v-model:checked="scheduleForm.verification.enabled"
               checked-children="开"
               un-checked-children="关"
-            />
-          </div>
-          <div class="plan-field">
-            <span class="plan-field-label">验证数量</span>
-            <a-input-number
-              v-model:value="scheduleForm.verification.quantity"
-              :min="0"
-              :precision="0"
-              :disabled="!scheduleForm.verification.enabled"
-              style="width: 120px"
+              @change="handleVerificationToggle"
             />
           </div>
           <div class="plan-field plan-field-wide">
@@ -743,12 +676,10 @@ interface DetailItem {
   quantity: number
   paramChange: {
     enabled: boolean
-    quantity: number
     docId: string | undefined
   }
   verification: {
     enabled: boolean
-    quantity: number
     docId: string | undefined
   }
 }
@@ -828,8 +759,6 @@ interface AddForm {
   scheduleDate: Dayjs | null
   productSeries: string | undefined
   partNo: string | undefined
-  processParamChange: number
-  processVerification: number
   details: DetailItem[]
 }
 
@@ -838,8 +767,6 @@ const addForm = reactive<AddForm>({
   scheduleDate: null,
   productSeries: undefined,
   partNo: undefined,
-  processParamChange: 0,
-  processVerification: 0,
   details: []
 })
 
@@ -942,12 +869,10 @@ interface ScheduleForm {
   quantity: number
   paramChange: {
     enabled: boolean
-    quantity: number
     docId: string | undefined
   }
   verification: {
     enabled: boolean
-    quantity: number
     docId: string | undefined
   }
 }
@@ -962,8 +887,8 @@ const scheduleForm = reactive<ScheduleForm>({
   coreBox: undefined,
   moldCount: 1,
   quantity: 1,
-  paramChange: { enabled: false, quantity: 0, docId: undefined },
-  verification: { enabled: false, quantity: 0, docId: undefined }
+  paramChange: { enabled: false, docId: undefined },
+  verification: { enabled: false, docId: undefined }
 })
 
 // 提示信息（根据砂芯需求计算）
@@ -1047,11 +972,25 @@ const handleDrop = (event: DragEvent, equipment: EquipmentItem) => {
   scheduleForm.coreBox = undefined
   scheduleForm.moldCount = 1
   scheduleForm.quantity = 1
-  scheduleForm.paramChange = { enabled: false, quantity: 0, docId: undefined }
-  scheduleForm.verification = { enabled: false, quantity: 0, docId: undefined }
+  scheduleForm.paramChange = { enabled: false, docId: undefined }
+  scheduleForm.verification = { enabled: false, docId: undefined }
 
   scheduleModalVisible.value = true
   draggedItem = null
+}
+
+// 参数变更计划开关：开启时关闭验证计划（互斥）
+const handleParamChangeToggle = (checked: boolean) => {
+  if (checked) {
+    scheduleForm.verification.enabled = false
+  }
+}
+
+// 验证计划开关：开启时关闭参数变更计划（互斥）
+const handleVerificationToggle = (checked: boolean) => {
+  if (checked) {
+    scheduleForm.paramChange.enabled = false
+  }
 }
 
 // 取消排产
@@ -1144,8 +1083,6 @@ const showAddModal = () => {
   addForm.scheduleDate = dayjs()
   addForm.productSeries = undefined
   addForm.partNo = undefined
-  addForm.processParamChange = 0
-  addForm.processVerification = 0
   expandedRowKeys.value = []
   addForm.details = [
     {
@@ -1156,8 +1093,8 @@ const showAddModal = () => {
       shift: undefined,
       coreBox: undefined,
       quantity: 0,
-      paramChange: { enabled: false, quantity: 0, docId: undefined },
-      verification: { enabled: false, quantity: 0, docId: undefined }
+      paramChange: { enabled: false, docId: undefined },
+      verification: { enabled: false, docId: undefined }
     }
   ]
   addModalVisible.value = true
@@ -1180,8 +1117,8 @@ const addDetailRow = () => {
     shift: undefined,
     coreBox: undefined,
     quantity: 0,
-    paramChange: { enabled: false, quantity: 0, docId: undefined },
-    verification: { enabled: false, quantity: 0, docId: undefined }
+    paramChange: { enabled: false, docId: undefined },
+    verification: { enabled: false, docId: undefined }
   })
 }
 
@@ -1240,8 +1177,6 @@ const handleConfirmAdd = () => {
     scheduleDate: addForm.scheduleDate.format('YYYY-MM-DD'),
     productSeries: addForm.productSeries,
     partNo: addForm.partNo,
-    processParamChange: addForm.processParamChange,
-    processVerification: addForm.processVerification,
     details: addForm.details
   })
   message.success('新增排产成功')
@@ -1441,14 +1376,6 @@ const handleConfirmAdd = () => {
 
 /* 新增弹窗样式 */
 .add-form {
-  margin-bottom: 0;
-}
-
-.verification-section {
-  padding: 0 4px;
-}
-
-.verification-section :deep(.ant-form-item) {
   margin-bottom: 0;
 }
 

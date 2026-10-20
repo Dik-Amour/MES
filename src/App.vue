@@ -87,7 +87,7 @@
             <template #icon>
               <FundOutlined />
             </template>
-            <template #title>可视化</template>
+            <template #title>寒亭可视化</template>
             <a-menu-item key="/dashboard/production">生产大屏</a-menu-item>
             <a-menu-item key="/dashboard/equipment">设备大屏</a-menu-item>
             <a-menu-item key="/dashboard/quality">质量大屏</a-menu-item>
