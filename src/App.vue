@@ -99,6 +99,13 @@
             <a-menu-item key="/dashboard/plant-virtual-kw">造型三线KW</a-menu-item>
           </a-sub-menu>
 
+          <a-sub-menu key="binhai-visualization">
+            <template #icon>
+              <FundOutlined />
+            </template>
+            <template #title>滨海可视化</template>
+          </a-sub-menu>
+
           <a-sub-menu key="screen-data">
             <template #icon>
               <DatabaseOutlined />
