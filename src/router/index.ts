@@ -254,6 +254,37 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/dashboard/PlantVirtualKw.vue'),
     meta: { requiresAuth: true }
   },
+  // 滨海可视化（移植自潍柴可视化项目的 Vue 大屏页面）
+  {
+    path: '/binhai-dashboard/production-ops',
+    name: 'BinhaiProductionOpsDashboard',
+    component: () => import('@/views/binhai-dashboard/ProductionOpsDashboard.vue'),
+    meta: { requiresAuth: true, title: '生产运营管理大屏' }
+  },
+  {
+    path: '/binhai-dashboard/equipment',
+    name: 'BinhaiEquipmentDashboard',
+    component: () => import('@/views/binhai-dashboard/EquipmentDashboard.vue'),
+    meta: { requiresAuth: true, title: '设备管理大屏' }
+  },
+  {
+    path: '/binhai-dashboard/quality',
+    name: 'BinhaiQualityDashboard',
+    component: () => import('@/views/binhai-dashboard/QualityDashboard.vue'),
+    meta: { requiresAuth: true, title: '质量管理大屏' }
+  },
+  {
+    path: '/binhai-dashboard/personnel',
+    name: 'BinhaiPersonnelDashboard',
+    component: () => import('@/views/binhai-dashboard/PersonnelDashboard.vue'),
+    meta: { requiresAuth: true, title: '人员管理大屏' }
+  },
+  {
+    path: '/binhai-dashboard/cost',
+    name: 'BinhaiCostDashboard',
+    component: () => import('@/views/binhai-dashboard/CostDashboard.vue'),
+    meta: { requiresAuth: true, title: '成本管理大屏' }
+  },
   // 大屏数据管理路由
   {
     path: '/screen-data/equipment',
