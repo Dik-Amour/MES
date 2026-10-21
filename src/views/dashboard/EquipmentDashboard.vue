@@ -1150,45 +1150,9 @@ onBeforeUnmount(() => {
   min-height: calc(100vh - 90px);
   min-width: 1180px;
 }
-
-.chart-card {
-  background: #f2f2f2;
-  border-radius: 4px;
-  padding: 8px;
-}
-
-.chart-title {
-  background: #fff;
-  display: inline-block;
-  padding: 2px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #333;
-  border-radius: 2px;
-  margin-bottom: 8px;
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .chart-header .chart-title {
   margin-bottom: 0;
 }
-
-.series-select {
-  font-size: 12px;
-  padding: 2px 8px;
-  border: 1px solid #d9d9d9;
-  border-radius: 2px;
-  background: #fff;
-  color: #333;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
 /* 第一行：KPI 指标带 */
 .kpi-panel {
   margin-bottom: 8px;

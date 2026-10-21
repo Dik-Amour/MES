@@ -754,11 +754,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-
 .chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   gap: 8px;
   margin-bottom: 6px;
   flex-wrap: wrap;
@@ -773,38 +769,14 @@ onBeforeUnmount(() => {
   padding-left: 8px;
   line-height: 1.4;
 }
-
 .mini-tabs {
-  display: flex;
-  gap: 4px;
   flex-shrink: 0;
 }
-
 .mini-tabs button {
-  border: none;
-  background: #fff;
-  color: #4472c4;
   font-size: 11px;
   padding: 2px 7px;
-  cursor: pointer;
-  border-radius: 2px;
   white-space: nowrap;
 }
-
-.mini-tabs button.active {
-  background: #4472c4;
-  color: #fff;
-}
-
-.series-select {
-  font-size: 12px;
-  padding: 2px 8px;
-  border: 1px solid #d9d9d9;
-  border-radius: 2px;
-  background: #fff;
-  color: #333;
-}
-
 .chart-body {
   height: 200px;
 }

@@ -638,58 +638,9 @@ onBeforeUnmount(() => {
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
-
-.chart-card {
-  background: #f2f2f2;
-  border-radius: 4px;
-  padding: 8px;
-}
-
 .chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 4px;
 }
-
-.chart-title {
-  background: #fff;
-  padding: 2px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #333;
-  border-radius: 2px;
-}
-
-.mini-tabs {
-  display: flex;
-  gap: 4px;
-}
-
-.mini-tabs button {
-  border: none;
-  background: #fff;
-  color: #4472c4;
-  font-size: 12px;
-  padding: 2px 10px;
-  cursor: pointer;
-  border-radius: 2px;
-}
-
-.mini-tabs button.active {
-  background: #4472c4;
-  color: #fff;
-}
-
-.series-select {
-  font-size: 12px;
-  padding: 2px 8px;
-  border: 1px solid #d9d9d9;
-  border-radius: 2px;
-  color: #333;
-  background: #fff;
-}
-
 .chart-body {
   height: 195px;
 }

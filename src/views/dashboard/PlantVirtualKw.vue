@@ -183,11 +183,7 @@ const flowLegends = [
   flex-direction: column;
   overflow: hidden;
 }
-
 .chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   gap: 6px;
   margin-bottom: 4px;
   flex-wrap: wrap;

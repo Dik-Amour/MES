@@ -1,10 +1,9 @@
 <script setup lang="ts">
 
-import binhaiLogo from '@/assets/binhai-logo.png'
 import { computed, ref } from 'vue'
 
 import EChart from '@/components/EChart.vue'
-import { useClock } from '@/composables/useClock'
+import DashboardHeader from '@/views/dashboard/DashboardHeader.vue'
 import type { EChartsOption } from 'echarts'
 
 /* =========================
@@ -70,13 +69,13 @@ const processCheckData = {
 
 /** 产线质量分析：废品率（折线）与废品损失（堆叠柱）共用产线清单 */
 const productionLines: LineSeries[] = [
-  { name: '熔炼线', color: '#1890ff', data: [2.8, 2.6, 2.9, 2.7, 2.5, 2.8, 2.6, 2.7, 2.9, 2.8, 2.6, 2.7] },
+  { name: '熔炼线', color: '#4472c4', data: [2.8, 2.6, 2.9, 2.7, 2.5, 2.8, 2.6, 2.7, 2.9, 2.8, 2.6, 2.7] },
   { name: '大机', color: '#0284c7', data: [3.2, 3.0, 3.3, 3.1, 2.9, 3.2, 3.0, 3.1, 3.3, 3.2, 3.0, 3.1] },
-  { name: '曲轴', color: '#2563eb', data: [2.5, 2.3, 2.6, 2.4, 2.2, 2.5, 2.3, 2.4, 2.6, 2.5, 2.3, 2.4] },
-  { name: '重潍柴', color: '#7BB3FF', data: [2.9, 2.7, 3.0, 2.8, 2.6, 2.9, 2.7, 2.8, 3.0, 2.9, 2.7, 2.8] },
-  { name: '新产品', color: '#4A90E2', data: [3.5, 3.3, 3.6, 3.4, 3.2, 3.5, 3.3, 3.4, 3.6, 3.5, 3.3, 3.4] },
-  { name: '制芯', color: '#66B3FF', data: [2.2, 2.0, 2.3, 2.1, 1.9, 2.2, 2.0, 2.1, 2.3, 2.2, 2.0, 2.1] },
-  { name: '清理', color: '#33A3FF', data: [2.6, 2.4, 2.7, 2.5, 2.3, 2.6, 2.4, 2.5, 2.7, 2.6, 2.4, 2.5] }
+  { name: '曲轴', color: '#4472c4', data: [2.5, 2.3, 2.6, 2.4, 2.2, 2.5, 2.3, 2.4, 2.6, 2.5, 2.3, 2.4] },
+  { name: '重潍柴', color: '#4472c4', data: [2.9, 2.7, 3.0, 2.8, 2.6, 2.9, 2.7, 2.8, 3.0, 2.9, 2.7, 2.8] },
+  { name: '新产品', color: '#4472c4', data: [3.5, 3.3, 3.6, 3.4, 3.2, 3.5, 3.3, 3.4, 3.6, 3.5, 3.3, 3.4] },
+  { name: '制芯', color: '#4472c4', data: [2.2, 2.0, 2.3, 2.1, 1.9, 2.2, 2.0, 2.1, 2.3, 2.2, 2.0, 2.1] },
+  { name: '清理', color: '#4472c4', data: [2.6, 2.4, 2.7, 2.5, 2.3, 2.6, 2.4, 2.5, 2.7, 2.6, 2.4, 2.5] }
 ]
 
 const productionLineLoss: Record<string, number[]> = {
@@ -114,17 +113,17 @@ const top15Parts = [
 const mainProductDefectRate: ProductSeries[] = [
   {
     name: '造型',
-    color: '#2563eb',
+    color: '#4472c4',
     value: [1.2, 1.5, 1.8, 1.3, 1.6, 1.4, 1.7, 1.5, 1.9, 1.4, 1.6, 1.3, 1.8, 1.5, 1.7]
   },
   {
     name: '熔炼',
-    color: '#16a34a',
+    color: '#70ad47',
     value: [0.8, 1.0, 1.2, 0.9, 1.1, 1.0, 1.3, 1.1, 1.4, 1.0, 1.2, 0.9, 1.3, 1.1, 1.2]
   },
   {
     name: '清理',
-    color: '#d97706',
+    color: '#ffc000',
     value: [0.5, 0.7, 0.9, 0.6, 0.8, 0.7, 1.0, 0.8, 1.1, 0.7, 0.9, 0.6, 1.0, 0.8, 0.9]
   }
 ]
@@ -132,17 +131,17 @@ const mainProductDefectRate: ProductSeries[] = [
 const mainProductRepairRate: ProductSeries[] = [
   {
     name: '造型',
-    color: '#2563eb',
+    color: '#4472c4',
     value: [2.1, 2.4, 2.7, 2.2, 2.5, 2.3, 2.6, 2.4, 2.8, 2.3, 2.5, 2.2, 2.7, 2.4, 2.6]
   },
   {
     name: '熔炼',
-    color: '#16a34a',
+    color: '#70ad47',
     value: [1.5, 1.8, 2.0, 1.6, 1.9, 1.7, 2.1, 1.9, 2.3, 1.7, 2.0, 1.6, 2.1, 1.9, 2.0]
   },
   {
     name: '清理',
-    color: '#d97706',
+    color: '#ffc000',
     value: [1.0, 1.2, 1.5, 1.1, 1.4, 1.2, 1.6, 1.4, 1.8, 1.2, 1.5, 1.1, 1.6, 1.4, 1.5]
   }
 ]
@@ -151,21 +150,21 @@ const mainProductRepairRate: ProductSeries[] = [
    ECharts 配置
    ========================= */
 const tooltipBase = {
-  backgroundColor: 'rgba(248, 250, 252, 0.95)',
-  borderColor: 'rgba(24, 144, 255, 0.3)',
-  textStyle: { color: '#374151' }
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  borderColor: 'rgba(68, 114, 196, 0.3)',
+  textStyle: { color: '#333' }
 }
 
 const categoryAxis = {
   type: 'category' as const,
   axisLine: { lineStyle: { color: '#cbd5e1' } },
-  axisLabel: { color: '#64748b', fontSize: 10 },
+  axisLabel: { color: '#666', fontSize: 10 },
   axisTick: { show: false }
 }
 
 const valueAxis = {
   type: 'value' as const,
-  nameTextStyle: { color: '#64748b', fontSize: 10 },
+  nameTextStyle: { color: '#666', fontSize: 10 },
   axisLine: { show: false },
   axisTick: { show: false },
   splitLine: {
@@ -174,7 +173,7 @@ const valueAxis = {
       color: 'rgba(148, 163, 184, 0.3)'
     }
   },
-  axisLabel: { color: '#64748b', fontSize: 10 }
+  axisLabel: { color: '#666', fontSize: 10 }
 }
 
 /** 产品质量指标：单折线，按产品系列切换 */
@@ -208,7 +207,7 @@ function createQualityIndicatorOption(product: QualityProduct): EChartsOption {
       ...valueAxis,
       name: '%',
       axisLabel: {
-        color: '#64748b',
+        color: '#666',
         fontSize: 10,
         formatter: '{value}%'
       }
@@ -219,16 +218,16 @@ function createQualityIndicatorOption(product: QualityProduct): EChartsOption {
         type: 'line',
         data: qualityIndicators[product],
         lineStyle: {
-          color: '#ef4444',
+          color: '#ff4d4f',
           width: 3,
-          shadowColor: 'rgba(255, 82, 82, 0.3)',
+          shadowColor: 'rgba(255, 77, 79, 0.3)',
           shadowBlur: 10
         },
         itemStyle: {
-          color: '#ef4444',
+          color: '#ff4d4f',
           borderWidth: 2,
           borderColor: '#FFFFFF',
-          shadowColor: 'rgba(255, 82, 82, 0.5)',
+          shadowColor: 'rgba(255, 77, 79, 0.5)',
           shadowBlur: 8
         },
         smooth: true,
@@ -237,7 +236,7 @@ function createQualityIndicatorOption(product: QualityProduct): EChartsOption {
         emphasis: {
           itemStyle: {
             shadowBlur: 15,
-            shadowColor: 'rgba(255, 82, 82, 0.8)'
+            shadowColor: 'rgba(255, 77, 79, 0.8)'
           }
         }
       }
@@ -282,8 +281,8 @@ function createDefectLossOption(year: DefectLossYear): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#2563eb' },
-              { offset: 1, color: '#3A6FD9' }
+              { offset: 0, color: '#4472c4' },
+              { offset: 1, color: '#4472c4' }
             ]
           },
           borderRadius: [4, 4, 0, 0]
@@ -328,7 +327,7 @@ function createProcessCheckOption(): EChartsOption {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        color: '#64748b',
+        color: '#666',
         fontSize: 11
       }
     },
@@ -358,7 +357,7 @@ function createProcessCheckOption(): EChartsOption {
         type: 'bar',
         data: processCheckData.closed,
         itemStyle: {
-          color: '#1890ff',
+          color: '#4472c4',
           borderRadius: [0, 4, 4, 0]
         },
         barWidth: '25%',
@@ -384,7 +383,7 @@ function createProductionDefectRateOption(): EChartsOption {
     },
     legend: {
       data: productionLines.map((line) => line.name),
-      textStyle: { color: '#64748b', fontSize: 10 },
+      textStyle: { color: '#666', fontSize: 10 },
       top: 0,
       left: 'center'
     },
@@ -402,9 +401,9 @@ function createProductionDefectRateOption(): EChartsOption {
     yAxis: {
       ...valueAxis,
       name: '废品率(%)',
-      nameTextStyle: { color: '#64748b', fontSize: 11 },
+      nameTextStyle: { color: '#666', fontSize: 11 },
       axisLabel: {
-        color: '#64748b',
+        color: '#666',
         fontSize: 10,
         formatter: '{value}%'
       }
@@ -430,7 +429,7 @@ function createProductionDefectLossOption(): EChartsOption {
     },
     legend: {
       data: productionLines.map((line) => line.name),
-      textStyle: { color: '#64748b', fontSize: 10 },
+      textStyle: { color: '#666', fontSize: 10 },
       top: 0,
       left: 'center'
     },
@@ -448,7 +447,7 @@ function createProductionDefectLossOption(): EChartsOption {
     yAxis: {
       ...valueAxis,
       name: '损失(元/吨)',
-      nameTextStyle: { color: '#64748b', fontSize: 11 }
+      nameTextStyle: { color: '#666', fontSize: 11 }
     },
     series: productionLines.map((line) => ({
       name: line.name,
@@ -479,13 +478,13 @@ function createZeroPpmOption(): EChartsOption {
     xAxis: {
       ...categoryAxis,
       data: months,
-      axisLabel: { color: '#64748b', fontSize: 11 }
+      axisLabel: { color: '#666', fontSize: 11 }
     },
     yAxis: {
       ...valueAxis,
       name: 'PPM',
-      nameTextStyle: { color: '#64748b', fontSize: 11 },
-      axisLabel: { color: '#64748b', fontSize: 11 }
+      nameTextStyle: { color: '#666', fontSize: 11 },
+      axisLabel: { color: '#666', fontSize: 11 }
     },
     series: [
       {
@@ -504,7 +503,7 @@ function createZeroPpmOption(): EChartsOption {
                 x2: 0,
                 y2: 1,
                 colorStops: [
-                  { offset: 0, color: '#16a34a' },
+                  { offset: 0, color: '#70ad47' },
                   { offset: 1, color: '#2F9E7E' }
                 ]
               }
@@ -517,7 +516,7 @@ function createZeroPpmOption(): EChartsOption {
                 x2: 0,
                 y2: 1,
                 colorStops: [
-                  { offset: 0, color: '#d97706' },
+                  { offset: 0, color: '#ffc000' },
                   { offset: 1, color: '#D89614' }
                 ]
               }
@@ -539,7 +538,7 @@ function createZeroPpmOption(): EChartsOption {
         label: {
           show: true,
           position: 'top',
-          color: '#374151',
+          color: '#333',
           fontSize: 11,
           fontWeight: 'bold'
         }
@@ -565,7 +564,7 @@ function createMainProductOption(series: ProductSeries[]): EChartsOption {
     },
     legend: {
       data: series.map((item) => item.name),
-      textStyle: { color: '#64748b', fontSize: 12 },
+      textStyle: { color: '#666', fontSize: 12 },
       top: 10,
       right: 20
     },
@@ -580,7 +579,7 @@ function createMainProductOption(series: ProductSeries[]): EChartsOption {
       ...categoryAxis,
       data: top15Parts,
       axisLabel: {
-        color: '#64748b',
+        color: '#666',
         fontSize: 10,
         rotate: 30,
         interval: 0
@@ -589,9 +588,9 @@ function createMainProductOption(series: ProductSeries[]): EChartsOption {
     yAxis: {
       ...valueAxis,
       name: '%',
-      nameTextStyle: { color: '#64748b', fontSize: 12 },
+      nameTextStyle: { color: '#666', fontSize: 12 },
       axisLabel: {
-        color: '#64748b',
+        color: '#666',
         fontSize: 10,
         formatter: '{value}%'
       }
@@ -609,8 +608,6 @@ function createMainProductOption(series: ProductSeries[]): EChartsOption {
 /* =========================
    页面状态与交互
    ========================= */
-const { time, date } = useClock()
-const logoUrl = binhaiLogo
 
 type ProductionType = 'defectRate' | 'defectLoss'
 type MainProductType = 'defectRate' | 'repairRate'
@@ -632,35 +629,10 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 
 <template>
   <div class="dashboard-container">
-    <!-- 顶部标题栏 -->
-    <div class="screen-header">
-      <div class="header-time">
-        <div class="time-value">{{ time }}</div>
-        <div class="date-value">{{ date }}</div>
-      </div>
-
-      <div class="header-title-wrapper">
-        <div class="title-decoration-left"></div>
-        <h1 class="header-title">质量管理大屏</h1>
-        <div class="title-decoration-right"></div>
-      </div>
-
-      <div class="header-right">
-        <div class="header-weather">
-          <svg class="weather-icon" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
-          </svg>
-          <div class="weather-text">
-            <span class="weather-location">潍坊</span>
-            <span class="weather-temp">18°C</span>
-            <span class="weather-status">晴</span>
-          </div>
-        </div>
-        <div class="header-logo">
-          <img :src="logoUrl" alt="WEICHAI" class="logo-image" />
-        </div>
-      </div>
-    </div>
+    <DashboardHeader
+      title="质量管理大屏"
+      weather="潍坊 18℃ 晴"
+    />
 
     <!-- 第一行：年度废品率、产品质量指标、吨均废品损失 -->
     <div class="dashboard-row">
@@ -944,137 +916,12 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 /* 顶部标题栏样式 */
-.screen-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  height: 70px;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(24, 144, 255, 0.3);
-  position: relative;
-}
-
-.screen-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.8) 50%, transparent 100%);
-  box-shadow: 0 0 10px rgba(24, 144, 255, 0.6);
-}
-
 /* 左侧时间 */
-.header-time {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 180px;
-}
-
-.time-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1890ff;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  line-height: 1;
-}
-
-.date-value {
-  font-size: 12px;
-  color: #64748b;
-}
-
 /* 中间标题 */
-.header-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
-  justify-content: center;
-}
-
-.header-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: #ffffff;
-  margin: 0;
-  letter-spacing: 4px;
-  text-shadow: 0 0 20px rgba(24, 144, 255, 0.4);
-}
-
 .title-decoration-left,
-.title-decoration-right {
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.8) 100%);
-}
-
-.title-decoration-right {
-  background: linear-gradient(90deg, rgba(24, 144, 255, 0.8) 0%, transparent 100%);
-}
-
 /* 右侧区域 */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  min-width: 300px;
-  justify-content: flex-end;
-}
-
 /* 右侧天气 */
-.header-weather {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.weather-icon {
-  width: 24px;
-  height: 24px;
-  color: #1890ff;
-}
-
-.weather-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.weather-location {
-  color: #64748b;
-}
-
-.weather-temp {
-  color: #1890ff;
-  font-weight: bold;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-}
-
-.weather-status {
-  color: #64748b;
-}
-
 /* Logo样式 */
-.header-logo {
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-  border-left: 1px solid rgba(24, 144, 255, 0.3);
-}
-
-.logo-image {
-  height: 45px;
-  width: auto;
-  object-fit: contain;
-}
-
 /* 网格布局 */
 .dashboard-row {
   display: grid;
@@ -1093,8 +940,8 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 
 /* 数据面板 */
 .data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-  border: 1px solid rgba(24, 144, 255, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1px solid rgba(68, 114, 196, 0.4);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
@@ -1109,7 +956,7 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.2);
+  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
 }
 
 .panel-icon {
@@ -1118,16 +965,16 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(24, 144, 255, 0.2);
+  background: rgba(68, 114, 196, 0.2);
   border-radius: 6px;
   margin-right: 12px;
-  color: #1890ff;
+  color: #4472c4;
 }
 
 .panel-title {
   font-size: 16px;
   font-weight: bold;
-  color: #1f2937;
+  color: #333;
   margin: 0;
   flex: 1;
 }
@@ -1139,8 +986,8 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   left: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1150,8 +997,8 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   right: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1161,8 +1008,8 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   left: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1172,8 +1019,8 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   right: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1193,7 +1040,7 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   grid-template-columns: 80px 1fr 1fr;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.3);
+  border-bottom: 1px solid rgba(68, 114, 196, 0.3);
 }
 
 .header-cell {
@@ -1203,7 +1050,7 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 .column-title {
-  color: #1890ff;
+  color: #4472c4;
   font-size: 14px;
   font-weight: bold;
   text-align: center;
@@ -1221,12 +1068,12 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   grid-template-columns: 80px 1fr 1fr;
   gap: 8px;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.1);
+  border-bottom: 1px solid rgba(68, 114, 196, 0.1);
   transition: background-color 0.2s ease;
 }
 
 .data-row:hover {
-  background: rgba(24, 144, 255, 0.05);
+  background: rgba(68, 114, 196, 0.05);
 }
 
 .product-label {
@@ -1237,7 +1084,7 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 .product-name {
-  color: #374151;
+  color: #333;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
@@ -1266,9 +1113,9 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 .tab-button {
-  background: rgba(241, 245, 249, 0.5);
-  border: 1px solid rgba(24, 144, 255, 0.3);
-  color: #64748b;
+  background: rgba(242, 242, 242, 0.5);
+  border: 1px solid rgba(68, 114, 196, 0.3);
+  color: #666;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -1280,16 +1127,16 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 .tab-button:hover {
-  color: #1890ff;
-  border-color: rgba(24, 144, 255, 0.5);
-  background: rgba(24, 144, 255, 0.1);
+  color: #4472c4;
+  border-color: rgba(68, 114, 196, 0.5);
+  background: rgba(68, 114, 196, 0.1);
 }
 
 .tab-button.active {
-  background: rgba(24, 144, 255, 0.2);
-  border-color: #1890ff;
-  color: #1890ff;
-  box-shadow: 0 0 10px rgba(24, 144, 255, 0.3);
+  background: rgba(68, 114, 196, 0.2);
+  border-color: #4472c4;
+  color: #4472c4;
+  box-shadow: 0 0 10px rgba(68, 114, 196, 0.3);
 }
 
 /* 质量指标tab样式 */
@@ -1324,114 +1171,5 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   .dashboard-row.wide-columns {
     grid-template-columns: 1fr;
   }
-
-  .header-title {
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
-}
-
-
-/* =========================
-   MES 浅色主题适配（以 MES 样式为主）
-   ========================= */
-.dashboard-container {
-  height: auto;
-  min-height: calc(100vh - 132px);
-  background: #f5f5f5;
-  color: #374151;
-}
-
-.screen-header,
-.kpi-card,
-.data-panel {
-  background: #ffffff !important;
-  border-color: #e5e7eb !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-}
-
-.screen-header {
-  border-bottom: 1px solid #e5e7eb !important;
-}
-
-.header-title {
-  color: #1f2937 !important;
-  font-size: 24px !important;
-  letter-spacing: 2px;
-  text-shadow: none !important;
-}
-
-.header-logo .logo-image {
-  height: 32px;
-}
-
-.time-value,
-.header-title,
-.kpi-value,
-.panel-title {
-  color: #1f2937;
-}
-
-.time-value {
-  color: #1890ff !important;
-}
-
-.date-value,
-.weather-location,
-.weather-status,
-.kpi-title,
-.panel-note,
-.unit-label {
-  color: #64748b !important;
-}
-
-.data-panel .corner-tl,
-.data-panel .corner-tr,
-.data-panel .corner-bl,
-.data-panel .corner-br,
-.kpi-card .corner-bl,
-.kpi-card .corner-br {
-  display: none;
-}
-
-.data-panel > .panel-header {
-  border-bottom: 1px solid #f0f2f5;
-  padding-bottom: 10px;
-}
-
-.data-panel .panel-icon,
-.kpi-card .kpi-icon {
-  color: #1890ff !important;
-  background: rgba(24, 144, 255, 0.08) !important;
-  border-color: rgba(24, 144, 255, 0.16) !important;
-}
-
-.table-header,
-.assessment-table-header {
-  background: #f5f7fa !important;
-  color: #374151 !important;
-}
-
-.data-panel table th,
-.data-panel table td {
-  border-color: #eef0f3 !important;
-}
-
-.data-panel table tbody tr:nth-child(odd) {
-  background: rgba(241, 245, 249, 0.65) !important;
-}
-
-.data-panel table tbody tr:hover {
-  background: rgba(24, 144, 255, 0.06) !important;
-}
-
-.success-text,
-.rate-value.success {
-  color: #16a34a !important;
-}
-
-.error-text,
-.rate-value.error {
-  color: #ef4444 !important;
 }
 </style>

@@ -7,7 +7,10 @@
     </div>
     <div class="header-center">{{ title }}</div>
     <div class="header-right">
-      <div class="logo-box">LOGO</div>
+      <div class="logo-box">
+        <img v-if="logoSrc" :src="logoSrc" :alt="logoAlt" class="logo-image" />
+        <span v-else>LOGO</span>
+      </div>
     </div>
   </div>
 </template>
@@ -15,11 +18,22 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-defineProps<{ title: string }>()
+withDefaults(
+  defineProps<{
+    title: string
+    weather?: string
+    logoSrc?: string
+    logoAlt?: string
+  }>(),
+  {
+    weather: '晴 23℃',
+    logoSrc: '',
+    logoAlt: 'LOGO'
+  }
+)
 
 const timeStr = ref('')
 const dateStr = ref('')
-const weather = ref('晴 23℃')
 let timer: ReturnType<typeof setInterval> | null = null
 
 const weekdays = ['日', '一', '二', '三', '四', '五', '六']
@@ -87,6 +101,12 @@ onBeforeUnmount(() => {
   font-weight: 600;
   color: #333;
   white-space: nowrap;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .header-right {

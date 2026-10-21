@@ -1249,11 +1249,7 @@ onBeforeUnmount(() => {
   min-width: 0;
   overflow: hidden;
 }
-
 .chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   gap: 6px;
   margin-bottom: 4px;
   flex-wrap: wrap;
@@ -1262,17 +1258,6 @@ onBeforeUnmount(() => {
 .chart-header.sub {
   margin-top: 0;
 }
-
-.chart-title {
-  background: #fff;
-  padding: 2px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #333;
-  border-radius: 2px;
-  white-space: nowrap;
-}
-
 .sub-label {
   font-size: 11px;
   color: #666;
@@ -1314,22 +1299,9 @@ onBeforeUnmount(() => {
   display: flex;
   gap: 4px;
 }
-
 .mini-tabs button {
-  border: none;
-  background: #fff;
-  color: #4472c4;
-  font-size: 12px;
   padding: 2px 8px;
-  cursor: pointer;
-  border-radius: 2px;
 }
-
-.mini-tabs button.active {
-  background: #4472c4;
-  color: #fff;
-}
-
 .more-link {
   color: #4472c4;
   font-size: 13px;

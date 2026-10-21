@@ -5,6 +5,7 @@ import 'ant-design-vue/dist/reset.css'
 import router from './router'
 import App from './App.vue'
 import './style.css'
+import './styles/dashboard-shared.css'
 
 const app = createApp(App)
 

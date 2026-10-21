@@ -1,10 +1,9 @@
 <script setup lang="ts">
 
-import binhaiLogo from '@/assets/binhai-logo.png'
 import { ref } from 'vue'
 
 import EChart from '@/components/EChart.vue'
-import { useClock } from '@/composables/useClock'
+import DashboardHeader from '@/views/dashboard/DashboardHeader.vue'
 import type { EChartsOption } from 'echarts'
 
 /* =========================
@@ -89,11 +88,11 @@ const kpiCards: KpiCard[] = [
 const monthlyCompletionData = {
   categories: ['原材料', '辅助材料', '燃动力费', '设备维修', '其他费用'],
   items: [
-    { value: 16.8, colors: ['#2563eb', '#3A6FD9'] },
-    { value: 3.2, colors: ['#16a34a', '#3AB886'] },
-    { value: 2.8, colors: ['#d97706', '#D69D06'] },
-    { value: 1.7, colors: ['#7c3aed', '#7250AA'] },
-    { value: 4.0, colors: ['#FF9D4D', '#DF7D2D'] }
+    { value: 16.8, colors: ['#4472c4', '#4472c4'] },
+    { value: 3.2, colors: ['#70ad47', '#3ba8a0'] },
+    { value: 2.8, colors: ['#ffc000', '#D69D06'] },
+    { value: 1.7, colors: ['#3ba8a0', '#7250AA'] },
+    { value: 4.0, colors: ['#ffc000', '#DF7D2D'] }
   ]
 }
 
@@ -125,21 +124,21 @@ const yearlyTrendData = {
 
 /** 成本占比分析：科目成本 */
 const subjectCostData: PieDatum[] = [
-  { name: '原材料', value: 1680, color: '#2563eb' },
-  { name: '辅助材料', value: 320, color: '#16a34a' },
-  { name: '燃动力费', value: 280, color: '#d97706' },
-  { name: '设备维修', value: 170, color: '#7c3aed' },
-  { name: '废品损失', value: 45, color: '#FF9D4D' },
-  { name: '工具工装', value: 85, color: '#5CDBD3' },
-  { name: '低值易耗', value: 35, color: '#B37FEB' }
+  { name: '原材料', value: 1680, color: '#4472c4' },
+  { name: '辅助材料', value: 320, color: '#70ad47' },
+  { name: '燃动力费', value: 280, color: '#ffc000' },
+  { name: '设备维修', value: 170, color: '#3ba8a0' },
+  { name: '废品损失', value: 45, color: '#ffc000' },
+  { name: '工具工装', value: 85, color: '#3ba8a0' },
+  { name: '低值易耗', value: 35, color: '#3ba8a0' }
 ]
 
 /** 成本占比分析：工序成本 */
 const processCostData: PieDatum[] = [
-  { name: '熔炼', value: 45, color: '#5CDBD3' },
+  { name: '熔炼', value: 45, color: '#3ba8a0' },
   { name: '造型', value: 35, color: '#FF6B6B' },
-  { name: '清理', value: 15, color: '#d97706' },
-  { name: '制芯', value: 5, color: '#16a34a' }
+  { name: '清理', value: 15, color: '#ffc000' },
+  { name: '制芯', value: 5, color: '#70ad47' }
 ]
 
 /** 能耗成本与生产负荷分析散点 */
@@ -170,21 +169,21 @@ const energyLoadData: [number, number][] = [
    ECharts 配置
    ========================= */
 const tooltipBase = {
-  backgroundColor: 'rgba(248, 250, 252, 0.95)',
-  borderColor: 'rgba(24, 144, 255, 0.3)',
-  textStyle: { color: '#374151' }
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  borderColor: 'rgba(68, 114, 196, 0.3)',
+  textStyle: { color: '#333' }
 }
 
 const categoryAxis = {
   type: 'category' as const,
   axisLine: { lineStyle: { color: '#cbd5e1' } },
-  axisLabel: { color: '#64748b', fontSize: 10 },
+  axisLabel: { color: '#666', fontSize: 10 },
   axisTick: { show: false }
 }
 
 const valueAxis = {
   type: 'value' as const,
-  nameTextStyle: { color: '#64748b', fontSize: 10 },
+  nameTextStyle: { color: '#666', fontSize: 10 },
   axisLine: { show: false },
   axisTick: { show: false },
   splitLine: {
@@ -193,7 +192,7 @@ const valueAxis = {
       color: 'rgba(148, 163, 184, 0.3)'
     }
   },
-  axisLabel: { color: '#64748b', fontSize: 10 }
+  axisLabel: { color: '#666', fontSize: 10 }
 }
 
 /** 本月成本概况 */
@@ -214,7 +213,7 @@ function createMonthlyCompletionOption(): EChartsOption {
     xAxis: {
       ...categoryAxis,
       data: monthlyCompletionData.categories,
-      axisLabel: { color: '#64748b', fontSize: 10, rotate: 15 }
+      axisLabel: { color: '#666', fontSize: 10, rotate: 15 }
     },
     yAxis: {
       ...valueAxis,
@@ -245,7 +244,7 @@ function createMonthlyCompletionOption(): EChartsOption {
         label: {
           show: true,
           position: 'top',
-          color: '#374151',
+          color: '#333',
           fontSize: 10
         }
       }
@@ -264,7 +263,7 @@ function createMonthlyTrendOption(): EChartsOption {
     },
     legend: {
       data: [`${currentYear}年`, `${lastYear}年`],
-      textStyle: { color: '#64748b', fontSize: 12 },
+      textStyle: { color: '#666', fontSize: 12 },
       top: 5,
       itemWidth: 14,
       itemHeight: 14
@@ -295,7 +294,7 @@ function createMonthlyTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#1890ff' },
+              { offset: 0, color: '#4472c4' },
               { offset: 1, color: '#0284c7' }
             ]
           },
@@ -304,7 +303,7 @@ function createMonthlyTrendOption(): EChartsOption {
         markLine: {
           silent: true,
           lineStyle: {
-            color: '#d97706',
+            color: '#ffc000',
             width: 2,
             type: 'solid'
           },
@@ -312,7 +311,7 @@ function createMonthlyTrendOption(): EChartsOption {
             show: true,
             position: 'end',
             formatter: `${currentYear}${monthlyTrendData.averageLabel}`,
-            color: '#d97706',
+            color: '#ffc000',
             fontSize: 11,
             backgroundColor: 'rgba(246, 189, 22, 0.2)',
             padding: [4, 8],
@@ -334,8 +333,8 @@ function createMonthlyTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#16a34a' },
-              { offset: 1, color: '#3AB886' }
+              { offset: 0, color: '#70ad47' },
+              { offset: 1, color: '#3ba8a0' }
             ]
           },
           borderRadius: [4, 4, 0, 0]
@@ -350,7 +349,7 @@ function createYearlyTrendOption(): EChartsOption {
   const dualAxis = {
     ...valueAxis,
     name: '元/吨',
-    nameTextStyle: { color: '#64748b', fontSize: 11 }
+    nameTextStyle: { color: '#666', fontSize: 11 }
   }
   return {
     tooltip: {
@@ -359,7 +358,7 @@ function createYearlyTrendOption(): EChartsOption {
     },
     legend: {
       data: ['单吨制造成本', '单吨可控成本'],
-      textStyle: { color: '#64748b', fontSize: 11 },
+      textStyle: { color: '#666', fontSize: 11 },
       top: 0
     },
     grid: {
@@ -372,7 +371,7 @@ function createYearlyTrendOption(): EChartsOption {
     xAxis: {
       ...categoryAxis,
       data: yearlyTrendData.years,
-      axisLabel: { color: '#64748b', fontSize: 11 }
+      axisLabel: { color: '#666', fontSize: 11 }
     },
     yAxis: [
       {
@@ -400,8 +399,8 @@ function createYearlyTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#2563eb' },
-              { offset: 1, color: '#3A6FD9' }
+              { offset: 0, color: '#4472c4' },
+              { offset: 1, color: '#4472c4' }
             ]
           },
           borderRadius: [4, 4, 0, 0]
@@ -414,10 +413,10 @@ function createYearlyTrendOption(): EChartsOption {
         data: yearlyTrendData.controllable,
         lineStyle: {
           width: 3,
-          color: '#16a34a'
+          color: '#70ad47'
         },
         itemStyle: {
-          color: '#16a34a',
+          color: '#70ad47',
           borderWidth: 2,
           borderColor: '#fff'
         },
@@ -440,7 +439,7 @@ function createCostPieOption(data: PieDatum[], mode: 'subject' | 'process'): ECh
       orient: 'vertical',
       right: '5%',
       top: 'center',
-      textStyle: { color: '#64748b', fontSize: 11 },
+      textStyle: { color: '#666', fontSize: 11 },
       itemWidth: 12,
       itemHeight: 12,
       itemGap: 8,
@@ -499,10 +498,10 @@ function createEnergyLoadOption(): EChartsOption {
       name: '生产负荷（%）',
       nameLocation: 'middle',
       nameGap: 25,
-      nameTextStyle: { color: '#64748b', fontSize: 12 },
+      nameTextStyle: { color: '#666', fontSize: 12 },
       axisLine: { lineStyle: { color: '#cbd5e1' } },
       axisLabel: {
-        color: '#64748b',
+        color: '#666',
         fontSize: 10,
         formatter: '{value}%'
       },
@@ -521,10 +520,10 @@ function createEnergyLoadOption(): EChartsOption {
       name: '能耗成本（元）',
       nameLocation: 'middle',
       nameGap: 40,
-      nameTextStyle: { color: '#64748b', fontSize: 12 },
+      nameTextStyle: { color: '#666', fontSize: 12 },
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { color: '#64748b', fontSize: 10 },
+      axisLabel: { color: '#666', fontSize: 10 },
       splitLine: {
         lineStyle: {
           type: 'dashed',
@@ -542,9 +541,9 @@ function createEnergyLoadOption(): EChartsOption {
           color: (params: any) => {
             const load = params.value[0] as number
             if (load >= 100) return '#FF6B6B'
-            if (load >= 85) return '#d97706'
-            if (load >= 70) return '#16a34a'
-            return '#2563eb'
+            if (load >= 85) return '#ffc000'
+            if (load >= 70) return '#70ad47'
+            return '#4472c4'
           },
           borderColor: 'rgba(255, 255, 255, 0.3)',
           borderWidth: 0.5,
@@ -566,8 +565,6 @@ function createEnergyLoadOption(): EChartsOption {
 /* =========================
    页面状态与交互
    ========================= */
-const { time, date } = useClock()
-const logoUrl = binhaiLogo
 
 type CompositionTab = 'subject' | 'process'
 
@@ -583,35 +580,10 @@ const processOption = createCostPieOption(processCostData, 'process')
 
 <template>
   <div class="dashboard-container">
-    <!-- 顶部标题栏 -->
-    <div class="screen-header">
-      <div class="header-time">
-        <div class="time-value">{{ time }}</div>
-        <div class="date-value">{{ date }}</div>
-      </div>
-
-      <div class="header-title-wrapper">
-        <div class="title-decoration-left"></div>
-        <h1 class="header-title">成本管理大屏</h1>
-        <div class="title-decoration-right"></div>
-      </div>
-
-      <div class="header-right">
-        <div class="header-weather">
-          <svg class="weather-icon" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
-          </svg>
-          <div class="weather-text">
-            <span class="weather-location">潍坊</span>
-            <span class="weather-temp">18°C</span>
-            <span class="weather-status">晴</span>
-          </div>
-        </div>
-        <div class="header-logo">
-          <img :src="logoUrl" alt="WEICHAI" class="logo-image" />
-        </div>
-      </div>
-    </div>
+    <DashboardHeader
+      title="成本管理大屏"
+      weather="潍坊 18℃ 晴"
+    />
 
     <!-- 主要指标展示 -->
     <div class="kpi-section">
@@ -667,7 +639,7 @@ const processOption = createCostPieOption(processCostData, 'process')
           </div>
           <div class="panel-content">
             <div style="margin-bottom: 8px">
-              <span style="color: #64748b; font-size: 12px">单位：万元</span>
+              <span style="color: #666; font-size: 12px">单位：万元</span>
             </div>
             <div class="chart-container">
               <EChart :option="monthlyCompletionOption" />
@@ -740,7 +712,7 @@ const processOption = createCostPieOption(processCostData, 'process')
           </div>
           <div class="panel-content">
             <div style="margin-bottom: 8px">
-              <span style="color: #64748b; font-size: 12px">单位：元</span>
+              <span style="color: #666; font-size: 12px">单位：元</span>
             </div>
             <div class="chart-container">
               <EChart :option="monthlyTrendOption" />
@@ -855,107 +827,7 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 /* 顶部标题栏样式 */
-.screen-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.3);
-}
-
-.header-time {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.time-value {
-  font-size: 28px;
-  font-weight: bold;
-  color: #1890ff;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  margin-bottom: 4px;
-}
-
-.date-value {
-  font-size: 14px;
-  color: #64748b;
-}
-
-.header-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
 .title-decoration-left,
-.title-decoration-right {
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, #1890ff 50%, transparent 100%);
-}
-
-.header-title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #1f2937;
-  text-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
-  white-space: nowrap;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.header-weather {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.weather-icon {
-  width: 24px;
-  height: 24px;
-  color: #1890ff;
-}
-
-.weather-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.weather-location {
-  color: #64748b;
-}
-
-.weather-temp {
-  color: #1890ff;
-  font-weight: bold;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-}
-
-.weather-status {
-  color: #64748b;
-}
-
-.header-logo {
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-  border-left: 1px solid rgba(24, 144, 255, 0.3);
-}
-
-.logo-image {
-  height: 45px;
-  width: auto;
-  object-fit: contain;
-}
-
 /* KPI 指标区域样式 */
 .kpi-section {
   margin-bottom: 20px;
@@ -969,8 +841,8 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .kpi-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(248, 250, 252, 0.85) 100%);
-  border: 1px solid rgba(24, 144, 255, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
+  border: 1px solid rgba(68, 114, 196, 0.4);
   border-radius: 8px;
   padding: 16px;
   height: 100px;
@@ -989,8 +861,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   left: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1001,8 +873,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   right: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1012,8 +884,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   left: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1023,8 +895,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   right: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1032,12 +904,12 @@ const processOption = createCostPieOption(processCostData, 'process')
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.2) 0%, rgba(24, 144, 255, 0.2) 100%);
-  border: 2px solid rgba(24, 144, 255, 0.4);
+  background: linear-gradient(135deg, rgba(68, 114, 196, 0.2) 0%, rgba(68, 114, 196, 0.2) 100%);
+  border: 2px solid rgba(68, 114, 196, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1890ff;
+  color: #4472c4;
   flex-shrink: 0;
 }
 
@@ -1051,18 +923,18 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .kpi-title {
-  color: #64748b;
+  color: #666;
   font-size: 12px;
   margin-bottom: 6px;
   line-height: 1.2;
 }
 
 .kpi-value {
-  color: #1890ff;
+  color: #4472c4;
   font-size: 24px;
   font-weight: bold;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  text-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
+  text-shadow: 0 0 10px rgba(68, 114, 196, 0.5);
   line-height: 1.2;
 }
 
@@ -1086,8 +958,8 @@ const processOption = createCostPieOption(processCostData, 'process')
 
 /* 数据面板样式 */
 .data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-  border: 1px solid rgba(24, 144, 255, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1px solid rgba(68, 114, 196, 0.4);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
@@ -1103,8 +975,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   left: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1114,8 +986,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   right: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1125,8 +997,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   left: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1136,8 +1008,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   right: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1146,7 +1018,7 @@ const processOption = createCostPieOption(processCostData, 'process')
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.2);
+  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
 }
 
 .panel-icon {
@@ -1155,16 +1027,16 @@ const processOption = createCostPieOption(processCostData, 'process')
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(24, 144, 255, 0.2);
+  background: rgba(68, 114, 196, 0.2);
   border-radius: 6px;
   margin-right: 12px;
-  color: #1890ff;
+  color: #4472c4;
 }
 
 .panel-title {
   font-size: 16px;
   font-weight: bold;
-  color: #1f2937;
+  color: #333;
   margin: 0;
 }
 
@@ -1185,7 +1057,7 @@ const processOption = createCostPieOption(processCostData, 'process')
   flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(24, 144, 255, 0.3) transparent;
+  scrollbar-color: rgba(68, 114, 196, 0.3) transparent;
   min-height: 0;
 }
 
@@ -1196,11 +1068,11 @@ const processOption = createCostPieOption(processCostData, 'process')
 
 .equipment-table table thead tr {
   background: transparent;
-  border-bottom: 1px dashed rgba(138, 148, 166, 0.3);
+  border-bottom: 1px dashed rgba(153, 153, 153, 0.3);
 }
 
 .equipment-table table thead th {
-  color: #64748b;
+  color: #666;
   font-weight: 600;
   font-size: 13px;
   padding: 12px 8px;
@@ -1208,26 +1080,26 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .equipment-table table tbody tr {
-  border-bottom: 1px dashed rgba(138, 148, 166, 0.2);
+  border-bottom: 1px dashed rgba(153, 153, 153, 0.2);
 }
 
 .equipment-table table tbody tr:hover {
-  background: rgba(24, 144, 255, 0.05) !important;
+  background: rgba(68, 114, 196, 0.05) !important;
 }
 
 .equipment-table table tbody td {
-  color: #1f2937;
+  color: #333;
   font-size: 12px;
   padding: 12px 8px;
   text-align: center;
 }
 
 .text-green {
-  color: #16a34a;
+  color: #70ad47;
 }
 
 .text-red {
-  color: #f56c6c;
+  color: #ff4d4f;
 }
 
 /* 切换按钮样式 */
@@ -1237,9 +1109,9 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .tab-button {
-  background: rgba(241, 245, 249, 0.5);
-  border: 1px solid rgba(24, 144, 255, 0.3);
-  color: #64748b;
+  background: rgba(242, 242, 242, 0.5);
+  border: 1px solid rgba(68, 114, 196, 0.3);
+  color: #666;
   font-size: 12px;
   padding: 6px 12px;
   cursor: pointer;
@@ -1255,13 +1127,13 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .tab-button.active {
-  background: rgba(90, 216, 166, 0.2);
-  border-color: #16a34a;
-  color: #16a34a;
+  background: rgba(112, 173, 71, 0.2);
+  border-color: #70ad47;
+  color: #70ad47;
 }
 
 .tab-button:hover {
-  color: #16a34a;
+  color: #70ad47;
 }
 
 @media (max-width: 1400px) {
@@ -1274,109 +1146,5 @@ const processOption = createCostPieOption(processCostData, 'process')
     grid-template-columns: 1fr;
     gap: 16px;
   }
-}
-
-
-/* =========================
-   MES 浅色主题适配（以 MES 样式为主）
-   ========================= */
-.dashboard-container {
-  height: auto;
-  min-height: calc(100vh - 132px);
-  background: #f5f5f5;
-  color: #374151;
-}
-
-.screen-header,
-.kpi-card,
-.data-panel {
-  background: #ffffff !important;
-  border-color: #e5e7eb !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-}
-
-.screen-header {
-  border-bottom: 1px solid #e5e7eb !important;
-}
-
-.header-title {
-  color: #1f2937 !important;
-  font-size: 24px !important;
-  letter-spacing: 2px;
-  text-shadow: none !important;
-}
-
-.header-logo .logo-image {
-  height: 32px;
-}
-
-.time-value,
-.header-title,
-.kpi-value,
-.panel-title {
-  color: #1f2937;
-}
-
-.time-value {
-  color: #1890ff !important;
-}
-
-.date-value,
-.weather-location,
-.weather-status,
-.kpi-title,
-.panel-note,
-.unit-label {
-  color: #64748b !important;
-}
-
-.data-panel .corner-tl,
-.data-panel .corner-tr,
-.data-panel .corner-bl,
-.data-panel .corner-br,
-.kpi-card .corner-bl,
-.kpi-card .corner-br {
-  display: none;
-}
-
-.data-panel > .panel-header {
-  border-bottom: 1px solid #f0f2f5;
-  padding-bottom: 10px;
-}
-
-.data-panel .panel-icon,
-.kpi-card .kpi-icon {
-  color: #1890ff !important;
-  background: rgba(24, 144, 255, 0.08) !important;
-  border-color: rgba(24, 144, 255, 0.16) !important;
-}
-
-.table-header,
-.assessment-table-header {
-  background: #f5f7fa !important;
-  color: #374151 !important;
-}
-
-.data-panel table th,
-.data-panel table td {
-  border-color: #eef0f3 !important;
-}
-
-.data-panel table tbody tr:nth-child(odd) {
-  background: rgba(241, 245, 249, 0.65) !important;
-}
-
-.data-panel table tbody tr:hover {
-  background: rgba(24, 144, 255, 0.06) !important;
-}
-
-.success-text,
-.rate-value.success {
-  color: #16a34a !important;
-}
-
-.error-text,
-.rate-value.error {
-  color: #ef4444 !important;
 }
 </style>

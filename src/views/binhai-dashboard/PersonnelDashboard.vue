@@ -1,10 +1,9 @@
 <script setup lang="ts">
 
-import binhaiLogo from '@/assets/binhai-logo.png'
 import { ref } from 'vue'
 
 import EChart from '@/components/EChart.vue'
-import { useClock } from '@/composables/useClock'
+import DashboardHeader from '@/views/dashboard/DashboardHeader.vue'
 import type { EChartsOption } from 'echarts'
 
 /* =========================
@@ -35,9 +34,9 @@ interface AppointmentDatum {
 }
 
 const appointmentData: AppointmentDatum[] = [
-  { name: '助理技师', value: 45, colors: ['#2563eb', '#3A6FD9'] },
-  { name: '技师', value: 68, colors: ['#16a34a', '#3AB886'] },
-  { name: '高级技师', value: 32, colors: ['#d97706', '#D69D06'] }
+  { name: '助理技师', value: 45, colors: ['#4472c4', '#4472c4'] },
+  { name: '技师', value: 68, colors: ['#70ad47', '#3ba8a0'] },
+  { name: '高级技师', value: 32, colors: ['#ffc000', '#D69D06'] }
 ]
 
 interface DynamicsRow {
@@ -73,7 +72,7 @@ const scheduleRows: ScheduleRow[] = [
     time: '2025-12-03 17:51:00',
     position: '上机位1',
     status: '在岗',
-    statusColor: '#16a34a',
+    statusColor: '#70ad47',
     duration: '314.38'
   },
   {
@@ -82,7 +81,7 @@ const scheduleRows: ScheduleRow[] = [
     time: '2025-12-03 10:22:26',
     position: '上机位1',
     status: '休息',
-    statusColor: '#64748b',
+    statusColor: '#666',
     duration: '696.72'
   },
   {
@@ -160,9 +159,9 @@ interface StackedSeries {
 }
 
 const departmentSeries: StackedSeries[] = [
-  { name: '一线人员', data: [45, 52, 38, 42], colors: ['#2563eb', '#3A6FD9'] },
-  { name: '技术支持', data: [12, 15, 10, 11], colors: ['#16a34a', '#3AB886'] },
-  { name: '管理技术', data: [8, 10, 7, 9], colors: ['#d97706', '#D69D06'] }
+  { name: '一线人员', data: [45, 52, 38, 42], colors: ['#4472c4', '#4472c4'] },
+  { name: '技术支持', data: [12, 15, 10, 11], colors: ['#70ad47', '#3ba8a0'] },
+  { name: '管理技术', data: [8, 10, 7, 9], colors: ['#ffc000', '#D69D06'] }
 ]
 
 const outputTrendMonths = ['1月', '2月', '3月', '4月', '5月', '6月']
@@ -200,28 +199,28 @@ const dynamicsSeriesConfig: DynamicsSeriesConfig[] = [
     name: '大机',
     baseCount: 85,
     variance: 15,
-    color: '#16a34a',
-    areaColors: ['rgba(90, 216, 166, 0.3)', 'rgba(90, 216, 166, 0.05)']
+    color: '#70ad47',
+    areaColors: ['rgba(112, 173, 71, 0.3)', 'rgba(112, 173, 71, 0.05)']
   },
   {
     name: '曲轴',
     baseCount: 75,
     variance: 12,
-    color: '#2563eb',
+    color: '#4472c4',
     areaColors: ['rgba(91, 143, 249, 0.3)', 'rgba(91, 143, 249, 0.05)']
   },
   {
     name: '机体',
     baseCount: 65,
     variance: 10,
-    color: '#d97706',
+    color: '#ffc000',
     areaColors: ['rgba(246, 189, 22, 0.3)', 'rgba(246, 189, 22, 0.05)']
   },
   {
     name: '新产品',
     baseCount: 55,
     variance: 8,
-    color: '#7c3aed',
+    color: '#3ba8a0',
     areaColors: ['rgba(146, 112, 202, 0.3)', 'rgba(146, 112, 202, 0.05)']
   }
 ]
@@ -271,9 +270,9 @@ function createPersonnelValues(
    ECharts 配置
    ========================= */
 const tooltipBase = {
-  backgroundColor: 'rgba(248, 250, 252, 0.95)',
-  borderColor: 'rgba(24, 144, 255, 0.3)',
-  textStyle: { color: '#374151' }
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  borderColor: 'rgba(68, 114, 196, 0.3)',
+  textStyle: { color: '#333' }
 }
 
 const dashedSplitLine = {
@@ -288,19 +287,19 @@ const valueAxisBase = {
   axisLine: { show: false },
   axisTick: { show: false },
   splitLine: dashedSplitLine,
-  axisLabel: { color: '#64748b', fontSize: 10 }
+  axisLabel: { color: '#666', fontSize: 10 }
 }
 
 const categoryAxisBase = {
   type: 'category' as const,
   axisLine: { lineStyle: { color: '#cbd5e1' } },
-  axisLabel: { color: '#64748b', fontSize: 11 },
+  axisLabel: { color: '#666', fontSize: 11 },
   axisTick: { show: false }
 }
 
 /** 人力资源动态明细：横向条形图，逐条渐变着色 */
 function createHrDynamicsOption(): EChartsOption {
-  const barColors = ['#2563eb', '#16a34a', '#d97706', '#7c3aed', '#FF9D4D', '#5CDBD3', '#B37FEB']
+  const barColors = ['#4472c4', '#70ad47', '#ffc000', '#3ba8a0', '#ffc000', '#3ba8a0', '#3ba8a0']
   return {
     tooltip: {
       ...tooltipBase,
@@ -347,7 +346,7 @@ function createHrDynamicsOption(): EChartsOption {
         label: {
           show: true,
           position: 'right',
-          color: '#374151',
+          color: '#333',
           fontSize: 11,
           formatter: '{c} 人'
         }
@@ -367,7 +366,7 @@ function createAppointmentOption(): EChartsOption {
       orient: 'vertical',
       right: '10%',
       top: 'center',
-      textStyle: { color: '#64748b', fontSize: 12 },
+      textStyle: { color: '#666', fontSize: 12 },
       itemWidth: 14,
       itemHeight: 14
     },
@@ -383,7 +382,7 @@ function createAppointmentOption(): EChartsOption {
           position: 'center',
           formatter: '{d}%\n{b}',
           fontSize: 14,
-          color: '#374151'
+          color: '#333'
         },
         emphasis: {
           label: {
@@ -425,7 +424,7 @@ function createDynamicsOption(): EChartsOption {
     },
     legend: {
       data: dynamicsSeriesConfig.map((item) => item.name),
-      textStyle: { color: '#64748b', fontSize: 11 },
+      textStyle: { color: '#666', fontSize: 11 },
       top: 0,
       itemWidth: 12,
       itemHeight: 12
@@ -440,13 +439,13 @@ function createDynamicsOption(): EChartsOption {
     xAxis: {
       ...categoryAxisBase,
       data: labels,
-      axisLabel: { color: '#64748b', fontSize: 10, interval: 'auto' },
+      axisLabel: { color: '#666', fontSize: 10, interval: 'auto' },
       boundaryGap: false
     },
     yAxis: {
       ...valueAxisBase,
       name: '人数',
-      nameTextStyle: { color: '#64748b', fontSize: 10 }
+      nameTextStyle: { color: '#666', fontSize: 10 }
     },
     series: dynamicsSeriesConfig.map((item) => ({
       name: item.name,
@@ -484,7 +483,7 @@ function createDepartmentOption(): EChartsOption {
     },
     legend: {
       data: departmentSeries.map((item) => item.name),
-      textStyle: { color: '#64748b', fontSize: 11 },
+      textStyle: { color: '#666', fontSize: 11 },
       top: 0,
       itemWidth: 12,
       itemHeight: 12
@@ -503,7 +502,7 @@ function createDepartmentOption(): EChartsOption {
     yAxis: {
       ...valueAxisBase,
       name: '人数',
-      nameTextStyle: { color: '#64748b', fontSize: 11 }
+      nameTextStyle: { color: '#666', fontSize: 11 }
     },
     series: departmentSeries.map((item) => ({
       name: item.name,
@@ -549,7 +548,7 @@ function createOutputTrendOption(): EChartsOption {
     yAxis: {
       ...valueAxisBase,
       name: '吨/人',
-      nameTextStyle: { color: '#64748b', fontSize: 11 }
+      nameTextStyle: { color: '#666', fontSize: 11 }
     },
     series: [
       {
@@ -566,8 +565,8 @@ function createOutputTrendOption(): EChartsOption {
             x2: 1,
             y2: 0,
             colorStops: [
-              { offset: 0, color: '#3BA7FF' },
-              { offset: 1, color: '#16a34a' }
+              { offset: 0, color: '#4472c4' },
+              { offset: 1, color: '#70ad47' }
             ]
           }
         },
@@ -585,7 +584,7 @@ function createOutputTrendOption(): EChartsOption {
           }
         },
         itemStyle: {
-          color: '#3BA7FF',
+          color: '#4472c4',
           borderColor: '#fff',
           borderWidth: 2
         }
@@ -620,8 +619,8 @@ function createIndicatorOption(): EChartsOption {
               x2: 1,
               y2: 0,
               colorStops: [
-                { offset: 0, color: '#2563eb' },
-                { offset: 1, color: '#3BA7FF' }
+                { offset: 0, color: '#4472c4' },
+                { offset: 1, color: '#4472c4' }
               ]
             }
           }
@@ -642,7 +641,7 @@ function createIndicatorOption(): EChartsOption {
         },
         axisLabel: {
           distance: 15,
-          color: '#64748b',
+          color: '#666',
           fontSize: 10
         },
         anchor: {
@@ -651,20 +650,20 @@ function createIndicatorOption(): EChartsOption {
           size: 8,
           itemStyle: {
             borderWidth: 2,
-            borderColor: '#2563eb'
+            borderColor: '#4472c4'
           }
         },
         title: {
           show: true,
           offsetCenter: [0, '80%'],
-          color: '#64748b',
+          color: '#666',
           fontSize: 12
         },
         detail: {
           valueAnimation: true,
           fontSize: 20,
           fontWeight: 'bold',
-          color: '#374151',
+          color: '#333',
           offsetCenter: [0, '50%'],
           formatter: '{value} 级'
         },
@@ -689,8 +688,8 @@ function createIndicatorOption(): EChartsOption {
               x2: 1,
               y2: 0,
               colorStops: [
-                { offset: 0, color: '#16a34a' },
-                { offset: 1, color: '#3AB886' }
+                { offset: 0, color: '#70ad47' },
+                { offset: 1, color: '#3ba8a0' }
               ]
             }
           }
@@ -711,7 +710,7 @@ function createIndicatorOption(): EChartsOption {
         },
         axisLabel: {
           distance: 15,
-          color: '#64748b',
+          color: '#666',
           fontSize: 10
         },
         anchor: {
@@ -720,20 +719,20 @@ function createIndicatorOption(): EChartsOption {
           size: 8,
           itemStyle: {
             borderWidth: 2,
-            borderColor: '#16a34a'
+            borderColor: '#70ad47'
           }
         },
         title: {
           show: true,
           offsetCenter: [0, '80%'],
-          color: '#64748b',
+          color: '#666',
           fontSize: 12
         },
         detail: {
           valueAnimation: true,
           fontSize: 20,
           fontWeight: 'bold',
-          color: '#374151',
+          color: '#333',
           offsetCenter: [0, '50%'],
           formatter: '{value} 小时'
         },
@@ -746,8 +745,6 @@ function createIndicatorOption(): EChartsOption {
 /* =========================
    页面状态与交互
    ========================= */
-const { time, date } = useClock()
-const logoUrl = binhaiLogo
 
 type MetricTab = 'skill' | 'training'
 
@@ -765,34 +762,10 @@ const indicatorOption = createIndicatorOption()
 <template>
   <div class="dashboard-container">
     <!-- 顶部标题栏 -->
-    <div class="screen-header">
-      <div class="header-time">
-        <div class="time-value">{{ time }}</div>
-        <div class="date-value">{{ date }}</div>
-      </div>
-
-      <div class="header-title-wrapper">
-        <div class="title-decoration-left"></div>
-        <h1 class="header-title">人员管理大屏</h1>
-        <div class="title-decoration-right"></div>
-      </div>
-
-      <div class="header-right">
-        <div class="header-weather">
-          <svg class="weather-icon" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
-          </svg>
-          <div class="weather-text">
-            <span class="weather-location">潍坊</span>
-            <span class="weather-temp">18°C</span>
-            <span class="weather-status">晴</span>
-          </div>
-        </div>
-        <div class="header-logo">
-          <img :src="logoUrl" alt="WEICHAI" class="logo-image" />
-        </div>
-      </div>
-    </div>
+    <DashboardHeader
+      title="人员管理大屏"
+      weather="潍坊 18℃ 晴"
+    />
 
     <div class="dashboard-row">
       <!-- 左侧列 -->
@@ -827,9 +800,9 @@ const indicatorOption = createIndicatorOption()
               <div class="data-item-content">
                 <div class="data-item-label">总在岗人数/缺勤人数</div>
                 <div class="data-item-value">
-                  <span style="color: #16a34a; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5)">256</span>
-                  <span style="color: #64748b; margin: 0 4px">/</span>
-                  <span style="color: #ef4444; text-shadow: 0 0 10px rgba(255, 82, 82, 0.5)">8</span>
+                  <span style="color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5)">256</span>
+                  <span style="color: #9cc9ff; margin: 0 4px">/</span>
+                  <span style="color: #ff5252; text-shadow: 0 0 10px rgba(255, 82, 82, 0.5)">8</span>
                 </div>
                 <div class="data-item-progress">
                   <div class="progress-bar" style="width: 97%"></div>
@@ -1125,137 +1098,12 @@ const indicatorOption = createIndicatorOption()
 }
 
 /* 顶部标题栏样式 */
-.screen-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  height: 70px;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(24, 144, 255, 0.3);
-  position: relative;
-}
-
-.screen-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.8) 50%, transparent 100%);
-  box-shadow: 0 0 10px rgba(24, 144, 255, 0.6);
-}
-
 /* 左侧时间 */
-.header-time {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 180px;
-}
-
-.time-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1890ff;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  line-height: 1;
-}
-
-.date-value {
-  font-size: 12px;
-  color: #64748b;
-}
-
 /* 中间标题 */
-.header-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
-  justify-content: center;
-}
-
-.header-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: #ffffff;
-  margin: 0;
-  letter-spacing: 4px;
-  text-shadow: 0 0 20px rgba(24, 144, 255, 0.4);
-}
-
 .title-decoration-left,
-.title-decoration-right {
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.8) 100%);
-}
-
-.title-decoration-right {
-  background: linear-gradient(90deg, rgba(24, 144, 255, 0.8) 0%, transparent 100%);
-}
-
 /* 右侧区域 */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  min-width: 300px;
-  justify-content: flex-end;
-}
-
 /* 右侧天气 */
-.header-weather {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.weather-icon {
-  width: 24px;
-  height: 24px;
-  color: #1890ff;
-}
-
-.weather-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.weather-location {
-  color: #64748b;
-}
-
-.weather-temp {
-  color: #1890ff;
-  font-weight: bold;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-}
-
-.weather-status {
-  color: #64748b;
-}
-
 /* Logo 样式 */
-.header-logo {
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-  border-left: 1px solid rgba(24, 144, 255, 0.3);
-}
-
-.logo-image {
-  height: 45px;
-  width: auto;
-  object-fit: contain;
-}
-
 /* 网格布局 */
 .dashboard-row {
   display: grid;
@@ -1272,8 +1120,8 @@ const indicatorOption = createIndicatorOption()
 
 /* 数据面板 */
 .data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-  border: 1px solid rgba(24, 144, 255, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border: 1px solid rgba(68, 114, 196, 0.4);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
@@ -1297,7 +1145,7 @@ const indicatorOption = createIndicatorOption()
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.2);
+  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
 }
 
 .panel-icon {
@@ -1306,16 +1154,16 @@ const indicatorOption = createIndicatorOption()
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(24, 144, 255, 0.2);
+  background: rgba(68, 114, 196, 0.2);
   border-radius: 6px;
   margin-right: 12px;
-  color: #1890ff;
+  color: #4472c4;
 }
 
 .panel-title {
   font-size: 16px;
   font-weight: bold;
-  color: #1f2937;
+  color: #333;
   margin: 0;
   flex: 1;
 }
@@ -1327,8 +1175,8 @@ const indicatorOption = createIndicatorOption()
   left: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1338,8 +1186,8 @@ const indicatorOption = createIndicatorOption()
   right: 0;
   width: 12px;
   height: 12px;
-  border-top: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-top: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1349,8 +1197,8 @@ const indicatorOption = createIndicatorOption()
   left: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-left: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-left: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1360,8 +1208,8 @@ const indicatorOption = createIndicatorOption()
   right: 0;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid #1890ff;
-  border-right: 2px solid #1890ff;
+  border-bottom: 2px solid #4472c4;
+  border-right: 2px solid #4472c4;
   z-index: 10;
 }
 
@@ -1378,16 +1226,16 @@ const indicatorOption = createIndicatorOption()
   display: flex;
   align-items: center;
   padding: 12px;
-  background: rgba(24, 144, 255, 0.05);
-  border: 1px solid rgba(24, 144, 255, 0.2);
+  background: rgba(68, 114, 196, 0.05);
+  border: 1px solid rgba(68, 114, 196, 0.2);
   border-radius: 6px;
   transition: all 0.3s ease;
 }
 
 .data-item:hover {
-  background: rgba(24, 144, 255, 0.1);
-  border-color: rgba(24, 144, 255, 0.4);
-  box-shadow: 0 0 15px rgba(24, 144, 255, 0.3);
+  background: rgba(68, 114, 196, 0.1);
+  border-color: rgba(68, 114, 196, 0.4);
+  box-shadow: 0 0 15px rgba(68, 114, 196, 0.3);
 }
 
 .data-item-icon {
@@ -1402,14 +1250,14 @@ const indicatorOption = createIndicatorOption()
 }
 
 .data-item-icon.green {
-  background: rgba(0, 255, 136, 0.2);
-  color: #16a34a;
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+  background: rgba(112, 173, 71, 0.2);
+  color: #70ad47;
+  box-shadow: 0 0 15px rgba(112, 173, 71, 0.3);
 }
 
 .data-item-icon.gray {
-  background: rgba(138, 148, 166, 0.2);
-  color: #64748b;
+  background: rgba(153, 153, 153, 0.2);
+  color: #666;
 }
 
 .data-item-content {
@@ -1418,22 +1266,22 @@ const indicatorOption = createIndicatorOption()
 
 .data-item-label {
   font-size: 13px;
-  color: #64748b;
+  color: #666;
   margin-bottom: 6px;
 }
 
 .data-item-value {
   font-size: 18px;
   font-weight: bold;
-  color: #16a34a;
-  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  color: #70ad47;
+  text-shadow: 0 0 10px rgba(112, 173, 71, 0.5);
   font-family: 'DIN Alternate', 'Source Han Sans CN', 'Microsoft YaHei', sans-serif;
 }
 
 .data-item-progress {
   width: 100%;
   height: 8px;
-  background: rgba(24, 144, 255, 0.1);
+  background: rgba(68, 114, 196, 0.1);
   border-radius: 4px;
   overflow: hidden;
   margin-top: 6px;
@@ -1441,9 +1289,9 @@ const indicatorOption = createIndicatorOption()
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #16a34a 0%, #1890ff 100%);
+  background: linear-gradient(90deg, #70ad47 0%, #4472c4 100%);
   border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 10px rgba(112, 173, 71, 0.5);
   transition: width 0.3s ease;
 }
 
@@ -1459,28 +1307,28 @@ const indicatorOption = createIndicatorOption()
   align-items: center;
   padding: 8px 12px;
   margin-bottom: 8px;
-  background: rgba(24, 144, 255, 0.05);
-  border: 1px solid rgba(24, 144, 255, 0.2);
+  background: rgba(68, 114, 196, 0.05);
+  border: 1px solid rgba(68, 114, 196, 0.2);
   border-radius: 4px;
   font-size: 12px;
   transition: all 0.3s ease;
 }
 
 .dynamics-row:hover {
-  background: rgba(24, 144, 255, 0.1);
-  border-color: rgba(24, 144, 255, 0.4);
+  background: rgba(68, 114, 196, 0.1);
+  border-color: rgba(68, 114, 196, 0.4);
   transform: translateX(4px);
 }
 
 .dynamics-arrow {
-  color: #16a34a;
+  color: #70ad47;
   font-size: 12px;
   margin-right: 10px;
   flex-shrink: 0;
 }
 
 .dynamics-time {
-  color: #1890ff;
+  color: #4472c4;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
   font-weight: bold;
   margin-right: 12px;
@@ -1488,32 +1336,32 @@ const indicatorOption = createIndicatorOption()
 }
 
 .dynamics-name {
-  color: #1f2937;
+  color: #333;
   font-weight: 500;
   margin-right: 6px;
   flex-shrink: 0;
 }
 
 .dynamics-dot {
-  color: #64748b;
+  color: #666;
   margin-right: 6px;
   flex-shrink: 0;
 }
 
 .dynamics-action {
-  color: #64748b;
+  color: #666;
   flex: 1;
 }
 
 /* 异常提醒框 */
 .alert-box {
   position: relative;
-  background: linear-gradient(135deg, #ef4444 0%, #e53935 100%);
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff4d4f 100%);
   border: 2px solid #ffffff;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
-  box-shadow: 0 0 30px rgba(255, 82, 82, 0.8);
+  box-shadow: 0 0 30px rgba(255, 77, 79, 0.8);
 }
 
 .alert-close {
@@ -1563,11 +1411,11 @@ const indicatorOption = createIndicatorOption()
 
 .schedule-table thead tr {
   background: rgba(255, 255, 255, 0.6);
-  border-bottom: 2px solid #3a9ff1;
+  border-bottom: 2px solid #ff4d4f;
 }
 
 .schedule-table thead th {
-  color: #1f2937;
+  color: #333;
   font-weight: bold;
   font-size: 12px;
   text-align: center;
@@ -1575,17 +1423,17 @@ const indicatorOption = createIndicatorOption()
 }
 
 .schedule-table tbody tr {
-  border-bottom: 1px solid rgba(58, 159, 241, 0.2);
+  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
   transition: background-color 0.2s ease;
 }
 
 .schedule-table tbody tr:hover {
   background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 4px rgba(58, 159, 241, 0.2);
+  box-shadow: 0 0 4px rgba(68, 114, 196, 0.2);
 }
 
 .schedule-table tbody td {
-  color: #1f2937;
+  color: #333;
   font-size: 12px;
   text-align: center;
   padding: 8px 4px;
@@ -1600,9 +1448,9 @@ const indicatorOption = createIndicatorOption()
 }
 
 .tab-button {
-  background: rgba(241, 245, 249, 0.5);
-  border: 1px solid rgba(24, 144, 255, 0.3);
-  color: #64748b;
+  background: rgba(242, 242, 242, 0.5);
+  border: 1px solid rgba(68, 114, 196, 0.3);
+  color: #666;
   padding: 6px 12px;
   border-radius: 4px;
   font-size: 12px;
@@ -1611,13 +1459,13 @@ const indicatorOption = createIndicatorOption()
 }
 
 .tab-button:hover {
-  color: #16a34a;
+  color: #70ad47;
 }
 
 .tab-button.active {
-  background: rgba(90, 216, 166, 0.2);
-  border-color: #16a34a;
-  color: #16a34a;
+  background: rgba(112, 173, 71, 0.2);
+  border-color: #70ad47;
+  color: #70ad47;
   box-shadow: none;
 }
 
@@ -1648,14 +1496,14 @@ const indicatorOption = createIndicatorOption()
 .big-number {
   font-size: 48px;
   font-weight: 900;
-  color: #16a34a;
+  color: #70ad47;
   font-family: 'DIN Alternate', 'Source Han Sans CN', 'Microsoft YaHei', sans-serif;
-  text-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 60px rgba(0, 255, 136, 0.4);
+  text-shadow: 0 0 30px rgba(112, 173, 71, 0.8), 0 0 60px rgba(112, 173, 71, 0.4);
   line-height: 1;
 }
 
 .big-unit {
-  color: #64748b;
+  color: #666;
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -1673,12 +1521,12 @@ const indicatorOption = createIndicatorOption()
 .training-item {
   text-align: center;
   padding: 12px;
-  background: rgba(241, 245, 249, 0.5);
+  background: rgba(242, 242, 242, 0.5);
   border-radius: 4px;
 }
 
 .training-label {
-  color: #64748b;
+  color: #666;
   font-size: 12px;
   margin-bottom: 8px;
 }
@@ -1690,138 +1538,29 @@ const indicatorOption = createIndicatorOption()
 }
 
 .training-change {
-  color: #64748b;
+  color: #666;
   font-size: 12px;
 }
 
 .training-value.green {
-  color: #16a34a;
+  color: #70ad47;
 }
 
 .training-value.yellow {
-  color: #d97706;
+  color: #ffc000;
 }
 
 .training-value.blue {
-  color: #2563eb;
+  color: #4472c4;
 }
 
 .training-value.purple {
-  color: #7c3aed;
+  color: #3ba8a0;
 }
 
 @media (max-width: 1400px) {
   .dashboard-row {
     grid-template-columns: 1fr;
   }
-
-  .header-title {
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
-}
-
-
-/* =========================
-   MES 浅色主题适配（以 MES 样式为主）
-   ========================= */
-.dashboard-container {
-  height: auto;
-  min-height: calc(100vh - 132px);
-  background: #f5f5f5;
-  color: #374151;
-}
-
-.screen-header,
-.kpi-card,
-.data-panel {
-  background: #ffffff !important;
-  border-color: #e5e7eb !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-}
-
-.screen-header {
-  border-bottom: 1px solid #e5e7eb !important;
-}
-
-.header-title {
-  color: #1f2937 !important;
-  font-size: 24px !important;
-  letter-spacing: 2px;
-  text-shadow: none !important;
-}
-
-.header-logo .logo-image {
-  height: 32px;
-}
-
-.time-value,
-.header-title,
-.kpi-value,
-.panel-title {
-  color: #1f2937;
-}
-
-.time-value {
-  color: #1890ff !important;
-}
-
-.date-value,
-.weather-location,
-.weather-status,
-.kpi-title,
-.panel-note,
-.unit-label {
-  color: #64748b !important;
-}
-
-.data-panel .corner-tl,
-.data-panel .corner-tr,
-.data-panel .corner-bl,
-.data-panel .corner-br,
-.kpi-card .corner-bl,
-.kpi-card .corner-br {
-  display: none;
-}
-
-.data-panel > .panel-header {
-  border-bottom: 1px solid #f0f2f5;
-  padding-bottom: 10px;
-}
-
-.data-panel .panel-icon,
-.kpi-card .kpi-icon {
-  color: #1890ff !important;
-  background: rgba(24, 144, 255, 0.08) !important;
-  border-color: rgba(24, 144, 255, 0.16) !important;
-}
-
-.table-header,
-.assessment-table-header {
-  background: #f5f7fa !important;
-  color: #374151 !important;
-}
-
-.data-panel table th,
-.data-panel table td {
-  border-color: #eef0f3 !important;
-}
-
-.data-panel table tbody tr:nth-child(odd) {
-  background: rgba(241, 245, 249, 0.65) !important;
-}
-
-.data-panel table tbody tr:hover {
-  background: rgba(24, 144, 255, 0.06) !important;
-}
-
-.success-text,
-.rate-value.success {
-  color: #16a34a !important;
-}
-
-.error-text,
-.rate-value.error {
-  color: #ef4444 !important;
 }
 </style>
