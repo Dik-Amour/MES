@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="safety-inspection">
     <!-- 筛选卡片 -->
     <a-card :bordered="false" class="filter-card">

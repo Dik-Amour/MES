@@ -267,21 +267,7 @@ const handleReset = () => {
 </script>
 
 <style scoped>
-.filter-card {
-  margin-bottom: 16px;
-}
 
-.report-card {
-  margin-bottom: 16px;
-}
-
-.report-title {
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #333;
-}
 
 .summary-metric {
   font-weight: 600;

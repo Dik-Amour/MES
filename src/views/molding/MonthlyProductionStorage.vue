@@ -357,13 +357,6 @@ const completionData = ref([
   padding: 0;
 }
 
-.filter-card {
-  margin-bottom: 16px;
-}
-
-.action-card {
-  margin-bottom: 16px;
-}
 
 .data-table :deep(.ant-table-thead > tr > th) {
   background: #fafafa;

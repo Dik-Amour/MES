@@ -370,11 +370,4 @@ onMounted(() => {
   padding: 0;
 }
 
-.filter-card {
-  margin-bottom: 16px;
-}
-
-.table-card {
-  margin-bottom: 16px;
-}
 </style>

@@ -1012,10 +1012,6 @@ const handleTableChange = (pag: any) => {
 </script>
 
 <style scoped>
-.filter-card, .action-card {
-  margin-bottom: 16px;
-}
-
 /* 弹框样式 */
 .config-modal :deep(.ant-modal-body) {
   padding: 20px 24px;

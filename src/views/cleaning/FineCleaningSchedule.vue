@@ -1179,19 +1179,7 @@ onMounted(() => {
   padding: 0;
 }
 
-.filter-card {
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
 
-.action-card {
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.table-card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
 
 /* 固定清单配置弹窗样式 */
 .config-actions {

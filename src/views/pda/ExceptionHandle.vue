@@ -346,14 +346,7 @@ const showRejectLog = () => { rejectVisible.value = true }
 </script>
 
 <style scoped>
-.pda-page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 430px;
-  margin: 0 auto;
-  background: #f5f5f5;
-}
+
 
 /* 顶部标题栏（白底黑字，与示意图一致） */
 .pda-header {
@@ -372,25 +365,11 @@ const showRejectLog = () => { rejectVisible.value = true }
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-.pda-header-left {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 8px;
-}
 
 .pda-header-left:active {
   background: #f0f0f0;
 }
 
-.pda-header-title {
-  flex: 1;
-  text-align: center;
-}
 
 .pda-header-right {
   width: 64px;

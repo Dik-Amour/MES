@@ -454,8 +454,6 @@ const handleAuditCancel = () => {
 </script>
 
 <style scoped>
-.filter-card, .action-card { margin-bottom: 16px; }
-
 /* ---- 明细弹框 ---- */
 .detail-section {
   position: relative;

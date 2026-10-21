@@ -1192,25 +1192,11 @@ const filterOption = (input: string, option: any) => {
 </script>
 
 <style scoped>
-.filter-card {
-  margin-bottom: 16px;
-}
 
-.action-card {
-  margin-bottom: 16px;
-}
 
-.table-card {
-  margin-bottom: 16px;
-}
 
 .zero-value {
   color: #bfbfbf;
 }
 
-.upload-tip {
-  color: #999;
-  font-size: 12px;
-  margin-top: 4px;
-}
 </style>

@@ -338,9 +338,6 @@ const handleExport = () => {
   margin-bottom: 0;
 }
 
-.table-card {
-  margin-bottom: 16px;
-}
 
 .cell-value {
   font-weight: 600;

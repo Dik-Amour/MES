@@ -277,14 +277,7 @@ const goBack = () => {
 </script>
 
 <style scoped>
-.pda-page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 430px;
-  margin: 0 auto;
-  background: #f5f5f5;
-}
+
 
 .pda-header {
   display: flex;
@@ -301,26 +294,11 @@ const goBack = () => {
   z-index: 100;
 }
 
-.pda-header-left {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.2s;
-}
 
 .pda-header-left:active {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.pda-header-title {
-  flex: 1;
-  text-align: center;
-}
 
 .pda-header-right {
   width: 40px;
@@ -348,12 +326,7 @@ const goBack = () => {
 }
 
 /* 表单行 */
-.form-row {
-  display: flex;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f5;
-}
+
 
 .form-row.last {
   border-bottom: none;
@@ -367,10 +340,6 @@ const goBack = () => {
   font-weight: 500;
 }
 
-.form-control {
-  flex: 1;
-  min-width: 0;
-}
 
 .form-control.with-suffix {
   display: flex;
@@ -382,20 +351,6 @@ const goBack = () => {
   flex: 1;
 }
 
-.scan-btn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: #1890ff;
-  background: #e6f7ff;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
 
 .scan-btn:active {
   background: #bae7ff;
@@ -408,17 +363,6 @@ const goBack = () => {
   flex-direction: column;
 }
 
-.picker-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  font-size: 15px;
-  color: #333;
-  border-bottom: 1px solid #f5f5f5;
-  cursor: pointer;
-  transition: background 0.2s;
-}
 
 .picker-item:active {
   background: #f5f5f5;
@@ -456,25 +400,11 @@ const goBack = () => {
   color: #333;
 }
 
-.rack-header-clear {
-  font-size: 14px;
-  color: #ff4d4f;
-  cursor: pointer;
-}
 
 .rack-header-clear:active {
   opacity: 0.7;
 }
 
-.rack-list-scroll {
-  max-height: 280px;
-  overflow-y: auto;
-  padding: 0 12px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  -webkit-overflow-scrolling: touch;
-}
 
 .rack-list-scroll::-webkit-scrollbar {
   width: 4px;
@@ -507,19 +437,6 @@ const goBack = () => {
   color: #333;
 }
 
-.rack-card-delete {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: #ff4d4f;
-  background: #fff2f0;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
 
 .rack-card-delete:active {
   background: #ffccc7;
@@ -547,11 +464,6 @@ const goBack = () => {
   color: #999;
 }
 
-.info-cell-value {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
 
 .info-cell-value.highlight {
   color: #52c41a;
