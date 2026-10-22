@@ -57,19 +57,49 @@
       title="考核设置"
       @cancel="handleAssessCancel"
       :footer="null"
-      width="700px"
+      width="920px"
     >
       <div class="assess-modal-content">
+        <div class="assess-toolbar">
+          <a-select
+            v-model:value="assessLineFilter"
+            placeholder="产线筛选"
+            allow-clear
+            :options="assessLineFilterOptions"
+            class="line-filter-select"
+          />
+          <div class="assess-toolbar-actions">
+            <a-button type="primary" @click="handleAssessAdd">
+              <PlusOutlined /> 新增
+            </a-button>
+            <a-button :disabled="assessSelectedKeys.length === 0" @click="handleAssessEdit">
+              <EditOutlined /> 修改
+            </a-button>
+            <a-button danger :disabled="assessSelectedKeys.length === 0" @click="handleAssessDelete">
+              <DeleteOutlined /> 删除
+            </a-button>
+          </div>
+        </div>
         <a-table
           :columns="assessColumns"
-          :data-source="assessData"
+          :data-source="pagedAssessData"
           :pagination="false"
+          :row-selection="{ selectedRowKeys: assessSelectedKeys, onChange: onAssessSelectChange, type: 'radio' }"
           bordered
           size="small"
           class="data-table assess-table"
           :row-key="(record: any) => record.key"
         >
           <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'productionLine'">
+              <a-select
+                v-model:value="record.productionLine"
+                :options="lineSelectOptions"
+                placeholder="请选择产线"
+                size="small"
+                class="line-select"
+              />
+            </template>
             <template v-if="column.dataIndex === 'assessQuantity'">
               <div class="quantity-stepper">
                 <a-button size="small" @click="decrementQuantity(record)">-</a-button>
@@ -91,8 +121,38 @@
                 class="pour-time-input"
               />
             </template>
+            <template v-if="column.dataIndex === 'startDate'">
+              <a-date-picker
+                v-model:value="record.startDate"
+                value-format="YYYY-MM-DD"
+                placeholder="开始日期"
+                size="small"
+                class="date-picker-input"
+                :disabled-date="(current: any) => disabledStartDate(record, current)"
+              />
+            </template>
+            <template v-if="column.dataIndex === 'endDate'">
+              <a-date-picker
+                v-model:value="record.endDate"
+                value-format="YYYY-MM-DD"
+                placeholder="结束日期"
+                size="small"
+                class="date-picker-input"
+                :disabled-date="(current: any) => disabledEndDate(record, current)"
+              />
+            </template>
           </template>
         </a-table>
+        <div class="assess-pagination">
+          <a-pagination
+            v-model:current="assessPage"
+            v-model:page-size="assessPageSize"
+            :total="filteredAssessData.length"
+            :show-size-changer="false"
+            :show-total="assessShowTotal"
+            size="small"
+          />
+        </div>
         <div class="assess-modal-footer">
           <a-button type="primary" @click="handleAssessSave">确定</a-button>
           <a-button @click="handleAssessCancel">取消</a-button>
@@ -140,10 +200,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
-import { SearchOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, ReloadOutlined, SettingOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 
 // 日期范围
 const dateRange = ref<[Dayjs | null, Dayjs | null] | null>(null)
@@ -161,23 +221,113 @@ const handleReset = () => {
 // 考核设置弹框
 const assessModalVisible = ref(false)
 
+// 产线选项
+const productionLineOptions = [
+  '造型一线中件造型',
+  '造型一线大件造型',
+  '造型二线中件造型',
+  '造型二线大件造型',
+  '造型三线KW造型',
+  '造型三线HWS造型'
+]
+const lineSelectOptions = productionLineOptions.map(v => ({ value: v, label: v }))
+
 // 考核设置表格列
 const assessColumns = [
   { title: '序号', dataIndex: 'index', key: 'index', width: 60, align: 'center' as const },
-  { title: '产线', dataIndex: 'productionLine', key: 'productionLine', width: 180 },
-  { title: '考核数量', dataIndex: 'assessQuantity', key: 'assessQuantity', width: 160, align: 'center' as const },
-  { title: '浇注准时时间', dataIndex: 'pourTime', key: 'pourTime', width: 140, align: 'center' as const }
+  { title: '产线', dataIndex: 'productionLine', key: 'productionLine', width: 170 },
+  { title: '考核数量', dataIndex: 'assessQuantity', key: 'assessQuantity', width: 150, align: 'center' as const },
+  { title: '浇注准时时间', dataIndex: 'pourTime', key: 'pourTime', width: 130, align: 'center' as const },
+  { title: '开始日期', dataIndex: 'startDate', key: 'startDate', width: 140, align: 'center' as const },
+  { title: '结束日期', dataIndex: 'endDate', key: 'endDate', width: 140, align: 'center' as const }
 ]
 
 // 考核设置数据
 const assessData = ref([
-  { key: '1', index: 1, productionLine: '造型一线中件造型', assessQuantity: 0, pourTime: '07:30' },
-  { key: '2', index: 2, productionLine: '造型一线大件造型', assessQuantity: 0, pourTime: '07:30' },
-  { key: '3', index: 3, productionLine: '造型二线中件造型', assessQuantity: 0, pourTime: '07:30' },
-  { key: '4', index: 4, productionLine: '造型二线大件造型', assessQuantity: 0, pourTime: '07:30' },
-  { key: '5', index: 5, productionLine: '造型三线KW造型', assessQuantity: 0, pourTime: '07:30' },
-  { key: '6', index: 6, productionLine: '造型三线HWS造型', assessQuantity: 0, pourTime: '07:30' }
+  { key: '1', index: 1, productionLine: '造型一线中件造型', assessQuantity: 0, pourTime: '07:30', startDate: '2026-06-01', endDate: '2026-06-30' },
+  { key: '2', index: 2, productionLine: '造型一线大件造型', assessQuantity: 0, pourTime: '07:30', startDate: '2026-06-01', endDate: '2026-06-30' },
+  { key: '3', index: 3, productionLine: '造型二线中件造型', assessQuantity: 0, pourTime: '07:30', startDate: '2026-06-01', endDate: '2026-06-30' },
+  { key: '4', index: 4, productionLine: '造型二线大件造型', assessQuantity: 0, pourTime: '07:30', startDate: '2026-06-01', endDate: '2026-06-30' },
+  { key: '5', index: 5, productionLine: '造型三线KW造型', assessQuantity: 0, pourTime: '07:30', startDate: '2026-06-01', endDate: '2026-06-30' },
+  { key: '6', index: 6, productionLine: '造型三线HWS造型', assessQuantity: 0, pourTime: '07:30', startDate: '2026-06-01', endDate: '2026-06-30' }
 ])
+
+// 产线筛选
+const assessLineFilter = ref<string | undefined>(undefined)
+const assessLineFilterOptions = productionLineOptions.map(v => ({ value: v, label: v }))
+const filteredAssessData = computed(() => {
+  if (!assessLineFilter.value) return assessData.value
+  return assessData.value.filter(item => item.productionLine === assessLineFilter.value)
+})
+
+// 考核设置分页
+const assessPage = ref(1)
+const assessPageSize = ref(5)
+const pagedAssessData = computed(() => {
+  const start = (assessPage.value - 1) * assessPageSize.value
+  return filteredAssessData.value.slice(start, start + assessPageSize.value)
+})
+
+// 筛选变化时重置页码
+watch(assessLineFilter, () => {
+  assessPage.value = 1
+})
+
+const assessShowTotal = (total: number) => `共 ${total} 条`
+
+// 考核设置选中行
+const assessSelectedKeys = ref<(string | number)[]>([])
+const onAssessSelectChange = (keys: (string | number)[]) => {
+  assessSelectedKeys.value = keys
+}
+
+// 新增考核设置（插入到最前面；有产线筛选时自动带入筛选产线）
+let assessKey = assessData.value.length
+const handleAssessAdd = () => {
+  assessKey += 1
+  assessData.value.unshift({
+    key: String(assessKey),
+    index: 1,
+    productionLine: assessLineFilter.value ?? '',
+    assessQuantity: 0,
+    pourTime: '07:30',
+    startDate: '',
+    endDate: ''
+  })
+  assessData.value.forEach((item, i) => { item.index = i + 1 })
+  assessPage.value = 1
+  assessSelectedKeys.value = [String(assessKey)]
+  message.success('新增成功，请完善考核信息')
+}
+
+// 修改考核设置
+const handleAssessEdit = () => {
+  if (assessSelectedKeys.value.length === 0) {
+    message.warning('请先选择一条考核记录')
+    return
+  }
+  message.success('修改成功')
+}
+
+// 删除考核设置
+const handleAssessDelete = () => {
+  if (assessSelectedKeys.value.length === 0) {
+    message.warning('请先选择一条考核记录')
+    return
+  }
+  const key = assessSelectedKeys.value[0]
+  const idx = assessData.value.findIndex(item => item.key === key)
+  if (idx !== -1) {
+    assessData.value.splice(idx, 1)
+    assessData.value.forEach((item, i) => { item.index = i + 1 })
+  }
+  assessSelectedKeys.value = []
+  const maxPage = Math.max(1, Math.ceil(filteredAssessData.value.length / assessPageSize.value))
+  if (assessPage.value > maxPage) {
+    assessPage.value = maxPage
+  }
+  message.success('删除成功')
+}
 
 // 增加数量
 const incrementQuantity = (record: any) => {
@@ -193,13 +343,67 @@ const decrementQuantity = (record: any) => {
 
 // 考核设置
 const handleAssessSetting = () => {
+  assessPage.value = 1
+  assessSelectedKeys.value = []
   assessModalVisible.value = true
 }
 
-// 保存考核设置
+// 保存考核设置（兕底校验同产线日期区间重叠）
 const handleAssessSave = () => {
+  const errMsg = validateAssessDates()
+  if (errMsg) {
+    message.warning(errMsg)
+    return
+  }
   message.success('考核设置保存成功')
   assessModalVisible.value = false
+}
+
+// 校验同产线日期区间是否重叠
+const validateAssessDates = () => {
+  const list = assessData.value
+  for (let i = 0; i < list.length; i++) {
+    const a = list[i]
+    if (!a.productionLine || !a.startDate || !a.endDate) continue
+    if (a.startDate > a.endDate) {
+      return `「${a.productionLine}」的开始日期不能晚于结束日期`
+    }
+    for (let j = i + 1; j < list.length; j++) {
+      const b = list[j]
+      if (b.productionLine !== a.productionLine) continue
+      if (!b.startDate || !b.endDate) continue
+      if (a.startDate <= b.endDate && b.startDate <= a.endDate) {
+        return `「${a.productionLine}」的考核日期区间与已有配置重叠，请修改`
+      }
+    }
+  }
+  return ''
+}
+
+// 同产线其他记录已占用的日期判断
+const isDateOccupiedByOthers = (record: any, current: any) => {
+  if (!current) return false
+  const day = current.format('YYYY-MM-DD')
+  return assessData.value.some(item => {
+    if (item.key === record.key) return false
+    if (item.productionLine !== record.productionLine) return false
+    if (!item.startDate || !item.endDate) return false
+    return day >= item.startDate && day <= item.endDate
+  })
+}
+
+// 开始日期禁用：不晚于本行结束日期，且不落入同产线已有区间
+const disabledStartDate = (record: any, current: any) => {
+  if (!current) return false
+  if (record.endDate && current.format('YYYY-MM-DD') > record.endDate) return true
+  return isDateOccupiedByOthers(record, current)
+}
+
+// 结束日期禁用：不早于本行开始日期，且不落入同产线已有区间
+const disabledEndDate = (record: any, current: any) => {
+  if (!current) return false
+  if (record.startDate && current.format('YYYY-MM-DD') < record.startDate) return true
+  return isDateOccupiedByOthers(record, current)
 }
 
 // 取消考核设置
@@ -424,6 +628,37 @@ const completionData = ref([
 .pour-time-input {
   width: 100px;
   text-align: center;
+}
+
+.date-picker-input {
+  width: 120px;
+}
+
+.assess-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.assess-toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.line-filter-select {
+  width: 180px;
+}
+
+.line-select {
+  width: 100%;
+}
+
+.assess-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 .assess-table :deep(.ant-table-thead > tr > th) {
