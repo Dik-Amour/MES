@@ -89,6 +89,12 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/pda/sand-core-inbound': { title: '砂芯入库', path: '/pda/sand-core-inbound', icon: CalendarOutlined },
     '/pda/sand-core-outbound': { title: '砂芯出库', path: '/pda/sand-core-outbound', icon: CalendarOutlined },
     '/pda/exception-handle': { title: '异常处理', path: '/pda/exception-handle', icon: CalendarOutlined },
+    '/pda/core-lowering': { title: '大机组芯下芯', path: '/pda/core-lowering', icon: CalendarOutlined },
+    '/pda/core-marking': { title: '制芯缸盖刻号', path: '/pda/core-marking', icon: CalendarOutlined },
+    // 制芯生产管理路径
+    '/core-production': { title: '制芯生产管理', path: '/core-production/binhai-storage', icon: InboxOutlined },
+    '/core-production/binhai-storage': { title: '滨海砂芯立库', path: '/core-production/binhai-storage', icon: InboxOutlined },
+    '/core-production/inout-record': { title: '立库出入库记录', path: '/core-production/inout-record', icon: InboxOutlined },
     // 可视化路径
     '/dashboard': { title: '寒亭可视化', path: '/dashboard/production', icon: InboxOutlined },
     '/dashboard/production': { title: '生产大屏', path: '/dashboard/production', icon: InboxOutlined },
@@ -148,6 +154,11 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   // 添加PDA操作父级菜单
   if (route.path.startsWith('/pda')) {
     items.push(pathMap['/pda'])
+  }
+
+  // 添加制芯生产管理父级菜单
+  if (route.path.startsWith('/core-production')) {
+    items.push(pathMap['/core-production'])
   }
 
   // 添加现场管理父级菜单

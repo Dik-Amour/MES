@@ -145,6 +145,8 @@
             <a-menu-item key="/pda/sand-core-inbound">砂芯入库</a-menu-item>
             <a-menu-item key="/pda/sand-core-outbound">砂芯出库</a-menu-item>
             <a-menu-item key="/pda/exception-handle">异常处理</a-menu-item>
+            <a-menu-item key="/pda/core-lowering">大机组芯下芯</a-menu-item>
+            <a-menu-item key="/pda/core-marking">制芯缸盖刻号</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="core-making">
@@ -153,6 +155,15 @@
             </template>
             <template #title>制芯计划</template>
             <a-menu-item key="/core-making/binhai-scheduling">滨海制芯排产</a-menu-item>
+          </a-sub-menu>
+
+          <a-sub-menu key="core-production">
+            <template #icon>
+              <InboxOutlined />
+            </template>
+            <template #title>制芯生产管理</template>
+            <a-menu-item key="/core-production/binhai-storage">滨海砂芯立库</a-menu-item>
+            <a-menu-item key="/core-production/inout-record">立库出入库记录</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="site">
@@ -310,6 +321,7 @@ const parentKeyMap: Array<[string, string]> = [
   ['/andon', 'andon'],
   ['/molding', 'molding'],
   ['/pda', 'pda'],
+  ['/core-production', 'core-production'],
   ['/site', 'site'],
   ['/users', 'user'],
   ['/settings', 'system'],

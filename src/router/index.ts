@@ -311,11 +311,36 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/pda/ExceptionHandle.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/pda/core-lowering',
+    name: 'CoreLowering',
+    component: () => import('@/views/pda/CoreLowering.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/core-marking',
+    name: 'CoreMarking',
+    component: () => import('@/views/pda/CoreMarking.vue'),
+    meta: { requiresAuth: true }
+  },
   // 制芯计划路由
   {
     path: '/core-making/binhai-scheduling',
     name: 'BinhaiCoreMakingScheduling',
     component: () => import('@/views/core-making/BinhaiCoreMakingScheduling.vue'),
+    meta: { requiresAuth: true }
+  },
+  // 制芯生产管理路由
+  {
+    path: '/core-production/binhai-storage',
+    name: 'BinhaiCoreStorage',
+    component: () => import('@/views/core-production/BinhaiCoreStorage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/core-production/inout-record',
+    name: 'CoreStorageInOutRecord',
+    component: () => import('@/views/core-production/CoreStorageInOutRecord.vue'),
     meta: { requiresAuth: true }
   },
   // 现场管理路由
