@@ -323,6 +323,55 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/pda/CoreMarking.vue'),
     meta: { requiresAuth: true }
   },
+  // 寒亭制芯 PDA 还原页面
+  {
+    path: '/pda/menu',
+    name: 'PdaOperationMenu',
+    component: () => import('@/views/pda/PdaOperationMenu.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/core-making-task',
+    name: 'CoreMakingTask',
+    component: () => import('@/views/pda/CoreMakingTask.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/manual-core-marking',
+    name: 'ManualCoreMarking',
+    component: () => import('@/views/pda/ManualCoreMarking.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/core-transfer',
+    name: 'CoreTransfer',
+    component: () => import('@/views/pda/CoreTransfer.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/manual-transfer',
+    name: 'ManualTransfer',
+    component: () => import('@/views/pda/ManualTransfer.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/exception-handling',
+    name: 'ExceptionHandling',
+    component: () => import('@/views/pda/ExceptionHandling.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/assembly-marking',
+    name: 'AssemblyMarking',
+    component: () => import('@/views/pda/AssemblyMarking.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pda/test-virtual-storage',
+    name: 'TestVirtualStorage',
+    component: () => import('@/views/pda/TestVirtualStorage.vue'),
+    meta: { requiresAuth: true }
+  },
   // 制芯计划路由
   {
     path: '/core-making/binhai-scheduling',
