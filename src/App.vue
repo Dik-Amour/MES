@@ -403,6 +403,19 @@ const handleLogout = () => {
   transition: all 0.2s;
 }
 
+.app-sider :deep(.ant-layout-sider-children) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app-sider :deep(.ant-menu) {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .logo {
   height: 64px;
   display: flex;
