@@ -26,6 +26,38 @@
         </div>
       </div>
 
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">芯架码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="scannedRackCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handleScanRack">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="lastScannedRack" class="scan-result">
+          <span>已扫描：{{ lastScannedRack.rackCode }}</span>
+          <strong>{{ lastScannedRack.coreName }} · {{ lastScannedRack.quantity }} 颗</strong>
+        </div>
+      </div>
+
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">托盘码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="palletCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handlePalletScan">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="palletInfo" class="scan-result">
+          <span>已扫描：{{ palletInfo.palletCode }}</span>
+          <strong>{{ palletInfo.rfid }}</strong>
+        </div>
+      </div>
+
       <div class="section-block tray-card">
         <div class="tray-title">当前托盘信息</div>
         <a-radio-group v-model:value="selectedItem" class="tray-list">
@@ -38,6 +70,38 @@
         </a-radio-group>
       </div>
 
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">芯架码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="scannedRackCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handleScanRack">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="lastScannedRack" class="scan-result">
+          <span>已扫描：{{ lastScannedRack.rackCode }}</span>
+          <strong>{{ lastScannedRack.coreName }} · {{ lastScannedRack.quantity }} 颗</strong>
+        </div>
+      </div>
+
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">托盘码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="palletCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handlePalletScan">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="palletInfo" class="scan-result">
+          <span>已扫描：{{ palletInfo.palletCode }}</span>
+          <strong>{{ palletInfo.rfid }}</strong>
+        </div>
+      </div>
+
       <div class="section-block tray-card">
         <div class="tray-title">线上托盘</div>
         <a-radio-group v-model:value="selectedItem" class="tray-list">
@@ -48,6 +112,38 @@
             <div class="tray-info"><strong>RFID20251105003</strong><span>水套芯组 · 4 颗</span></div>
           </a-radio>
         </a-radio-group>
+      </div>
+
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">芯架码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="scannedRackCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handleScanRack">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="lastScannedRack" class="scan-result">
+          <span>已扫描：{{ lastScannedRack.rackCode }}</span>
+          <strong>{{ lastScannedRack.coreName }} · {{ lastScannedRack.quantity }} 颗</strong>
+        </div>
+      </div>
+
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">托盘码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="palletCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handlePalletScan">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="palletInfo" class="scan-result">
+          <span>已扫描：{{ palletInfo.palletCode }}</span>
+          <strong>{{ palletInfo.rfid }}</strong>
+        </div>
       </div>
 
       <div class="section-block tray-card">
@@ -103,7 +199,9 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { simulateRackScan } from '@/lib/pdaRackScan'
+import { simulatePalletScan } from '@/lib/pdaPalletScan'
+import { ArrowLeftOutlined, ScanOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const line = ref('大四HWS线')
@@ -112,6 +210,24 @@ const selectedItem = ref('current')
 const actionVisible = ref(false)
 const carrierCode = ref<string>()
 const selectedLocation = ref('')
+const scannedRackCode = ref('')
+const lastScannedRack = ref<ReturnType<typeof simulateRackScan> | null>(null)
+const palletCode = ref('')
+const palletInfo = ref<ReturnType<typeof simulatePalletScan> | null>(null)
+
+const handlePalletScan = () => {
+  const result = simulatePalletScan(palletCode.value)
+  palletCode.value = result.palletCode
+  palletInfo.value = result
+  message.success(`托盘扫码成功：${result.palletCode}`)
+}
+
+const handleScanRack = () => {
+  const rack = simulateRackScan()
+  scannedRackCode.value = rack.rackCode
+  lastScannedRack.value = rack
+  message.success(`芯架扫码成功：${rack.rackCode}`)
+}
 
 const lineOptions = ['大四HWS线', '大三KW线'].map(value => ({ label: value, value }))
 const workstationOptions = ['界面下料', '界面上料', '异常处理'].map(value => ({ label: value, value }))
@@ -148,6 +264,24 @@ const goBack = () => router.back()
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.rack-scan-card {
+  padding: 4px 16px;
+}
+
+.scan-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 12px;
+  color: #666;
+  font-size: 13px;
+}
+
+.scan-result strong {
+  color: #1890ff;
+  font-weight: 500;
 }
 
 .tray-card {

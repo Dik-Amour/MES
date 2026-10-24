@@ -17,21 +17,25 @@
           <div class="form-row">
             <div class="form-label">产线：</div>
             <div class="form-control">
-              <a-input
+              <a-select
                 v-model:value="formData.productionLine"
-                placeholder="产线"
-                readonly
-                @click="showProductionLinePicker = true"
+                placeholder="请选择产线"
+                :options="productionLineOptions"
+                allow-clear
+                style="width: 100%"
+                @change="handleProductionLineChange"
               />
             </div>
           </div>
           <div class="form-row last">
             <div class="form-label">上机位：</div>
             <div class="form-control with-suffix">
-              <a-input
+              <a-select
                 v-model:value="formData.machinePosition"
-                placeholder="上机位"
+                placeholder="请选择上机位"
+                :options="machinePositionOptions"
                 allow-clear
+                style="width: 100%"
               />
               <div class="scan-btn" @click="handleScanMachinePosition">
                 <QrcodeOutlined />
@@ -132,27 +136,6 @@
         </div>
       </div>
 
-      <!-- 产线选择弹窗 -->
-      <a-drawer
-        v-model:open="showProductionLinePicker"
-        title="选择产线"
-        placement="bottom"
-        :height="360"
-        :closable="true"
-      >
-        <div class="picker-list">
-          <div
-            v-for="line in productionLineOptions"
-            :key="line"
-            class="picker-item"
-            :class="{ active: formData.productionLine === line }"
-            @click="selectProductionLine(line)"
-          >
-            <span>{{ line }}</span>
-            <CheckOutlined v-if="formData.productionLine === line" class="check-icon" />
-          </div>
-        </div>
-      </a-drawer>
     </div>
 
     <!-- 底部操作区 -->
@@ -169,6 +152,8 @@ import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
+import { getMachinePositionOptions, scanMachinePosition } from '@/lib/pdaMachinePosition'
+import { simulateRackScan } from '@/lib/pdaRackScan'
 import {
   ArrowLeftOutlined,
   CheckOutlined,
@@ -185,7 +170,9 @@ const productionLineOptions = [
   '缸体线',
   '缸盖线',
   '壳体线'
-]
+].map(value => ({ label: value, value }))
+
+const machinePositionOptions = ref<{ label: string; value: string }[]>([])
 
 // 表单数据
 const formData = reactive({
@@ -213,26 +200,24 @@ const rackList = ref<{
   scanTime: string
 }[]>([])
 
-// 产线选择弹窗
-const showProductionLinePicker = ref(false)
-
 // 是否可提交
 const canSubmit = computed(() => {
   return formData.productionLine && formData.machinePosition && formData.boxCode && rackList.value.length > 0
 })
 
-// 选择产线
-const selectProductionLine = (line: string) => {
-  formData.productionLine = line
+// 产线变化后加载关联的上机位
+const handleProductionLineChange = (line?: string) => {
   formData.machinePosition = undefined
-  showProductionLinePicker.value = false
+  machinePositionOptions.value = line ? getMachinePositionOptions(line) : []
 }
 
-// 扫码获取上机位
+// 扫码获取上机位，并同步回填关联产线
 const handleScanMachinePosition = () => {
-  // TODO: 调用扫码接口获取上机位信息
-  formData.machinePosition = '机体线封箱'
-  message.success('上机位扫码成功')
+  const result = scanMachinePosition(formData.productionLine, productionLineOptions[0].value)
+  formData.productionLine = result.productionLine
+  formData.machinePosition = result.machinePosition
+  machinePositionOptions.value = getMachinePositionOptions(result.productionLine)
+  message.success(`扫码成功：${result.productionLine} / ${result.machinePosition}`)
 }
 
 // 扫描芯架码（直接填充到已扫描芯架列表）

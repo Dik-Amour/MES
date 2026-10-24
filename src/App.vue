@@ -147,8 +147,6 @@
             <a-menu-item key="/pda/exception-handle">异常处理</a-menu-item>
             <a-menu-item key="/pda/core-lowering">大机组芯下芯</a-menu-item>
             <a-menu-item key="/pda/core-marking">制芯缸盖刻号</a-menu-item>
-            <a-menu-item key="/pda/menu">PDA功能菜单</a-menu-item>
-            <a-menu-item key="/pda/core-making-task">制芯任务</a-menu-item>
             <a-menu-item key="/pda/manual-core-marking">人工刻号</a-menu-item>
             <a-menu-item key="/pda/core-transfer">组芯流转</a-menu-item>
             <a-menu-item key="/pda/manual-transfer">人工流转</a-menu-item>

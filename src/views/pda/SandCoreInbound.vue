@@ -17,11 +17,13 @@
           <div class="form-row">
             <div class="form-label">产线：</div>
             <div class="form-control">
-              <a-input
+              <a-select
                 v-model:value="formData.productionLine"
-                placeholder="产线"
-                readonly
-                @click="showProductionLinePicker = true"
+                placeholder="请选择产线"
+                :options="productionLineOptions"
+                allow-clear
+                style="width: 100%"
+                @change="handleProductionLineChange"
               />
             </div>
           </div>
@@ -126,27 +128,6 @@
         </div>
       </div>
 
-      <!-- 产线选择弹窗 -->
-      <a-drawer
-        v-model:open="showProductionLinePicker"
-        title="选择产线"
-        placement="bottom"
-        :height="360"
-        :closable="true"
-      >
-        <div class="picker-list">
-          <div
-            v-for="line in productionLineOptions"
-            :key="line"
-            class="picker-item"
-            :class="{ active: formData.productionLine === line }"
-            @click="selectProductionLine(line)"
-          >
-            <span>{{ line }}</span>
-            <CheckOutlined v-if="formData.productionLine === line" class="check-icon" />
-          </div>
-        </div>
-      </a-drawer>
     </div>
 
     <!-- 底部操作区 -->
@@ -162,6 +143,8 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { getMachinePositionOptions, scanMachinePosition } from '@/lib/pdaMachinePosition'
+import { simulateRackScan } from '@/lib/pdaRackScan'
 import {
   ArrowLeftOutlined,
   CheckOutlined,
@@ -180,7 +163,7 @@ const productionLineOptions = [
   '造型二线中件清理',
   '造型一线大件清理',
   '造型一线中件清理'
-]
+].map(value => ({ label: value, value }))
 
 // 上机位选项（可根据产线动态加载）
 const machinePositionOptions = ref<{ label: string; value: string }[]>([])
@@ -218,37 +201,24 @@ const totalQuantity = computed(() => {
   return rackInfoList.value.reduce((sum, item) => sum + item.quantity, 0)
 })
 
-// 产线选择弹窗
-const showProductionLinePicker = ref(false)
-
 // 是否可提交
 const canSubmit = computed(() => {
   return formData.productionLine && formData.machinePosition && formData.storageArea && rackInfoList.value.length > 0
 })
 
-// 选择产线
-const selectProductionLine = (line: string) => {
-  formData.productionLine = line
+// 产线变化后重新加载关联的上机位
+const handleProductionLineChange = (line?: string) => {
   formData.machinePosition = undefined
-  showProductionLinePicker.value = false
-  // 根据产线加载上机位选项
-  loadMachinePositions(line)
+  machinePositionOptions.value = line ? getMachinePositionOptions(line) : []
 }
 
-// 加载上机位选项（模拟）
-const loadMachinePositions = (line: string) => {
-  // TODO: 根据产线从接口获取上机位列表
-  machinePositionOptions.value = [
-    { label: `${line}-上机位1`, value: `${line}-上机位1` },
-    { label: `${line}-上机位2`, value: `${line}-上机位2` },
-    { label: `${line}-上机位3`, value: `${line}-上机位3` }
-  ]
-}
-
-// 扫码获取上机位
+// 扫码获取上机位，并同步回填关联产线
 const handleScanMachinePosition = () => {
-  // TODO: 调用扫码接口获取上机位信息
-  message.info('扫码功能开发中...')
+  const result = scanMachinePosition(formData.productionLine, productionLineOptions[0].value)
+  formData.productionLine = result.productionLine
+  formData.machinePosition = result.machinePosition
+  machinePositionOptions.value = getMachinePositionOptions(result.productionLine)
+  message.success(`扫码成功：${result.productionLine} / ${result.machinePosition}`)
 }
 
 // 扫码芯架码（直接添加）

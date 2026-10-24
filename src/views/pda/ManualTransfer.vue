@@ -95,7 +95,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { simulateRackScan } from '@/lib/pdaRackScan'
+import { ArrowLeftOutlined, ScanOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const line = ref('大四HWS线')
@@ -113,6 +114,15 @@ const selectedFrame = ref<{
   code: string
   coreCode: string
 } | null>(null)
+const scannedRackCode = ref('')
+const lastScannedRack = ref<ReturnType<typeof simulateRackScan> | null>(null)
+
+const handleScanRack = () => {
+  const rack = simulateRackScan()
+  scannedRackCode.value = rack.rackCode
+  lastScannedRack.value = rack
+  message.success(`芯架扫码成功：${rack.rackCode}`)
+}
 
 const confirmCore = (name: string, code: string) => {
   if (!code.trim()) {
@@ -147,6 +157,24 @@ const goBack = () => router.back()
 
 .form-control + .ant-btn {
   margin-left: 8px;
+}
+
+.rack-scan-card {
+  padding: 4px 16px;
+}
+
+.scan-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 12px;
+  color: #666;
+  font-size: 13px;
+}
+
+.scan-result strong {
+  color: #1890ff;
+  font-weight: 500;
 }
 
 .frame-section {

@@ -17,21 +17,25 @@
           <div class="form-row">
             <div class="form-label">产线：</div>
             <div class="form-control">
-              <a-input
+              <a-select
                 v-model:value="formData.productionLine"
-                placeholder="产线"
-                readonly
-                @click="showProductionLinePicker = true"
+                placeholder="请选择产线"
+                :options="productionLineOptions"
+                allow-clear
+                style="width: 100%"
+                @change="handleProductionLineChange"
               />
             </div>
           </div>
           <div class="form-row last">
             <div class="form-label">上机位：</div>
             <div class="form-control with-suffix">
-              <a-input
+              <a-select
                 v-model:value="formData.machinePosition"
-                placeholder="请输入或扫描上机位"
+                placeholder="请选择或扫码获取上机位"
+                :options="machinePositionOptions"
                 allow-clear
+                style="width: 100%"
               />
               <div class="scan-btn" @click="handleScanMachinePosition">
                 <QrcodeOutlined />
@@ -50,7 +54,7 @@
             <div class="form-control with-suffix">
               <a-input
                 v-model:value="formData.palletCode"
-                placeholder="请扫码"
+                placeholder="点击右侧按钮模拟扫码"
                 @press-enter="handlePalletScan"
               />
               <div class="scan-btn" @click="handlePalletScan">
@@ -145,27 +149,6 @@
         </div>
       </div>
 
-      <!-- 产线选择弹窗 -->
-      <a-drawer
-        v-model:open="showProductionLinePicker"
-        title="选择产线"
-        placement="bottom"
-        :height="360"
-        :closable="true"
-      >
-        <div class="picker-list">
-          <div
-            v-for="line in productionLineOptions"
-            :key="line"
-            class="picker-item"
-            :class="{ active: formData.productionLine === line }"
-            @click="selectProductionLine(line)"
-          >
-            <span>{{ line }}</span>
-            <CheckOutlined v-if="formData.productionLine === line" class="check-icon" />
-          </div>
-        </div>
-      </a-drawer>
     </div>
 
     <!-- 底部操作区 -->
@@ -183,6 +166,8 @@ import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
+import { getMachinePositionOptions, scanMachinePosition } from '@/lib/pdaMachinePosition'
+import { simulatePalletScan } from '@/lib/pdaPalletScan'
 import {
   ArrowLeftOutlined,
   CheckOutlined,
@@ -199,7 +184,9 @@ const productionLineOptions = [
   '缸盖二线',
   '缸体线',
   '壳体线'
-]
+].map(value => ({ label: value, value }))
+
+const machinePositionOptions = ref<{ label: string; value: string }[]>([])
 
 // 表单数据
 const formData = reactive({
@@ -221,48 +208,32 @@ const boundRacks = ref<{
   bindTime: string
 }[]>([])
 
-// 产线选择弹窗
-const showProductionLinePicker = ref(false)
-
 // 是否可提交
 const canSubmit = computed(() => {
   return formData.productionLine && formData.machinePosition && palletInfo.value && formData.engrave1.trim()
 })
 
-// 选择产线
-const selectProductionLine = (line: string) => {
-  formData.productionLine = line
+// 产线变化后加载关联的上机位
+const handleProductionLineChange = (line?: string) => {
   formData.machinePosition = undefined
-  showProductionLinePicker.value = false
+  machinePositionOptions.value = line ? getMachinePositionOptions(line) : []
 }
 
-// 扫码获取上机位
+// 扫码获取上机位，并同步回填关联产线
 const handleScanMachinePosition = () => {
-  // TODO: 调用扫码接口获取上机位信息
-  formData.machinePosition = '缸盖线刻号工位'
-  message.success('上机位扫码成功')
+  const result = scanMachinePosition(formData.productionLine, productionLineOptions[0].value)
+  formData.productionLine = result.productionLine
+  formData.machinePosition = result.machinePosition
+  machinePositionOptions.value = getMachinePositionOptions(result.productionLine)
+  message.success(`扫码成功：${result.productionLine} / ${result.machinePosition}`)
 }
 
 // 扫描托盘码（读出托盘上的砂芯信息）
 const handlePalletScan = () => {
-  const code = formData.palletCode.trim()
-  if (!code) {
-    message.warning('请扫描托盘码')
-    return
-  }
-  // TODO: 调用接口根据托盘码查询砂芯信息，以下为模拟数据
-  const mockMap: Record<string, { coreNo: string; coreName: string; coreDate: string; maker: string }> = {
-    'TP202309001': { coreNo: 'C000005980', coreName: '1000978236R_KMA_jzx_缸盖芯', coreDate: '2026-10-22', maker: '张三' },
-    'TP202309002': { coreNo: 'C000006123', coreName: '1000978237R_KMA_jzx_进气芯', coreDate: '2026-10-22', maker: '李四' },
-    'TP202309003': { coreNo: 'C000006230', coreName: '1001024589R_KMA_jzx_排气芯', coreDate: '2026-10-21', maker: '王五' }
-  }
-  palletInfo.value = mockMap[code] || {
-    coreNo: `C${Math.floor(Math.random() * 900000000 + 100000000)}`,
-    coreName: `${code}_砂芯`,
-    coreDate: dayjs().format('YYYY-MM-DD'),
-    maker: '未知'
-  }
-  message.success(`托盘 ${code} 信息读取成功`)
+  const result = simulatePalletScan(formData.palletCode)
+  formData.palletCode = result.palletCode
+  palletInfo.value = result
+  message.success(`托盘 ${result.palletCode} 信息读取成功`)
 }
 
 // 扫码绑定芯架

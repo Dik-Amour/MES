@@ -34,6 +34,22 @@
         </div>
       </div>
 
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">芯架码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="scannedRackCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handleScanRack">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="lastScannedRack" class="scan-result">
+          <span>已扫描：{{ lastScannedRack.rackCode }}</span>
+          <strong>{{ lastScannedRack.coreName }} · {{ lastScannedRack.quantity }} 颗</strong>
+        </div>
+      </div>
+
       <div v-if="moldModel" class="section-block task-list-card">
         <div class="task-list-header">
           <span>制芯任务列表</span>
@@ -103,7 +119,8 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { ArrowLeftOutlined, CameraOutlined } from '@ant-design/icons-vue'
+import { simulateRackScan } from '@/lib/pdaRackScan'
+import { ArrowLeftOutlined, CameraOutlined, ScanOutlined } from '@ant-design/icons-vue'
 
 interface Task {
   id: number
@@ -128,6 +145,15 @@ const selectedTask = ref<Task | null>(null)
 const shift = ref('白班')
 const reportQuantity = ref(0)
 const wasteQuantity = ref(0)
+const scannedRackCode = ref('')
+const lastScannedRack = ref<ReturnType<typeof simulateRackScan> | null>(null)
+
+const handleScanRack = () => {
+  const rack = simulateRackScan()
+  scannedRackCode.value = rack.rackCode
+  lastScannedRack.value = rack
+  message.success(`芯架扫码成功：${rack.rackCode}`)
+}
 
 const lineOptions = ['制芯线1', '制芯线2', '制芯线3'].map(value => ({ label: value, value }))
 const workstationOptions = ['工位1', '工位2', '工位3'].map(value => ({ label: value, value }))
@@ -193,6 +219,24 @@ const goBack = () => router.back()
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.rack-scan-card {
+  padding: 4px 16px;
+}
+
+.scan-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 12px;
+  color: #666;
+  font-size: 13px;
+}
+
+.scan-result strong {
+  color: #1890ff;
+  font-weight: 500;
 }
 
 .mold-card,

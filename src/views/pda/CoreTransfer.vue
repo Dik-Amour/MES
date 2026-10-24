@@ -84,6 +84,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { simulateRackScan } from '@/lib/pdaRackScan'
 import { ArrowLeftOutlined, ScanOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -109,12 +110,15 @@ interface CoreInfo {
 const consumptionInfo = ref<CoreInfo | null>(null)
 const transferInfo = ref<CoreInfo | null>(null)
 
-const coreInfo = (): CoreInfo => ({
-  taskNumber: '612600013459R',
-  coreName: '进气道砂芯',
-  coreCount: 48,
-  batch: 'PF-20251014045'
-})
+const coreInfo = (): CoreInfo => {
+  const rack = simulateRackScan()
+  return {
+    taskNumber: rack.coreNo,
+    coreName: rack.coreName,
+    coreCount: rack.quantity,
+    batch: rack.batch
+  }
+}
 
 const scanFrame = (type: 'consumption' | 'transfer') => {
   const info = coreInfo()

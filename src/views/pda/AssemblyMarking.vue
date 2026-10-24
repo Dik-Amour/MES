@@ -41,12 +41,44 @@
         </div>
       </div>
 
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">芯架码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="scannedRackCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handleScanRack">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="lastScannedRack" class="scan-result">
+          <span>已扫描：{{ lastScannedRack.rackCode }}</span>
+          <strong>{{ lastScannedRack.coreName }} · {{ lastScannedRack.quantity }} 颗</strong>
+        </div>
+      </div>
+
+      <div class="section-block rack-scan-card">
+        <div class="form-row last">
+          <div class="form-label">托盘码：</div>
+          <div class="form-control with-suffix">
+            <a-input v-model:value="palletCode" readonly placeholder="点击右侧按钮模拟扫码" />
+            <div class="scan-btn" @click="handlePalletScan">
+              <ScanOutlined />
+            </div>
+          </div>
+        </div>
+        <div v-if="palletInfo" class="scan-result">
+          <span>已扫描：{{ palletInfo.palletCode }}</span>
+          <strong>{{ palletInfo.rfid }}</strong>
+        </div>
+      </div>
+
       <div class="section-block info-card">
         <div class="info-header">托盘信息</div>
-        <div class="pda-info-row"><span>当前托盘RFID：</span><strong>RFID-ML-001234</strong></div>
-        <div class="pda-info-row"><span>砂芯名称：</span><strong>进气道砂芯</strong></div>
-        <div class="pda-info-row"><span>制芯任务：</span><strong>612600013460R/机体</strong></div>
-        <div class="pda-info-row"><span>批次号：</span><strong>BATCH-20251103-B</strong></div>
+        <div class="pda-info-row"><span>当前托盘RFID：</span><strong>{{ palletInfo?.rfid || "RFID-ML-001234" }}</strong></div>
+        <div class="pda-info-row"><span>砂芯名称：</span><strong>{{ palletInfo?.coreName || "进气道砂芯" }}</strong></div>
+        <div class="pda-info-row"><span>制芯任务：</span><strong>{{ palletInfo?.coreNo || "612600013460R/机体" }}</strong></div>
+        <div class="pda-info-row"><span>批次号：</span><strong>{{ palletInfo?.maker || "BATCH-20251103-B" }}</strong></div>
       </div>
     </div>
 
@@ -62,13 +94,33 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { simulateRackScan } from '@/lib/pdaRackScan'
+import { simulatePalletScan } from '@/lib/pdaPalletScan'
+import { ArrowLeftOutlined, ScanOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const line = ref('大四HWS线')
 const markingType = ref('人工刻号')
 const serialNumber = ref('')
 const serialSet = ref(false)
+const scannedRackCode = ref('')
+const lastScannedRack = ref<ReturnType<typeof simulateRackScan> | null>(null)
+const palletCode = ref('')
+const palletInfo = ref<ReturnType<typeof simulatePalletScan> | null>(null)
+
+const handlePalletScan = () => {
+  const result = simulatePalletScan(palletCode.value)
+  palletCode.value = result.palletCode
+  palletInfo.value = result
+  message.success(`托盘扫码成功：${result.palletCode}`)
+}
+
+const handleScanRack = () => {
+  const rack = simulateRackScan()
+  scannedRackCode.value = rack.rackCode
+  lastScannedRack.value = rack
+  message.success(`芯架扫码成功：${rack.rackCode}`)
+}
 
 const lineOptions = [
   { label: '大四HWS线', value: '大四HWS线' },
@@ -117,6 +169,24 @@ const goBack = () => router.back()
   display: flex;
   gap: 10px;
   padding: 12px 0;
+}
+
+.rack-scan-card {
+  padding: 4px 16px;
+}
+
+.scan-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 12px;
+  color: #666;
+  font-size: 13px;
+}
+
+.scan-result strong {
+  color: #1890ff;
+  font-weight: 500;
 }
 
 .info-card {
