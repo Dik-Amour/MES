@@ -161,6 +161,7 @@
             </template>
             <template #title>制芯计划</template>
             <a-menu-item key="/core-making/binhai-scheduling">滨海制芯排产</a-menu-item>
+            <a-menu-item key="/core-making/sand-core-takt">砂芯生产节拍</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="core-production">
@@ -327,6 +328,7 @@ const parentKeyMap: Array<[string, string]> = [
   ['/andon', 'andon'],
   ['/molding', 'molding'],
   ['/pda', 'pda'],
+  ['/core-making', 'core-making'],
   ['/core-production', 'core-production'],
   ['/site', 'site'],
   ['/users', 'user'],

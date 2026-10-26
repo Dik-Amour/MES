@@ -41,7 +41,6 @@
                 <QrcodeOutlined />
               </div>
             </div>
-            <div class="form-tip">可手动输入或扫码获取上机位信息</div>
           </div>
         </div>
       </div>
@@ -61,7 +60,6 @@
                 <ScanOutlined />
               </div>
             </div>
-            <div class="form-tip">读取托盘码后自动带出砂芯信息，可扫码更新</div>
           </div>
         </div>
         <!-- 托盘上的砂芯信息（只读） -->
@@ -85,7 +83,6 @@
               <div class="info-cell-value">{{ palletInfo.maker }}</div>
             </div>
           </div>
-          <div class="form-tip">系统自动带出，不可编辑</div>
         </div>
       </div>
 
@@ -115,12 +112,23 @@
         </div>
       </div>
 
-      <!-- 区块4：扫码绑定芯架 -->
+      <!-- 区块4：芯架码绑定 -->
       <div class="section-block bind-block">
-        <div class="bind-btn" @click="handleBindRackScan">
-          <QrcodeOutlined /> 扫码绑定芯架
+        <div class="section-body">
+          <div class="form-row last">
+            <div class="form-label">芯架码：</div>
+            <div class="form-control with-suffix">
+              <a-input
+                v-model:value="formData.rackCode"
+                placeholder="请扫码或输入芯架码"
+                @press-enter="handleBindRackScan"
+              />
+              <div class="scan-btn" @click="handleBindRackScan">
+                <ScanOutlined />
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bind-tip">扫描芯架二维码完成绑定操作</div>
         <!-- 已绑定芯架列表 -->
         <div v-if="boundRacks.length > 0" class="rack-list-body">
           <div v-for="(item, index) in boundRacks" :key="item.rackCode" class="rack-card">
@@ -156,7 +164,6 @@
       <a-button type="primary" block size="large" class="submit-btn" :disabled="!canSubmit" @click="handleSubmit">
         <CheckOutlined /> 确认绑定
       </a-button>
-      <div class="footer-tip">请确保输入的信息准确无误，确认后将完成绑定操作</div>
     </div>
   </div>
 </template>
@@ -168,6 +175,7 @@ import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
 import { getMachinePositionOptions, scanMachinePosition } from '@/lib/pdaMachinePosition'
 import { simulatePalletScan } from '@/lib/pdaPalletScan'
+import { simulateRackScan } from '@/lib/pdaRackScan'
 import {
   ArrowLeftOutlined,
   CheckOutlined,
@@ -193,6 +201,7 @@ const formData = reactive({
   productionLine: undefined as string | undefined,
   machinePosition: undefined as string | undefined,
   palletCode: '',
+  rackCode: '',
   engrave1: '',
   engrave2: ''
 })
@@ -236,14 +245,14 @@ const handlePalletScan = () => {
   message.success(`托盘 ${result.palletCode} 信息读取成功`)
 }
 
-// 扫码绑定芯架
+// 扫码或输入芯架码绑定
 const handleBindRackScan = () => {
   if (!palletInfo.value) {
     message.warning('请先扫描托盘码读取砂芯信息')
     return
   }
-  // TODO: 调用接口查询芯架信息，以下为模拟数据
-  const rackCode = `GJ${Math.floor(Math.random() * 9000 + 1000)}`
+  const enteredCode = formData.rackCode.trim()
+  const rackCode = enteredCode || simulateRackScan(boundRacks.value.map(item => item.rackCode)).rackCode
   if (boundRacks.value.some(item => item.rackCode === rackCode)) {
     message.warning('该芯架已绑定，请勿重复')
     return
@@ -254,6 +263,7 @@ const handleBindRackScan = () => {
     coreName: palletInfo.value.coreName,
     bindTime: dayjs().format('HH:mm:ss')
   })
+  formData.rackCode = ''
   message.success(`芯架 ${rackCode} 绑定成功`)
 }
 
@@ -271,6 +281,7 @@ const handleSubmit = () => {
   formData.productionLine = undefined
   formData.machinePosition = undefined
   formData.palletCode = ''
+  formData.rackCode = ''
   formData.engrave1 = ''
   formData.engrave2 = ''
   palletInfo.value = null
@@ -357,14 +368,6 @@ const goBack = () => {
   border-bottom: none;
 }
 
-/* 辅助提示 */
-.form-tip {
-  width: 100%;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #999;
-}
-
 /* 托盘砂芯信息 */
 .pallet-info {
   margin: 0 16px 12px;
@@ -408,34 +411,7 @@ const goBack = () => {
 
 /* 扫码绑定芯架 */
 .bind-block {
-  padding: 16px;
-}
-
-.bind-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 48px;
-  background: #52c41a;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  user-select: none;
-  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.35);
-}
-
-.bind-btn:active {
-  background: #49ad14;
-  transform: scale(0.99);
-}
-
-.bind-tip {
-  margin-top: 8px;
-  text-align: center;
-  font-size: 12px;
-  color: #999;
+  padding-bottom: 16px;
 }
 
 /* 已绑定芯架列表 */
@@ -443,7 +419,7 @@ const goBack = () => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 12px;
+  margin: 12px 16px 0;
   max-height: 320px;
   overflow-y: auto;
 }
@@ -517,10 +493,4 @@ const goBack = () => {
   border-radius: 8px;
 }
 
-.footer-tip {
-  margin-top: 8px;
-  text-align: center;
-  font-size: 12px;
-  color: #999;
-}
 </style>

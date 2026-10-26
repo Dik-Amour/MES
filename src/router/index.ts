@@ -323,13 +323,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/pda/CoreMarking.vue'),
     meta: { requiresAuth: true }
   },
-  // 寒亭制芯 PDA 还原页面
-  {
-    path: '/pda/menu',
-    name: 'PdaOperationMenu',
-    component: () => import('@/views/pda/PdaOperationMenu.vue'),
-    meta: { requiresAuth: true }
-  },
   {
     path: '/pda/core-making-task',
     name: 'CoreMakingTask',
@@ -377,6 +370,12 @@ const routes: RouteRecordRaw[] = [
     path: '/core-making/binhai-scheduling',
     name: 'BinhaiCoreMakingScheduling',
     component: () => import('@/views/core-making/BinhaiCoreMakingScheduling.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/core-making/sand-core-takt',
+    name: 'SandCoreTaktTime',
+    component: () => import('@/views/core-making/SandCoreTaktTime.vue'),
     meta: { requiresAuth: true }
   },
   // 制芯生产管理路由

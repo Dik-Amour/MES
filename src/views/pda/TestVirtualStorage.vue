@@ -24,9 +24,6 @@
         <a-button type="primary" block size="large" @click="router.push('/pda/manual-transfer')">
           打开人工流转页面
         </a-button>
-        <a-button block size="large" @click="router.push('/pda/menu')">
-          返回PDA菜单
-        </a-button>
       </div>
 
       <div class="test-card">
