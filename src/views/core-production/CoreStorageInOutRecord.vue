@@ -57,11 +57,6 @@
               {{ record.type }}
             </a-tag>
           </template>
-          <template v-if="column.dataIndex === 'status'">
-            <a-tag :color="record.status === '成功' ? 'blue' : 'red'">
-              {{ record.status }}
-            </a-tag>
-          </template>
         </template>
       </a-table>
       <div class="table-pagination">
@@ -98,25 +93,23 @@ const typeOptions = [
 
 // 表格列
 const columns = [
+  { title: '托盘号', dataIndex: 'palletNo', key: 'palletNo', width: 150, align: 'center' as const },
+  { title: '砂芯编号', dataIndex: 'coreCode', key: 'coreCode', width: 120, align: 'center' as const },
+  { title: '砂芯名称', dataIndex: 'coreName', key: 'coreName', width: 180 },
   { title: '时间', dataIndex: 'time', key: 'time', width: 170 },
   { title: '类型', dataIndex: 'type', key: 'type', width: 80, align: 'center' as const },
-  { title: '料框号', dataIndex: 'frameNo', key: 'frameNo', width: 120, align: 'center' as const },
-  { title: '砂芯名称', dataIndex: 'coreName', key: 'coreName', width: 180 },
-  { title: '毛坯件号', dataIndex: 'partNo', key: 'partNo', width: 160 },
-  { title: '数量', dataIndex: 'quantity', key: 'quantity', width: 80, align: 'center' as const },
-  { title: '操作人', dataIndex: 'operator', key: 'operator', width: 100, align: 'center' as const },
-  { title: '状态', dataIndex: 'status', key: 'status', width: 90, align: 'center' as const }
+  { title: '设备名称', dataIndex: 'deviceName', key: 'deviceName', width: 150 }
 ]
 
 // 模拟数据
 let rowKey = 0
 const recordData = ref([
-  { key: ++rowKey, time: '2026-10-22 09:30:02', type: '入库', frameNo: 'KJ-10025', coreName: '液压阀体芯', partNo: 'WP14-001', quantity: 45, operator: '张三', status: '成功' },
-  { key: ++rowKey, time: '2026-10-22 08:42:11', type: '入库', frameNo: 'KJ-10022', coreName: '发动机缸盖芯', partNo: 'WP12-002', quantity: 36, operator: '张三', status: '成功' },
-  { key: ++rowKey, time: '2026-10-22 08:15:20', type: '入库', frameNo: 'KJ-10021', coreName: '发动机缸体芯', partNo: 'WP12-001', quantity: 40, operator: '李四', status: '成功' },
-  { key: ++rowKey, time: '2026-10-21 16:10:35', type: '出库', frameNo: 'KJ-10018', coreName: '发动机缸体芯', partNo: 'WP12-001', quantity: 38, operator: '李四', status: '成功' },
-  { key: ++rowKey, time: '2026-10-21 15:05:48', type: '入库', frameNo: 'KJ-10024', coreName: '离合器壳体芯', partNo: 'WP13-002', quantity: 28, operator: '王五', status: '成功' },
-  { key: ++rowKey, time: '2026-10-21 10:22:07', type: '出库', frameNo: 'KJ-10019', coreName: '变速箱壳体芯', partNo: 'WP13-001', quantity: 30, operator: '王五', status: '失败' }
+  { key: ++rowKey, palletNo: 'TP-A-10025', coreCode: 'SC-006', coreName: '机体主油道砂芯', time: '2026-10-28 09:30:02', type: '入库', deviceName: '堆垛机1号' },
+  { key: ++rowKey, palletNo: 'TP-A-10022', coreCode: 'SC-002', coreName: '缸盖水道砂芯', time: '2026-10-28 08:42:11', type: '入库', deviceName: '堆垛机1号' },
+  { key: ++rowKey, palletNo: 'TP-A-10021', coreCode: 'SC-001', coreName: '缸盖内腔砂芯A', time: '2026-10-28 08:15:20', type: '入库', deviceName: '堆垛机2号' },
+  { key: ++rowKey, palletNo: 'TP-A-10018', coreCode: 'SC-001', coreName: '缸盖内腔砂芯A', time: '2026-10-27 16:10:35', type: '出库', deviceName: '堆垛机2号' },
+  { key: ++rowKey, palletNo: 'TP-A-10024', coreCode: 'SC-005', coreName: '机体顶盖砂芯', time: '2026-10-27 15:05:48', type: '入库', deviceName: '出入库输送线' },
+  { key: ++rowKey, palletNo: 'TP-B-10019', coreCode: 'SC-003', coreName: '缸盖气道砂芯', time: '2026-10-27 10:22:07', type: '出库', deviceName: '出入库输送线' }
 ])
 
 // 筛选

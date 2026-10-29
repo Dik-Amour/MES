@@ -171,6 +171,7 @@
             <template #title>制芯生产管理</template>
             <a-menu-item key="/core-production/binhai-storage">滨海砂芯立库</a-menu-item>
             <a-menu-item key="/core-production/inout-record">立库出入库记录</a-menu-item>
+            <a-menu-item key="/core-production/marking-record">缸盖刻号记录</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="site">

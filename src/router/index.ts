@@ -391,6 +391,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/core-production/CoreStorageInOutRecord.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/core-production/marking-record',
+    name: 'CoreMarkingRecord',
+    component: () => import('@/views/core-production/CoreMarkingRecord.vue'),
+    meta: { requiresAuth: true }
+  },
   // 现场管理路由
   {
     path: '/site/safety-inspection',

@@ -50,13 +50,31 @@
         bordered
         size="small"
         class="data-table"
+        :scroll="{ x: 1800 }"
         :row-key="(record: any) => record.key"
       >
         <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 'status'">
-            <a-tag :color="record.status === '在库' ? 'green' : 'orange'">
+          <!-- 是否有货 -->
+          <template v-if="column.dataIndex === 'hasStock'">
+            <a-tag :color="record.hasStock ? 'green' : 'default'">
+              {{ record.hasStock ? '有货' : '无货' }}
+            </a-tag>
+          </template>
+          <!-- 锁定 -->
+          <template v-else-if="column.dataIndex === 'locked'">
+            <a-tag :color="record.locked ? 'red' : 'default'">
+              {{ record.locked ? '锁定' : '未锁定' }}
+            </a-tag>
+          </template>
+          <!-- 状态 -->
+          <template v-else-if="column.dataIndex === 'status'">
+            <a-tag :color="statusColorMap[record.status]">
               {{ record.status }}
             </a-tag>
+          </template>
+          <!-- 空值显示为 — -->
+          <template v-else-if="emptyFallbackKeys.includes(column.dataIndex)">
+            {{ record[column.dataIndex] || '—' }}
           </template>
         </template>
       </a-table>
@@ -83,38 +101,75 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 const query = ref<{ coreName: string; status?: string }>({ coreName: '', status: undefined })
 
 const statusOptions = [
-  { value: '在库', label: '在库' },
-  { value: '已出库', label: '已出库' }
+  { value: '可用', label: '可用' },
+  { value: '不可用', label: '不可用' },
+  { value: '维护中', label: '维护中' }
 ]
+
+const statusColorMap: Record<string, string> = {
+  可用: 'green',
+  不可用: 'red',
+  维护中: 'orange'
+}
+
+// 空值显示为 — 的列
+const emptyFallbackKeys = ['stockTime', 'palletId', 'pallet', 'coreCode', 'coreName', 'remark', 'palletTime']
 
 // 统计数据
 const stats = computed(() => [
-  { label: '在库总数', value: storageData.value.filter(d => d.status === '在库').reduce((s, d) => s + d.quantity, 0) },
-  { label: '在库框数', value: storageData.value.filter(d => d.status === '在库').length },
-  { label: '今日入库', value: 12 },
-  { label: '今日出库', value: 9 }
+  { label: '库位总数', value: storageData.value.length },
+  { label: '有货库位', value: storageData.value.filter(d => d.hasStock).length },
+  { label: '空闲库位', value: storageData.value.filter(d => !d.hasStock).length },
+  { label: '锁定库位', value: storageData.value.filter(d => d.locked).length }
 ])
 
 // 表格列
 const columns = [
-  { title: '库位号', dataIndex: 'location', key: 'location', width: 100, align: 'center' as const },
-  { title: '料框号', dataIndex: 'frameNo', key: 'frameNo', width: 120, align: 'center' as const },
-  { title: '砂芯名称', dataIndex: 'coreName', key: 'coreName', width: 180 },
-  { title: '毛坯件号', dataIndex: 'partNo', key: 'partNo', width: 160 },
-  { title: '数量', dataIndex: 'quantity', key: 'quantity', width: 80, align: 'center' as const },
+  { title: '库位id', dataIndex: 'locationId', key: 'locationId', width: 100, align: 'center' as const },
+  { title: '库位号', dataIndex: 'locationNo', key: 'locationNo', width: 100, align: 'center' as const },
+  { title: '是否有货', dataIndex: 'hasStock', key: 'hasStock', width: 90, align: 'center' as const },
+  { title: '锁定', dataIndex: 'locked', key: 'locked', width: 90, align: 'center' as const },
   { title: '状态', dataIndex: 'status', key: 'status', width: 90, align: 'center' as const },
-  { title: '入库时间', dataIndex: 'inTime', key: 'inTime', width: 170 }
+  { title: '执行', dataIndex: 'exec', key: 'exec', width: 100, align: 'center' as const },
+  { title: '库存时间', dataIndex: 'stockTime', key: 'stockTime', width: 170 },
+  { title: '托盘id', dataIndex: 'palletId', key: 'palletId', width: 110, align: 'center' as const },
+  { title: '托盘', dataIndex: 'pallet', key: 'pallet', width: 130, align: 'center' as const },
+  { title: '砂芯', dataIndex: 'coreCode', key: 'coreCode', width: 120, align: 'center' as const },
+  { title: '砂芯名称', dataIndex: 'coreName', key: 'coreName', width: 170 },
+  { title: '备注详情', dataIndex: 'remark', key: 'remark', width: 160 },
+  { title: '仓库', dataIndex: 'warehouse', key: 'warehouse', width: 130, align: 'center' as const },
+  { title: '组盘时间', dataIndex: 'palletTime', key: 'palletTime', width: 170 }
 ]
+
+interface StorageRow {
+  key: number
+  locationId: string
+  locationNo: string
+  hasStock: boolean
+  locked: boolean
+  status: string
+  exec: string
+  stockTime: string
+  palletId: string
+  pallet: string
+  coreCode: string
+  coreName: string
+  remark: string
+  warehouse: string
+  palletTime: string
+}
 
 // 模拟数据
 let rowKey = 0
-const storageData = ref([
-  { key: ++rowKey, location: 'A-01-03', frameNo: 'KJ-10021', coreName: '发动机缸体芯', partNo: 'WP12-001', quantity: 40, status: '在库', inTime: '2026-10-22 08:15:20' },
-  { key: ++rowKey, location: 'A-01-04', frameNo: 'KJ-10022', coreName: '发动机缸盖芯', partNo: 'WP12-002', quantity: 36, status: '在库', inTime: '2026-10-22 08:42:11' },
-  { key: ++rowKey, location: 'A-02-01', frameNo: 'KJ-10023', coreName: '变速箱壳体芯', partNo: 'WP13-001', quantity: 30, status: '已出库', inTime: '2026-10-21 14:20:36' },
-  { key: ++rowKey, location: 'A-02-02', frameNo: 'KJ-10024', coreName: '离合器壳体芯', partNo: 'WP13-002', quantity: 28, status: '在库', inTime: '2026-10-21 15:05:48' },
-  { key: ++rowKey, location: 'B-01-01', frameNo: 'KJ-10025', coreName: '液压阀体芯', partNo: 'WP14-001', quantity: 45, status: '在库', inTime: '2026-10-22 09:30:02' },
-  { key: ++rowKey, location: 'B-01-02', frameNo: 'KJ-10026', coreName: '液压缸体芯', partNo: 'WP14-002', quantity: 42, status: '已出库', inTime: '2026-10-20 16:48:29' }
+const storageData = ref<StorageRow[]>([
+  { key: ++rowKey, locationId: 'L001', locationNo: 'A-01-03', hasStock: true, locked: false, status: '可用', exec: '', stockTime: '2026-10-28 08:15:20', palletId: 'P10021', pallet: 'TP-A-10021', coreCode: 'SC-001', coreName: '缸盖内腔砂芯A', remark: '待发往造型一线', warehouse: '滨海砂芯立库', palletTime: '2026-10-28 08:10:05' },
+  { key: ++rowKey, locationId: 'L002', locationNo: 'A-01-04', hasStock: true, locked: false, status: '可用', exec: '出库中', stockTime: '2026-10-28 08:42:11', palletId: 'P10022', pallet: 'TP-A-10022', coreCode: 'SC-002', coreName: '缸盖水道砂芯', remark: '', warehouse: '滨海砂芯立库', palletTime: '2026-10-28 08:36:40' },
+  { key: ++rowKey, locationId: 'L003', locationNo: 'A-02-01', hasStock: false, locked: false, status: '可用', exec: '', stockTime: '', palletId: '', pallet: '', coreCode: '', coreName: '', remark: '', warehouse: '滨海砂芯立库', palletTime: '' },
+  { key: ++rowKey, locationId: 'L004', locationNo: 'A-02-02', hasStock: true, locked: true, status: '不可用', exec: '', stockTime: '2026-10-27 15:05:48', palletId: 'P10024', pallet: 'TP-A-10024', coreCode: 'SC-005', coreName: '机体顶盖砂芯', remark: '盘点锁定', warehouse: '滨海砂芯立库', palletTime: '2026-10-27 14:58:12' },
+  { key: ++rowKey, locationId: 'L005', locationNo: 'B-01-01', hasStock: true, locked: false, status: '可用', exec: '入库中', stockTime: '2026-10-28 09:30:02', palletId: 'P10025', pallet: 'TP-B-10025', coreCode: 'SC-006', coreName: '机体主油道砂芯', remark: '', warehouse: '滨海砂芯立库', palletTime: '2026-10-28 09:25:36' },
+  { key: ++rowKey, locationId: 'L006', locationNo: 'B-01-02', hasStock: false, locked: true, status: '维护中', exec: '', stockTime: '', palletId: '', pallet: '', coreCode: '', coreName: '', remark: '货架维修，暂不可用', warehouse: '滨海砂芯立库', palletTime: '' },
+  { key: ++rowKey, locationId: 'L007', locationNo: 'B-02-01', hasStock: true, locked: false, status: '可用', exec: '', stockTime: '2026-10-27 16:48:29', palletId: 'P10027', pallet: 'TP-B-10027', coreCode: 'SC-008', coreName: '缸盖内腔砂芯B', remark: '', warehouse: '滨海砂芯立库', palletTime: '2026-10-27 16:40:15' },
+  { key: ++rowKey, locationId: 'L008', locationNo: 'B-02-02', hasStock: false, locked: false, status: '可用', exec: '', stockTime: '', palletId: '', pallet: '', coreCode: '', coreName: '', remark: '', warehouse: '滨海砂芯立库', palletTime: '' }
 ])
 
 // 筛选

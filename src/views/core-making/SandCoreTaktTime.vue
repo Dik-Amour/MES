@@ -87,7 +87,6 @@
             placeholder="请选择件号"
             allow-clear
             style="width: 100%"
-            @change="handlePartChange"
           >
             <a-select-option v-for="p in partOptions" :key="p" :value="p">{{ p }}</a-select-option>
           </a-select>
@@ -106,11 +105,10 @@
           <a-select
             v-model:value="formData.coreCode"
             :options="coreCodeOptions.map(c => ({ value: c }))"
-            placeholder="请先选择件号"
+            placeholder="请选择砂芯编号"
             show-search
             allow-clear
             style="width: 100%"
-            :disabled="!formData.partNo"
             @change="handleCodeChange"
           />
         </a-form-item>
@@ -204,7 +202,7 @@ interface TaktFormData {
   changeoverTimeMin: number | null
 }
 
-// 砂芯基础数据（件号/砂芯编号/砂芯名称/砂芯类型 的联动来源）
+// 砂芯基础数据（砂芯编号/砂芯名称的关联来源）
 interface SandCoreMaster {
   partNo: string
   coreCode: string
@@ -215,7 +213,7 @@ interface SandCoreMaster {
 // ---------- 选项 ----------
 const coreTypeOptions = ['冷芯', '热芯', '手工砂芯']
 
-// 砂芯基础数据（弹框中件号/砂芯编号/砂芯名称联动与互校的来源）
+// 砂芯基础数据（砂芯名称/砂芯编号联动与互校的来源，件号独立选择不与之关联）
 const coreMasterData: SandCoreMaster[] = [
   { partNo: 'BJH46Q-1002010', coreCode: 'SC-001', coreName: '缸盖内腔砂芯A', coreType: '冷芯' },
   { partNo: 'BJH46Q-1002010', coreCode: 'SC-002', coreName: '缸盖水道砂芯', coreType: '冷芯' },
@@ -316,27 +314,16 @@ const formData = reactive<TaktFormData>({
   changeoverTimeMin: null
 })
 
-// 件号选项
+// 件号选项（独立选择，不与砂芯名称/编号联动）
 const partOptions = computed(() => [...new Set(coreMasterData.map(i => i.partNo))])
 
-// 当前件号下的砂芯编号选项
-const coreCodeOptions = computed(() =>
-  coreMasterData.filter(i => i.partNo === formData.partNo).map(i => i.coreCode)
-)
+// 砂芯编号选项（全部砂芯，与件号无关）
+const coreCodeOptions = computed(() => coreMasterData.map(i => i.coreCode))
 
-// 当前件号下的砂芯名称检索选项
+// 砂芯名称检索选项（全部砂芯，与件号无关）
 const coreNameOptions = computed(() =>
-  coreMasterData
-    .filter(i => i.partNo === formData.partNo)
-    .map(i => ({ value: i.coreName }))
+  coreMasterData.map(i => ({ value: i.coreName }))
 )
-
-// 选择/清空件号：清空砂芯编号、名称、类型
-const handlePartChange = () => {
-  formData.coreCode = undefined
-  formData.coreName = ''
-  formData.coreType = undefined
-}
 
 // 选择/清空砂芯编号：反向带出砂芯名称、类型
 const handleCodeChange = (code?: string) => {
@@ -345,7 +332,7 @@ const handleCodeChange = (code?: string) => {
     formData.coreType = undefined
     return
   }
-  const entry = coreMasterData.find(i => i.partNo === formData.partNo && i.coreCode === code)
+  const entry = coreMasterData.find(i => i.coreCode === code)
   if (entry) {
     formData.coreName = entry.coreName
     formData.coreType = entry.coreType
@@ -354,7 +341,7 @@ const handleCodeChange = (code?: string) => {
 
 // 检索选择砂芯名称：正向带出砂芯编号、类型
 const handleNameSelect = (name: string) => {
-  const entry = coreMasterData.find(i => i.partNo === formData.partNo && i.coreName === name)
+  const entry = coreMasterData.find(i => i.coreName === name)
   if (entry) {
     formData.coreCode = entry.coreCode
     formData.coreType = entry.coreType
@@ -409,18 +396,17 @@ const handleModalOk = () => {
     message.error('请选择砂芯编号')
     return
   }
-  // 砂芯名称与砂芯编号互校：必须与基础数据中同一砂芯匹配
+  // 砂芯名称与砂芯编号互校：必须为基础数据中同一条砂芯（不校验件号）
   const masterEntry = coreMasterData.find(
-    i => i.partNo === partNo && i.coreCode === coreCode && i.coreName === coreName
+    i => i.coreCode === coreCode && i.coreName === coreName
   )
   if (!masterEntry) {
-    const pairExists = coreMasterData.some(
-      i => i.partNo === partNo && (i.coreCode === coreCode || i.coreName === coreName)
-    )
-    if (pairExists) {
+    const codeExists = coreMasterData.some(i => i.coreCode === coreCode)
+    const nameExists = coreMasterData.some(i => i.coreName === coreName)
+    if (codeExists && nameExists) {
       message.error('砂芯编号与砂芯名称不匹配，请重新选择')
     } else {
-      message.error('所选件号下不存在该砂芯编号/名称，请重新选择')
+      message.error('不存在该砂芯编号/名称，请重新选择')
     }
     return
   }
