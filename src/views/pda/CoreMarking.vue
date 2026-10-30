@@ -5,7 +5,7 @@
       <div class="pda-header-left" @click="goBack">
         <ArrowLeftOutlined />
       </div>
-      <div class="pda-header-title">制芯缸盖刻号</div>
+      <div class="pda-header-title">机体线组芯</div>
       <div class="pda-header-right"></div>
     </div>
 
@@ -74,14 +74,6 @@
               <div class="info-cell-label">砂芯名称</div>
               <div class="info-cell-value">{{ palletInfo.coreName }}</div>
             </div>
-            <div class="info-cell">
-              <div class="info-cell-label">制芯日期</div>
-              <div class="info-cell-value">{{ palletInfo.coreDate }}</div>
-            </div>
-            <div class="info-cell">
-              <div class="info-cell-label">制芯人</div>
-              <div class="info-cell-value">{{ palletInfo.maker }}</div>
-            </div>
           </div>
         </div>
       </div>
@@ -141,10 +133,6 @@
                 <div class="info-cell-value">{{ item.rackCode }}</div>
               </div>
               <div class="info-cell">
-                <div class="info-cell-label">绑定时间</div>
-                <div class="info-cell-value">{{ item.bindTime }}</div>
-              </div>
-              <div class="info-cell">
                 <div class="info-cell-label">砂芯编号</div>
                 <div class="info-cell-value">{{ item.coreNo }}</div>
               </div>
@@ -171,7 +159,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import dayjs from 'dayjs'
 import { message } from 'ant-design-vue'
 import { getMachinePositionOptions, scanMachinePosition } from '@/lib/pdaMachinePosition'
 import { simulatePalletScan } from '@/lib/pdaPalletScan'
@@ -207,14 +194,13 @@ const formData = reactive({
 })
 
 // 托盘上的砂芯信息
-const palletInfo = ref<{ coreNo: string; coreName: string; coreDate: string; maker: string } | null>(null)
+const palletInfo = ref<{ coreNo: string; coreName: string } | null>(null)
 
 // 已绑定芯架列表
 const boundRacks = ref<{
   rackCode: string
   coreNo: string
   coreName: string
-  bindTime: string
 }[]>([])
 
 // 是否可提交
@@ -260,8 +246,7 @@ const handleBindRackScan = () => {
   boundRacks.value.push({
     rackCode,
     coreNo: palletInfo.value.coreNo,
-    coreName: palletInfo.value.coreName,
-    bindTime: dayjs().format('HH:mm:ss')
+    coreName: palletInfo.value.coreName
   })
   formData.rackCode = ''
   message.success(`芯架 ${rackCode} 绑定成功`)

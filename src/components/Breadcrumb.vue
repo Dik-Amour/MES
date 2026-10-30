@@ -90,7 +90,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/pda/sand-core-outbound': { title: '砂芯出库', path: '/pda/sand-core-outbound', icon: CalendarOutlined },
     '/pda/exception-handle': { title: '异常处理', path: '/pda/exception-handle', icon: CalendarOutlined },
     '/pda/core-lowering': { title: '大机组芯下芯', path: '/pda/core-lowering', icon: CalendarOutlined },
-    '/pda/core-marking': { title: '制芯缸盖刻号', path: '/pda/core-marking', icon: CalendarOutlined },
+    '/pda/core-marking': { title: '机体线组芯', path: '/pda/core-marking', icon: CalendarOutlined },
     '/pda/core-making-task': { title: '制芯任务', path: '/pda/core-making-task', icon: CalendarOutlined },
     '/pda/manual-core-marking': { title: '人工刻号', path: '/pda/manual-core-marking', icon: CalendarOutlined },
     '/pda/core-transfer': { title: '组芯流转', path: '/pda/core-transfer', icon: CalendarOutlined },
