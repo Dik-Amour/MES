@@ -140,6 +140,10 @@
                 <div class="info-cell-label">砂芯名称</div>
                 <div class="info-cell-value">{{ item.coreName }}</div>
               </div>
+              <div class="info-cell">
+                <div class="info-cell-label">数量</div>
+                <div class="info-cell-value">{{ item.quantity }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -162,7 +166,7 @@ import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getMachinePositionOptions, scanMachinePosition } from '@/lib/pdaMachinePosition'
 import { simulatePalletScan } from '@/lib/pdaPalletScan'
-import { simulateRackScan } from '@/lib/pdaRackScan'
+import { simulateRackScan, findRackByCode } from '@/lib/pdaRackScan'
 import {
   ArrowLeftOutlined,
   CheckOutlined,
@@ -201,6 +205,7 @@ const boundRacks = ref<{
   rackCode: string
   coreNo: string
   coreName: string
+  quantity: number
 }[]>([])
 
 // 是否可提交
@@ -238,7 +243,10 @@ const handleBindRackScan = () => {
     return
   }
   const enteredCode = formData.rackCode.trim()
-  const rackCode = enteredCode || simulateRackScan(boundRacks.value.map(item => item.rackCode)).rackCode
+  const excludeCodes = boundRacks.value.map(item => item.rackCode)
+  // 扫码时读取完整芯架信息；手动输入时按码查询，未匹配则生成模拟数量
+  const scanResult = enteredCode ? findRackByCode(enteredCode) : simulateRackScan(excludeCodes)
+  const rackCode = enteredCode || scanResult?.rackCode || ''
   if (boundRacks.value.some(item => item.rackCode === rackCode)) {
     message.warning('该芯架已绑定，请勿重复')
     return
@@ -246,7 +254,8 @@ const handleBindRackScan = () => {
   boundRacks.value.push({
     rackCode,
     coreNo: palletInfo.value.coreNo,
-    coreName: palletInfo.value.coreName
+    coreName: palletInfo.value.coreName,
+    quantity: scanResult?.quantity ?? Math.floor(Math.random() * 300) + 50
   })
   formData.rackCode = ''
   message.success(`芯架 ${rackCode} 绑定成功`)

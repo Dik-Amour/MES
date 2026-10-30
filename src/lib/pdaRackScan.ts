@@ -55,3 +55,10 @@ export function simulateRackScan(excludeRackCodes: string[] = []): PdaRackScanRe
   scanIndex += 1
   return { ...result }
 }
+
+/** 按芯架码查询模拟芯架信息，未匹配返回 undefined */
+export function findRackByCode(rackCode: string): PdaRackScanResult | undefined {
+  const code = rackCode.trim()
+  const matched = mockRacks.find((rack) => rack.rackCode === code)
+  return matched ? { ...matched } : undefined
+}
