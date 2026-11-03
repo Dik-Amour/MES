@@ -386,9 +386,21 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/core-production/inout-record',
-    name: 'CoreStorageInOutRecord',
-    component: () => import('@/views/core-production/CoreStorageInOutRecord.vue'),
+    path: '/core-production/body-line-storage',
+    name: 'BodyLineCoreStorage',
+    component: () => import('@/views/core-production/BodyLineCoreStorage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/core-production/inbound-record',
+    name: 'CoreStorageInboundRecord',
+    component: () => import('@/views/core-production/CoreStorageInboundRecord.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/core-production/outbound-record',
+    name: 'CoreStorageOutboundRecord',
+    component: () => import('@/views/core-production/CoreStorageOutboundRecord.vue'),
     meta: { requiresAuth: true }
   },
   {
