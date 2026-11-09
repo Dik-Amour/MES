@@ -378,6 +378,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/core-making/SandCoreTaktTime.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/core-making/station-workhour-config',
+    name: 'StationWorkHourConfig',
+    component: () => import('@/views/core-making/StationWorkHourConfig.vue'),
+    meta: { requiresAuth: true }
+  },
   // 制芯生产管理路由
   {
     path: '/core-production/binhai-storage',
