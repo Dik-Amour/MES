@@ -102,7 +102,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/core-production': { title: '制芯生产管理', path: '/core-production/body-line-storage', icon: InboxOutlined },
     '/core-production/body-line-storage': { title: '机体线砂芯库', path: '/core-production/body-line-storage', icon: InboxOutlined },
     '/core-production/inbound-record': { title: '砂芯立库入库记录', path: '/core-production/inbound-record', icon: InboxOutlined },
-    '/core-production/outbound-record': { title: '立库出库记录', path: '/core-production/outbound-record', icon: InboxOutlined },
+    '/core-production/outbound-record': { title: '砂芯立库出库记录', path: '/core-production/outbound-record', icon: InboxOutlined },
     // 可视化路径
     '/dashboard': { title: '寒亭可视化', path: '/dashboard/production', icon: InboxOutlined },
     '/dashboard/production': { title: '生产大屏', path: '/dashboard/production', icon: InboxOutlined },

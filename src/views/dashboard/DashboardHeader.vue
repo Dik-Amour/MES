@@ -1,13 +1,25 @@
 <template>
-  <div class="dash-header">
+  <div class="dash-header" :class="{ 'fui-header': variant === 'fui' }">
     <div class="header-left">
       <span class="hd-time">{{ timeStr }}</span>
+      <span class="header-divider"></span>
       <span class="hd-date">{{ dateStr }}</span>
+      <span class="header-divider"></span>
       <span class="hd-weather">{{ weather }}</span>
     </div>
-    <div class="header-center">{{ title }}</div>
+    <div class="header-center">
+      <span v-if="variant === 'fui'" class="title-wing title-wing-left">◆ ◆ ◆</span>
+      <span class="title-text">{{ title }}</span>
+      <span v-if="variant === 'fui'" class="title-wing title-wing-right">◆ ◆ ◆</span>
+    </div>
     <div class="header-right">
-      <div class="logo-box">
+      <nav v-if="variant === 'fui'" class="fui-nav" aria-label="大屏导航">
+        <button type="button" class="fui-nav-item active">生产运营</button>
+        <button type="button" class="fui-nav-item">设备管理</button>
+        <button type="button" class="fui-nav-item">质量管理</button>
+        <button type="button" class="fui-nav-item">人员成本</button>
+      </nav>
+      <div v-else class="logo-box">
         <img v-if="logoSrc" :src="logoSrc" :alt="logoAlt" class="logo-image" />
         <span v-else>LOGO</span>
       </div>
@@ -24,11 +36,13 @@ withDefaults(
     weather?: string
     logoSrc?: string
     logoAlt?: string
+    variant?: 'default' | 'fui'
   }>(),
   {
     weather: '晴 23℃',
     logoSrc: '',
-    logoAlt: 'LOGO'
+    logoAlt: 'LOGO',
+    variant: 'default'
   }
 )
 
@@ -66,6 +80,118 @@ onBeforeUnmount(() => {
   margin-bottom: 8px;
   display: flex;
   align-items: center;
+}
+
+.fui-header {
+  min-height: 64px;
+  padding: 8px 20px;
+  overflow: hidden;
+  color: #dff8ff;
+  background:
+    linear-gradient(90deg, rgba(0, 166, 216, 0.14), rgba(4, 22, 31, 0.96) 34%, rgba(4, 22, 31, 0.96) 66%, rgba(0, 166, 216, 0.14)),
+    #06141d;
+  border: 1px solid rgba(0, 190, 236, 0.75);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 24px rgba(0, 166, 216, 0.08),
+    0 0 14px rgba(0, 166, 216, 0.16);
+}
+
+.fui-header::before,
+.fui-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 28%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #10d5ff, transparent);
+}
+
+.fui-header::before {
+  left: 18%;
+}
+
+.fui-header::after {
+  right: 18%;
+}
+
+.fui-header .header-left {
+  gap: 12px;
+  color: #a9d8e7;
+}
+
+.fui-header .hd-time {
+  min-width: 72px;
+  color: #43e5ff;
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(67, 229, 255, 0.55);
+}
+
+.fui-header .hd-date,
+.fui-header .hd-weather {
+  color: #a9d8e7;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.header-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(88, 211, 245, 0.38);
+}
+
+.fui-header .header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: #f5fcff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-shadow: 0 0 14px rgba(31, 204, 255, 0.55);
+}
+
+.title-wing {
+  color: #20cfff;
+  font-size: 12px;
+  letter-spacing: 8px;
+  text-shadow: 0 0 9px rgba(32, 207, 255, 0.85);
+}
+
+.title-wing-right {
+  transform: scaleX(-1);
+}
+
+.fui-header .header-right {
+  align-items: center;
+}
+
+.fui-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.fui-nav-item {
+  min-width: 82px;
+  height: 34px;
+  padding: 0 12px;
+  color: #9ad8e9;
+  font-size: 13px;
+  background: linear-gradient(180deg, rgba(8, 51, 67, 0.92), rgba(5, 29, 40, 0.92));
+  border: 1px solid rgba(0, 186, 230, 0.52);
+  border-radius: 2px;
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.fui-nav-item:hover,
+.fui-nav-item.active {
+  color: #e9fcff;
+  background: linear-gradient(180deg, rgba(0, 174, 218, 0.46), rgba(0, 96, 130, 0.36));
+  border-color: #25d5ff;
+  box-shadow: inset 0 0 12px rgba(37, 213, 255, 0.2);
 }
 
 .header-left {

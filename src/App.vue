@@ -172,7 +172,7 @@
             <template #title>制芯生产管理</template>
             <a-menu-item key="/core-production/body-line-storage">机体线砂芯库</a-menu-item>
             <a-menu-item key="/core-production/inbound-record">砂芯立库入库记录</a-menu-item>
-            <a-menu-item key="/core-production/outbound-record">立库出库记录</a-menu-item>
+            <a-menu-item key="/core-production/outbound-record">砂芯立库出库记录</a-menu-item>
             <a-menu-item key="/core-production/marking-record">机体线组芯刻号</a-menu-item>
           </a-sub-menu>
 
