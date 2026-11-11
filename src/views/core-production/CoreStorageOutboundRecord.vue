@@ -47,17 +47,9 @@
         bordered
         size="small"
         class="data-table"
-        :scroll="{ x: 1900 }"
+        :scroll="{ x: 1200 }"
         :row-key="(record: any) => record.eventId"
       >
-        <template #bodyCell="{ column, record }">
-          <template v-if="emptyFallbackKeys.includes(column.dataIndex)">
-            {{ record[column.dataIndex] || '—' }}
-          </template>
-          <template v-else-if="column.dataIndex === 'outboundType'">
-            <a-tag color="blue">{{ record.outboundType }}</a-tag>
-          </template>
-        </template>
       </a-table>
       <div class="table-pagination">
         <a-pagination
@@ -101,20 +93,13 @@ const outboundTypeOptions = [
   { value: '调拨出库', label: '调拨出库' }
 ]
 
-const emptyFallbackKeys = ['operator', 'outReason']
-
 const columns = [
   { title: '事件ID', dataIndex: 'eventId', key: 'eventId', width: 200, align: 'center' as const },
   { title: '托盘码', dataIndex: 'palletCode', key: 'palletCode', width: 150, align: 'center' as const },
-  { title: '上料口编号', dataIndex: 'feedPortNo', key: 'feedPortNo', width: 110, align: 'center' as const },
-  { title: '砂芯数量', dataIndex: 'coreQty', key: 'coreQty', width: 90, align: 'center' as const },
   { title: '物料名称', dataIndex: 'materialName', key: 'materialName', width: 170 },
   { title: '物料编码', dataIndex: 'materialCode', key: 'materialCode', width: 130, align: 'center' as const },
   { title: '立库物料名称', dataIndex: 'wmsMaterialName', key: 'wmsMaterialName', width: 190 },
   { title: '立库物料编码', dataIndex: 'wmsMaterialCode', key: 'wmsMaterialCode', width: 180, align: 'center' as const },
-  { title: '出库类型', dataIndex: 'outboundType', key: 'outboundType', width: 120, align: 'center' as const },
-  { title: '出库原因/去向', dataIndex: 'outReason', key: 'outReason', width: 150 },
-  { title: '操作人', dataIndex: 'operator', key: 'operator', width: 110, align: 'center' as const },
   { title: '出库时间', dataIndex: 'outTime', key: 'outTime', width: 170 }
 ]
 

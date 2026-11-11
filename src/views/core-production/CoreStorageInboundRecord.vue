@@ -38,12 +38,18 @@
         bordered
         size="small"
         class="data-table"
-        :scroll="{ x: 1700 }"
+        :scroll="{ x: 2050 }"
         :row-key="(record: any) => record.eventId"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="emptyFallbackKeys.includes(column.dataIndex)">
             {{ record[column.dataIndex] || '—' }}
+          </template>
+          <template v-else-if="column.dataIndex === 'processParam'">
+            <a-button type="link" size="small" @click="openDetail('工艺参数', record.processParam)">查看</a-button>
+          </template>
+          <template v-else-if="column.dataIndex === 'mixingInfo'">
+            <a-button type="link" size="small" @click="openDetail('混砂信息', record.mixingInfo)">查看</a-button>
           </template>
         </template>
       </a-table>
@@ -58,6 +64,10 @@
         />
       </div>
     </a-card>
+
+    <a-modal v-model:open="detailVisible" :title="detailTitle" :footer="null" width="520px">
+      <div class="detail-content">{{ detailContent }}</div>
+    </a-modal>
   </div>
 </template>
 
@@ -80,20 +90,34 @@ const query = ref<{
   dateRange: null
 })
 
-const emptyFallbackKeys = ['operator']
+const emptyFallbackKeys = ['operator', 'deviceName', 'coreMakingTime']
 
 const columns = [
   { title: '事件ID', dataIndex: 'eventId', key: 'eventId', width: 200, align: 'center' as const },
   { title: '托盘码', dataIndex: 'palletCode', key: 'palletCode', width: 150, align: 'center' as const },
   { title: '上料口编号', dataIndex: 'feedPortNo', key: 'feedPortNo', width: 110, align: 'center' as const },
+  { title: '制芯设备', dataIndex: 'deviceName', key: 'deviceName', width: 130, align: 'center' as const },
+  { title: '制芯时间', dataIndex: 'coreMakingTime', key: 'coreMakingTime', width: 170, align: 'center' as const },
   { title: '立库物料名称', dataIndex: 'wmsMaterialName', key: 'wmsMaterialName', width: 190 },
   { title: '立库物料编号', dataIndex: 'wmsMaterialCode', key: 'wmsMaterialCode', width: 180, align: 'center' as const },
   { title: '物料名称', dataIndex: 'materialName', key: 'materialName', width: 170 },
   { title: '物料编号', dataIndex: 'materialCode', key: 'materialCode', width: 130, align: 'center' as const },
   { title: '砂芯数量', dataIndex: 'coreQty', key: 'coreQty', width: 90, align: 'center' as const },
+  { title: '工艺参数', dataIndex: 'processParam', key: 'processParam', width: 110, align: 'center' as const },
+  { title: '混砂信息', dataIndex: 'mixingInfo', key: 'mixingInfo', width: 110, align: 'center' as const },
   { title: '操作人', dataIndex: 'operator', key: 'operator', width: 110, align: 'center' as const },
   { title: '入库时间', dataIndex: 'inTime', key: 'inTime', width: 170 }
 ]
+
+const detailVisible = ref(false)
+const detailTitle = ref('')
+const detailContent = ref('')
+
+const openDetail = (title: string, content: string) => {
+  detailTitle.value = title
+  detailContent.value = content || '暂无数据'
+  detailVisible.value = true
+}
 
 const recordData = ref<InboundRecordRow[]>(inboundRecordRows)
 
@@ -192,5 +216,11 @@ const handleReset = () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
+}
+
+.detail-content {
+  line-height: 1.8;
+  color: #333;
+  word-break: break-all;
 }
 </style>
