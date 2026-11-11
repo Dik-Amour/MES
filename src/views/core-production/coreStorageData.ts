@@ -52,6 +52,9 @@ export interface OutboundRecordRow {
   feedPortNo: string
   outboundType: string
   outReason: string
+  deviceName: string
+  processParam: string
+  mixingInfo: string
 }
 
 // 同一砂芯立库的统一模拟数据源。入库/出库记录由这里派生，避免三个页面各自维护数据。
@@ -113,5 +116,8 @@ export const outboundRecordRows: OutboundRecordRow[] = coreStorageRows
     wmsMaterialCode: row.wmsMaterialCode,
     feedPortNo: row.feedPortNo,
     outboundType: row.outboundType || '生产线消耗',
-    outReason: row.outReason || ''
+    outReason: row.outReason || '',
+    deviceName: row.deviceName,
+    processParam: row.processParam,
+    mixingInfo: row.mixingInfo || ''
   }))

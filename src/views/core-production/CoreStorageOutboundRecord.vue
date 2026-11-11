@@ -47,9 +47,22 @@
         bordered
         size="small"
         class="data-table"
-        :scroll="{ x: 1200 }"
+        :scroll="{ x: 1700 }"
         :row-key="(record: any) => record.eventId"
       >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'processParam'">
+            <a-button v-if="record.processParam" type="link" size="small" @click="openDetail('工艺参数', record.processParam)">查看</a-button>
+            <span v-else>—</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'mixingInfo'">
+            <a-button v-if="record.mixingInfo" type="link" size="small" @click="openDetail('混砂信息', record.mixingInfo)">查看</a-button>
+            <span v-else>—</span>
+          </template>
+          <template v-else-if="emptyFallbackKeys.includes(column.dataIndex)">
+            {{ record[column.dataIndex] || '—' }}
+          </template>
+        </template>
       </a-table>
       <div class="table-pagination">
         <a-pagination
@@ -62,6 +75,10 @@
         />
       </div>
     </a-card>
+
+    <a-modal v-model:open="detailVisible" :title="detailTitle" :footer="null" width="520px">
+      <div class="detail-content">{{ detailContent }}</div>
+    </a-modal>
   </div>
 </template>
 
@@ -96,12 +113,28 @@ const outboundTypeOptions = [
 const columns = [
   { title: '事件ID', dataIndex: 'eventId', key: 'eventId', width: 200, align: 'center' as const },
   { title: '托盘码', dataIndex: 'palletCode', key: 'palletCode', width: 150, align: 'center' as const },
-  { title: '物料名称', dataIndex: 'materialName', key: 'materialName', width: 170 },
-  { title: '物料编码', dataIndex: 'materialCode', key: 'materialCode', width: 130, align: 'center' as const },
+  { title: '制芯设备', dataIndex: 'deviceName', key: 'deviceName', width: 130, align: 'center' as const },
   { title: '立库物料名称', dataIndex: 'wmsMaterialName', key: 'wmsMaterialName', width: 190 },
-  { title: '立库物料编码', dataIndex: 'wmsMaterialCode', key: 'wmsMaterialCode', width: 180, align: 'center' as const },
+  { title: '立库物料编号', dataIndex: 'wmsMaterialCode', key: 'wmsMaterialCode', width: 180, align: 'center' as const },
+  { title: '物料名称', dataIndex: 'materialName', key: 'materialName', width: 170 },
+  { title: '物料编号', dataIndex: 'materialCode', key: 'materialCode', width: 130, align: 'center' as const },
+  { title: '工艺参数', dataIndex: 'processParam', key: 'processParam', width: 110, align: 'center' as const },
+  { title: '混砂信息', dataIndex: 'mixingInfo', key: 'mixingInfo', width: 110, align: 'center' as const },
+  { title: '操作人', dataIndex: 'operator', key: 'operator', width: 110, align: 'center' as const },
   { title: '出库时间', dataIndex: 'outTime', key: 'outTime', width: 170 }
 ]
+
+const emptyFallbackKeys = ['operator', 'deviceName']
+
+const detailVisible = ref(false)
+const detailTitle = ref('')
+const detailContent = ref('')
+
+const openDetail = (title: string, content: string) => {
+  detailTitle.value = title
+  detailContent.value = content || '暂无数据'
+  detailVisible.value = true
+}
 
 const recordData = ref<OutboundRecordRow[]>(outboundRecordRows)
 
@@ -203,5 +236,11 @@ const handleReset = () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
+}
+
+.detail-content {
+  line-height: 1.8;
+  color: #333;
+  word-break: break-all;
 }
 </style>

@@ -11,10 +11,7 @@
         <a-form-item label="物料名称">
           <a-input v-model:value="query.materialName" placeholder="请输入物料名称" allow-clear style="width: 180px" />
         </a-form-item>
-        <a-form-item label="虚拟库状态">
-          <a-select v-model:value="query.virtualStatus" placeholder="请选择状态" allow-clear :options="statusOptions" style="width: 140px" />
-        </a-form-item>
-        <a-form-item :label="viewMode === 'current' ? '入库时间' : '事件时间'">
+        <a-form-item label="入库时间">
           <a-range-picker v-model:value="query.dateRange" format="YYYY-MM-DD" :placeholder="['开始日期', '结束日期']" />
         </a-form-item>
         <a-form-item>
@@ -35,11 +32,8 @@
 
     <a-card :bordered="false">
       <div class="table-toolbar">
-        <a-radio-group v-model:value="viewMode" button-style="solid" size="small">
-          <a-radio-button value="current">在库托盘</a-radio-button>
-          <a-radio-button value="history">历史记录</a-radio-button>
-        </a-radio-group>
-        <span class="toolbar-tip">{{ viewMode === 'current' ? '默认只展示当前仍在库的托盘' : '展示已出库及历史库存记录' }}</span>
+        <span class="toolbar-title">在库托盘</span>
+        <span class="toolbar-tip">仅展示当前仍在库的托盘</span>
       </div>
 
       <a-table
@@ -49,14 +43,11 @@
         bordered
         size="small"
         class="data-table"
-        :scroll="{ x: viewMode === 'history' ? 1800 : 1500 }"
+        :scroll="{ x: 1500 }"
         :row-key="(record: any) => record.palletCode"
       >
         <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 'virtualStatus'">
-            <a-tag :color="statusColorMap[record.virtualStatus]">{{ record.virtualStatus }}</a-tag>
-          </template>
-          <template v-else-if="emptyFallbackKeys.includes(column.dataIndex)">
+          <template v-if="emptyFallbackKeys.includes(column.dataIndex)">
             {{ record[column.dataIndex] || '—' }}
           </template>
         </template>
@@ -68,7 +59,6 @@
             <a-descriptions-item label="工艺参数" :span="3">{{ record.processParam || '—' }}</a-descriptions-item>
             <a-descriptions-item label="入库事件ID">{{ record.inboundEventId || '—' }}</a-descriptions-item>
             <a-descriptions-item label="入库操作人">{{ record.inboundOperator || '—' }}</a-descriptions-item>
-            <a-descriptions-item label="出库事件ID">{{ record.outboundEventId || '—' }}</a-descriptions-item>
           </a-descriptions>
         </template>
       </a-table>
@@ -88,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import dayjs, { type Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons-vue'
@@ -98,55 +88,31 @@ const query = ref<{
   palletCode: string
   deviceCode: string
   materialName: string
-  virtualStatus?: string
   dateRange: [Dayjs, Dayjs] | null
 }>({
   palletCode: '',
   deviceCode: '',
   materialName: '',
-  virtualStatus: undefined,
   dateRange: null
 })
 
-const viewMode = ref<'current' | 'history'>('current')
+const emptyFallbackKeys = ['inDuration']
 
-const statusOptions = [
-  { value: '已入库', label: '已入库' },
-  { value: '待映射', label: '待映射' },
-  { value: '已组芯', label: '已组芯' },
-  { value: '已出库', label: '已出库' }
+const columns = [
+  { title: '托盘码', dataIndex: 'palletCode', key: 'palletCode', width: 150, align: 'center' as const },
+  { title: '物料编码', dataIndex: 'materialCode', key: 'materialCode', width: 130, align: 'center' as const },
+  { title: '物料名称', dataIndex: 'materialName', key: 'materialName', width: 170 },
+  { title: '立库物料编号', dataIndex: 'wmsMaterialCode', key: 'wmsMaterialCode', width: 170, align: 'center' as const },
+  { title: '立库物料名称', dataIndex: 'wmsMaterialName', key: 'wmsMaterialName', width: 180 },
+  { title: '砂芯数量', dataIndex: 'coreQty', key: 'coreQty', width: 90, align: 'center' as const },
+  { title: '入库时间', dataIndex: 'inTime', key: 'inTime', width: 170 },
+  { title: '在库时长', dataIndex: 'inDuration', key: 'inDuration', width: 120, align: 'center' as const }
 ]
 
-const statusColorMap: Record<string, string> = {
-  已入库: 'green',
-  待映射: 'orange',
-  已组芯: 'purple',
-  已出库: 'blue'
-}
-
-const emptyFallbackKeys = ['outTime', 'inDuration']
-
-const columns = computed(() => {
-  const base = [
-    { title: '托盘码', dataIndex: 'palletCode', key: 'palletCode', width: 150, align: 'center' as const },
-    { title: '物料编码', dataIndex: 'materialCode', key: 'materialCode', width: 130, align: 'center' as const },
-    { title: '物料名称', dataIndex: 'materialName', key: 'materialName', width: 170 },
-    { title: '立库物料编号', dataIndex: 'wmsMaterialCode', key: 'wmsMaterialCode', width: 170, align: 'center' as const },
-    { title: '立库物料名称', dataIndex: 'wmsMaterialName', key: 'wmsMaterialName', width: 180 },
-    { title: '砂芯数量', dataIndex: 'coreQty', key: 'coreQty', width: 90, align: 'center' as const },
-    { title: '虚拟库状态', dataIndex: 'virtualStatus', key: 'virtualStatus', width: 110, align: 'center' as const },
-    { title: '入库时间', dataIndex: 'inTime', key: 'inTime', width: 170 },
-    { title: '在库时长', dataIndex: 'inDuration', key: 'inDuration', width: 120, align: 'center' as const }
-  ]
-  return viewMode.value === 'history'
-    ? [...base, { title: '出库时间', dataIndex: 'outTime', key: 'outTime', width: 170 }]
-    : base
-})
-
-const formatDuration = (inTime: string, outTime: string) => {
+const formatDuration = (inTime: string) => {
   if (!inTime) return ''
   const start = dayjs(inTime)
-  const end = outTime ? dayjs(outTime) : dayjs()
+  const end = dayjs()
   if (!start.isValid() || !end.isValid() || end.isBefore(start)) return ''
   const diff = end.diff(start)
   const days = Math.floor(diff / 86400000)
@@ -158,17 +124,16 @@ const formatDuration = (inTime: string, outTime: string) => {
 }
 
 const rows = computed(() =>
-  coreStorageRows.map(item => ({
-    ...item,
-    inDuration: formatDuration(item.inTime, item.outTime)
-  }))
+  coreStorageRows
+    .filter(item => !item.outTime && item.virtualStatus !== '已出库')
+    .map(item => ({
+      ...item,
+      inDuration: formatDuration(item.inTime)
+    }))
 )
 
-const currentRows = computed(() => rows.value.filter(item => !item.outTime && item.virtualStatus !== '已出库'))
-
 const stats = computed(() => {
-  const targetRows = viewMode.value === 'current' ? currentRows.value : rows.value
-  const totalDuration = currentRows.value.reduce((sum, item) => {
+  const totalDuration = rows.value.reduce((sum, item) => {
     const value = item.inDuration
     if (!value) return sum
     const days = Number(value.match(/(\d+)天/)?.[1] || 0)
@@ -176,10 +141,10 @@ const stats = computed(() => {
     return sum + days * 24 + hours
   }, 0)
   return [
-    { label: '在库托盘数', value: currentRows.value.length },
-    { label: '在库砂芯总数', value: currentRows.value.reduce((sum, item) => sum + item.coreQty, 0) },
-    { label: '待映射', value: currentRows.value.filter(item => item.virtualStatus === '待映射').length },
-    { label: viewMode.value === 'current' ? '平均在库时长' : '历史记录数', value: viewMode.value === 'current' ? (currentRows.value.length ? `${Math.round(totalDuration / currentRows.value.length)}小时` : '0小时') : targetRows.length }
+    { label: '在库托盘数', value: rows.value.length },
+    { label: '在库砂芯总数', value: rows.value.reduce((sum, item) => sum + item.coreQty, 0) },
+    { label: '待映射', value: rows.value.filter(item => item.virtualStatus === '待映射').length },
+    { label: '平均在库时长', value: rows.value.length ? `${Math.round(totalDuration / rows.value.length)}小时` : '0小时' }
   ]
 })
 
@@ -188,15 +153,13 @@ const filteredData = computed(() => {
   const startStr = start ? start.format('YYYY-MM-DD') : ''
   const endStr = end ? end.format('YYYY-MM-DD') : ''
   return rows.value
-    .filter(item => viewMode.value === 'current' ? !item.outTime && item.virtualStatus !== '已出库' : true)
     .filter(item => {
       const matchPallet = !query.value.palletCode || item.palletCode.includes(query.value.palletCode)
       const matchDevice = !query.value.deviceCode || item.deviceCode.includes(query.value.deviceCode)
       const matchName = !query.value.materialName || item.materialName.includes(query.value.materialName)
-      const matchStatus = !query.value.virtualStatus || item.virtualStatus === query.value.virtualStatus
-      const eventDay = item.inTime.slice(0, 10) || item.outTime.slice(0, 10)
+      const eventDay = item.inTime.slice(0, 10)
       const matchDate = (!startStr || eventDay >= startStr) && (!endStr || eventDay <= endStr)
-      return matchPallet && matchDevice && matchName && matchStatus && matchDate
+      return matchPallet && matchDevice && matchName && matchDate
     })
 })
 
@@ -205,10 +168,6 @@ const pageSize = 10
 const pagedData = computed(() => {
   const start = (page.value - 1) * pageSize
   return filteredData.value.slice(start, start + pageSize)
-})
-
-watch(viewMode, () => {
-  page.value = 1
 })
 
 const handleQuery = () => {
@@ -221,7 +180,6 @@ const handleReset = () => {
     palletCode: '',
     deviceCode: '',
     materialName: '',
-    virtualStatus: undefined,
     dateRange: null
   }
   page.value = 1
@@ -270,6 +228,12 @@ const handleReset = () => {
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.toolbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
 }
 
 .toolbar-tip {
