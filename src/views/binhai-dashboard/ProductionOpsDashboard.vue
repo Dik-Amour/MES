@@ -103,10 +103,11 @@ const yearlyAnalysis = {
   inbound: [2750, 3050, 3300, 3150, 3450, 3600, 3350]
 }
 
-const annualIndicators = [
-  { label: '出产完成率', value: '64%', colorClass: 'indicator-green' },
-  { label: '入库完成率', value: '64%', colorClass: 'indicator-blue' },
-  { label: '入均出产比', value: '64吨', colorClass: 'indicator-yellow' }
+const productionIndicators = [
+  { label: '当日出产', value: '80吨', colorClass: 'indicator-green' },
+  { label: '当日入库', value: '80吨', colorClass: 'indicator-blue' },
+  { label: '当月出产', value: '285吨', colorClass: 'indicator-green' },
+  { label: '当月入库', value: '280吨', colorClass: 'indicator-blue' }
 ]
 
 const productionSummary = {
@@ -643,8 +644,8 @@ const productCharts = productSeriesList.map((series) => ({
 
       <!-- 中间列 -->
       <div class="column">
-        <!-- 年度指标 -->
-        <div class="data-panel" style="height: 200px">
+        <!-- 生产指标 -->
+        <div class="data-panel" style="height: 288px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -655,11 +656,11 @@ const productCharts = productSeriesList.map((series) => ({
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="panel-title">年度指标</h3>
+            <h3 class="panel-title">生产指标</h3>
           </div>
 
-          <div class="annual-indicators">
-            <div v-for="item in annualIndicators" :key="item.label" class="indicator-card">
+          <div class="production-indicators">
+            <div v-for="item in productionIndicators" :key="item.label" class="indicator-card">
               <div class="indicator-label">{{ item.label }}</div>
               <div class="indicator-value" :class="item.colorClass">{{ item.value }}</div>
             </div>
@@ -744,7 +745,7 @@ const productCharts = productSeriesList.map((series) => ({
         </div>
 
         <!-- 年度分析 -->
-        <div class="data-panel" style="height: 396px">
+        <div class="data-panel" style="height: 308px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -1093,18 +1094,18 @@ const productCharts = productSeriesList.map((series) => ({
   position: relative;
 }
 
-/* 年度指标样式 */
-.annual-indicators {
+/* 生产指标样式 */
+.production-indicators {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
   flex: 1;
   align-items: center;
 }
 
 .indicator-card {
   text-align: center;
-  padding: 20px;
+  padding: 10px;
   background: rgba(242, 242, 242, 0.3);
   border-radius: 6px;
 }
@@ -1112,11 +1113,11 @@ const productCharts = productSeriesList.map((series) => ({
 .indicator-label {
   color: #666;
   font-size: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .indicator-value {
-  font-size: 36px;
+  font-size: 26px;
   font-weight: bold;
 }
 

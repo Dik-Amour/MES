@@ -108,34 +108,53 @@
             placeholder="请选择产线"
             allow-clear
             :options="productionLineOptions.map(l => ({ label: l, value: l }))"
+            @change="handleLineChange"
           />
         </a-form-item>
         <a-form-item label="工位" required>
-          <a-input v-model:value="formData.station" placeholder="请输入工位" allow-clear />
+          <a-select
+            v-model:value="formData.station"
+            placeholder="请选择工位"
+            allow-clear
+            :options="stationOptions.map(v => ({ label: v, value: v }))"
+            @change="handleStationChange"
+          />
         </a-form-item>
         <a-form-item label="子工位" required>
-          <a-input v-model:value="formData.subStation" placeholder="请输入子工位" allow-clear />
+          <a-select
+            v-model:value="formData.subStation"
+            placeholder="请选择子工位"
+            allow-clear
+            :options="subStationOptions.map(v => ({ label: v, value: v }))"
+            @change="handleSubStationChange"
+          />
         </a-form-item>
         <a-form-item label="设备" required>
-          <a-input v-model:value="formData.equipment" placeholder="请输入设备" allow-clear />
+          <a-select
+            v-model:value="formData.equipment"
+            placeholder="请先选择子工位"
+            allow-clear
+            :disabled="!formData.subStation"
+            :options="equipmentOptions.map(v => ({ label: v, value: v }))"
+          />
         </a-form-item>
         <a-form-item label="白班工作时长" required>
           <a-input-number
-            v-model:value="formData.dayShiftHours"
+            v-model:value="formData.dayShiftMinutes"
             :min="0"
-            :max="24"
-            :step="0.5"
-            placeholder="请输入小时数"
+            :max="1440"
+            :step="30"
+            placeholder="请输入分钟数"
             style="width: 100%"
           />
         </a-form-item>
-        <a-form-item label="晚班工作时长" required>
+        <a-form-item label="夜班工作时长" required>
           <a-input-number
-            v-model:value="formData.nightShiftHours"
+            v-model:value="formData.nightShiftMinutes"
             :min="0"
-            :max="24"
-            :step="0.5"
-            placeholder="请输入小时数"
+            :max="1440"
+            :step="30"
+            placeholder="请输入分钟数"
             style="width: 100%"
           />
         </a-form-item>
@@ -163,8 +182,8 @@ interface StationWorkHourRecord {
   station: string
   subStation: string
   equipment: string
-  dayShiftHours: number
-  nightShiftHours: number
+  dayShiftMinutes: number
+  nightShiftMinutes: number
   creator: string
   createTime: string
 }
@@ -189,20 +208,20 @@ const columns = [
   { title: '工位', dataIndex: 'station', key: 'station', width: 150 },
   { title: '子工位', dataIndex: 'subStation', key: 'subStation', width: 150 },
   { title: '设备', dataIndex: 'equipment', key: 'equipment', width: 200 },
-  { title: '白班工作时长（h）', dataIndex: 'dayShiftHours', key: 'dayShiftHours', width: 150 },
-  { title: '晚班工作时长（h）', dataIndex: 'nightShiftHours', key: 'nightShiftHours', width: 150 },
+  { title: '白班工作时长（分钟）', dataIndex: 'dayShiftMinutes', key: 'dayShiftMinutes', width: 150 },
+  { title: '夜班工作时长（分钟）', dataIndex: 'nightShiftMinutes', key: 'nightShiftMinutes', width: 150 },
   { title: '创建人', dataIndex: 'creator', key: 'creator', width: 100 },
   { title: '创建时间', dataIndex: 'createTime', key: 'createTime', width: 170 }
 ]
 
 const dataSource = ref<StationWorkHourRecord[]>([
-  { id: 1, productionLine: '制芯一线', station: '制芯工位', subStation: '射芯工位', equipment: '冷芯盒制芯机1#', dayShiftHours: 8, nightShiftHours: 8, creator: '张三', createTime: '2026-11-01 09:20' },
-  { id: 2, productionLine: '制芯一线', station: '制芯工位', subStation: '射芯工位', equipment: '热芯盒制芯机2#', dayShiftHours: 8, nightShiftHours: 8, creator: '张三', createTime: '2026-11-01 09:25' },
-  { id: 3, productionLine: '制芯二线', station: '制芯工位', subStation: '下芯工位', equipment: '组芯机械手1#', dayShiftHours: 8, nightShiftHours: 12, creator: '李四', createTime: '2026-11-02 14:10' },
-  { id: 4, productionLine: '制芯二线', station: '制芯工位', subStation: '修芯工位', equipment: '修芯工作台1#', dayShiftHours: 8, nightShiftHours: 0, creator: '李四', createTime: '2026-11-03 10:45' },
-  { id: 5, productionLine: '制芯三线', station: '砂芯检测工位', subStation: '尺寸检测工位', equipment: '三坐标检测仪1#', dayShiftHours: 8, nightShiftHours: 0, creator: '王五', createTime: '2026-11-04 15:30' },
-  { id: 6, productionLine: '制芯三线', station: '砂芯存储工位', subStation: '立库入库工位', equipment: '立库堆垛机1#', dayShiftHours: 8, nightShiftHours: 12, creator: '王五', createTime: '2026-11-05 08:50' },
-  { id: 7, productionLine: '制芯一线', station: '砂芯存储工位', subStation: '立库出库工位', equipment: '立库堆垛机2#', dayShiftHours: 8, nightShiftHours: 12, creator: '赵六', createTime: '2026-11-06 16:05' }
+  { id: 1, productionLine: '制芯一线', station: '制芯工位', subStation: '射芯工位', equipment: '冷芯盒制芯机1#', dayShiftMinutes: 480, nightShiftMinutes: 480, creator: '张三', createTime: '2026-11-01 09:20' },
+  { id: 2, productionLine: '制芯一线', station: '制芯工位', subStation: '射芯工位', equipment: '热芯盒制芯机2#', dayShiftMinutes: 480, nightShiftMinutes: 480, creator: '张三', createTime: '2026-11-01 09:25' },
+  { id: 3, productionLine: '制芯二线', station: '制芯工位', subStation: '下芯工位', equipment: '组芯机械手1#', dayShiftMinutes: 480, nightShiftMinutes: 720, creator: '李四', createTime: '2026-11-02 14:10' },
+  { id: 4, productionLine: '制芯二线', station: '制芯工位', subStation: '修芯工位', equipment: '修芯工作台1#', dayShiftMinutes: 480, nightShiftMinutes: 0, creator: '李四', createTime: '2026-11-03 10:45' },
+  { id: 5, productionLine: '制芯三线', station: '砂芯检测工位', subStation: '尺寸检测工位', equipment: '三坐标检测仪1#', dayShiftMinutes: 480, nightShiftMinutes: 0, creator: '王五', createTime: '2026-11-04 15:30' },
+  { id: 6, productionLine: '制芯三线', station: '砂芯存储工位', subStation: '立库入库工位', equipment: '立库堆垛机1#', dayShiftMinutes: 480, nightShiftMinutes: 720, creator: '王五', createTime: '2026-11-05 08:50' },
+  { id: 7, productionLine: '制芯一线', station: '砂芯存储工位', subStation: '立库出库工位', equipment: '立库堆垛机2#', dayShiftMinutes: 480, nightShiftMinutes: 720, creator: '赵六', createTime: '2026-11-06 16:05' }
 ])
 
 const pagination = reactive({
@@ -239,14 +258,64 @@ const emptyForm = {
   station: '',
   subStation: '',
   equipment: '',
-  dayShiftHours: undefined as number | undefined,
-  nightShiftHours: undefined as number | undefined
+  dayShiftMinutes: undefined as number | undefined,
+  nightShiftMinutes: undefined as number | undefined
 }
 
 const formData = reactive({ ...emptyForm })
 
 const resetForm = () => {
-  Object.assign(formData, { ...emptyForm, dayShiftHours: undefined, nightShiftHours: undefined })
+  Object.assign(formData, { ...emptyForm, dayShiftMinutes: undefined, nightShiftMinutes: undefined })
+}
+
+// ---------- 弹框下拉选项：产线 → 工位 → 子工位 → 设备（自动填充） ----------
+const uniq = (list: string[]) => Array.from(new Set(list))
+
+const stationOptions = computed(() =>
+  uniq(
+    dataSource.value
+      .filter(r => !formData.productionLine || r.productionLine === formData.productionLine)
+      .map(r => r.station)
+  )
+)
+
+const subStationOptions = computed(() =>
+  uniq(
+    dataSource.value
+      .filter(r =>
+        (!formData.productionLine || r.productionLine === formData.productionLine) &&
+        (!formData.station || r.station === formData.station)
+      )
+      .map(r => r.subStation)
+  )
+)
+
+const equipmentOptions = computed(() =>
+  uniq(
+    dataSource.value
+      .filter(r =>
+        (!formData.productionLine || r.productionLine === formData.productionLine) &&
+        (!formData.station || r.station === formData.station) &&
+        (!formData.subStation || r.subStation === formData.subStation)
+      )
+      .map(r => r.equipment)
+  )
+)
+
+const handleLineChange = () => {
+  formData.station = ''
+  formData.subStation = ''
+  formData.equipment = ''
+}
+
+const handleStationChange = () => {
+  formData.subStation = ''
+  formData.equipment = ''
+}
+
+const handleSubStationChange = () => {
+  const options = equipmentOptions.value
+  formData.equipment = options.length === 1 ? options[0] : ''
 }
 
 const handleAdd = () => {
@@ -267,8 +336,8 @@ const handleEdit = () => {
     station: record.station,
     subStation: record.subStation,
     equipment: record.equipment,
-    dayShiftHours: record.dayShiftHours,
-    nightShiftHours: record.nightShiftHours
+    dayShiftMinutes: record.dayShiftMinutes,
+    nightShiftMinutes: record.nightShiftMinutes
   })
   modalVisible.value = true
 }
@@ -292,10 +361,10 @@ const handleModalOk = () => {
     !formData.station ||
     !formData.subStation ||
     !formData.equipment ||
-    formData.dayShiftHours === null ||
-    formData.dayShiftHours === undefined ||
-    formData.nightShiftHours === null ||
-    formData.nightShiftHours === undefined
+    formData.dayShiftMinutes === null ||
+    formData.dayShiftMinutes === undefined ||
+    formData.nightShiftMinutes === null ||
+    formData.nightShiftMinutes === undefined
   ) {
     message.warning('请填写所有必填项')
     return
@@ -309,8 +378,8 @@ const handleModalOk = () => {
         station: formData.station,
         subStation: formData.subStation,
         equipment: formData.equipment,
-        dayShiftHours: formData.dayShiftHours,
-        nightShiftHours: formData.nightShiftHours
+        dayShiftMinutes: formData.dayShiftMinutes,
+        nightShiftMinutes: formData.nightShiftMinutes
       }
     }
     message.success('修改成功')
@@ -321,8 +390,8 @@ const handleModalOk = () => {
       station: formData.station,
       subStation: formData.subStation,
       equipment: formData.equipment,
-      dayShiftHours: formData.dayShiftHours!,
-      nightShiftHours: formData.nightShiftHours!,
+      dayShiftMinutes: formData.dayShiftMinutes!,
+      nightShiftMinutes: formData.nightShiftMinutes!,
       creator: 'admin',
       createTime: dayjs().format('YYYY-MM-DD HH:mm')
     })
