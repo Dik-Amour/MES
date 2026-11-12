@@ -103,11 +103,19 @@ const yearlyAnalysis = {
   inbound: [2750, 3050, 3300, 3150, 3450, 3600, 3350]
 }
 
+const monthlyAnalysis = {
+  categories: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  output: [218, 205, 236, 244, 252, 267, 249, 276, 281, 274, 289, 285],
+  inbound: [210, 198, 228, 239, 247, 259, 243, 268, 275, 269, 282, 280]
+}
+
 const productionIndicators = [
-  { label: '当日出产', value: '80吨', colorClass: 'indicator-green' },
-  { label: '当日入库', value: '80吨', colorClass: 'indicator-blue' },
-  { label: '当月出产', value: '285吨', colorClass: 'indicator-green' },
-  { label: '当月入库', value: '280吨', colorClass: 'indicator-blue' }
+  { label: '当日出产', value: '80', unit: '吨', tone: 'output' },
+  { label: '当日入库', value: '80', unit: '吨', tone: 'inbound' },
+  { label: '当月出产', value: '285', unit: '吨', tone: 'output' },
+  { label: '当月入库', value: '280', unit: '吨', tone: 'inbound' },
+  { label: '年度出产', value: '3,400', unit: '吨', tone: 'output' },
+  { label: '年度入库', value: '3,350', unit: '吨', tone: 'inbound' }
 ]
 
 const productionSummary = {
@@ -316,6 +324,141 @@ function createYearlyOption(): EChartsOption {
   } as EChartsOption
 }
 
+/** 月度出产 / 入库柱状图 */
+function createMonthlyOption(): EChartsOption {
+  return {
+    tooltip: {
+      trigger: 'axis',
+      ...tooltipBase
+    },
+    legend: {
+      data: ['出产量', '入库量'],
+      textStyle: { color: '#a9c9d4', fontSize: 11 },
+      top: 5
+    },
+    grid: { left: '3%', right: '3%', bottom: '3%', top: '15%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: monthlyAnalysis.categories,
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
+      axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
+      axisTick: { show: false }
+    },
+    yAxis: {
+      type: 'value',
+      name: '吨',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
+      splitLine: { lineStyle: { type: 'dashed', color: 'rgba(72, 164, 194, 0.24)' } },
+      axisLine: { show: false },
+      axisTick: { show: false }
+    },
+    series: [
+      {
+        name: '出产量',
+        type: 'bar',
+        data: monthlyAnalysis.output,
+        barWidth: '34%',
+        itemStyle: {
+          color: '#20cfff',
+          borderRadius: [3, 3, 0, 0],
+          shadowColor: 'rgba(32, 207, 255, 0.35)',
+          shadowBlur: 8
+        }
+      },
+      {
+        name: '入库量',
+        type: 'bar',
+        data: monthlyAnalysis.inbound,
+        barWidth: '34%',
+        itemStyle: {
+          color: '#ffd52a',
+          borderRadius: [3, 3, 0, 0],
+          shadowColor: 'rgba(255, 213, 42, 0.28)',
+          shadowBlur: 8
+        }
+      }
+    ]
+  } as EChartsOption
+}
+
+/** 计划量、实际完工与完成率组合图 */
+function createPlanOption(): EChartsOption {
+  const categories = ['蠕铁产量', '灰铁产量', '球铁产量', '合格率', '能耗指标']
+  const plan = assessmentRows.map((row) => Number(row.plan))
+  const actual = assessmentRows.map((row) => Number(row.actual))
+  const rate = assessmentRows.map((row) => Number(row.rate.replace('%', '')))
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      ...tooltipBase
+    },
+    legend: {
+      data: ['计划量', '实际完工', '完成率'],
+      textStyle: { color: '#a9c9d4', fontSize: 10 },
+      top: 2
+    },
+    grid: { left: '4%', right: '5%', bottom: '4%', top: '20%', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: categories,
+      axisLabel: { color: '#a9c9d4', fontSize: 9, interval: 0, rotate: 18 },
+      axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
+      axisTick: { show: false }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '数量',
+        nameTextStyle: { color: '#a9c9d4', fontSize: 9 },
+        axisLabel: { color: '#a9c9d4', fontSize: 9 },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(72, 164, 194, 0.22)' } },
+        axisLine: { show: false },
+        axisTick: { show: false }
+      },
+      {
+        type: 'value',
+        name: '%',
+        min: 90,
+        max: 105,
+        nameTextStyle: { color: '#a9c9d4', fontSize: 9 },
+        axisLabel: { color: '#a9c9d4', fontSize: 9 },
+        splitLine: { show: false },
+        axisLine: { show: false },
+        axisTick: { show: false }
+      }
+    ],
+    series: [
+      {
+        name: '计划量',
+        type: 'bar',
+        data: plan,
+        barWidth: '24%',
+        itemStyle: { color: 'rgba(32, 207, 255, 0.48)', borderRadius: [3, 3, 0, 0] }
+      },
+      {
+        name: '实际完工',
+        type: 'bar',
+        data: actual,
+        barWidth: '24%',
+        itemStyle: { color: '#4ee6a6', borderRadius: [3, 3, 0, 0] }
+      },
+      {
+        name: '完成率',
+        type: 'line',
+        yAxisIndex: 1,
+        data: rate,
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 7,
+        lineStyle: { color: '#ffd52a', width: 3 },
+        itemStyle: { color: '#ffd52a', borderColor: '#061821', borderWidth: 2 }
+      }
+    ]
+  } as EChartsOption
+}
+
 /** 产品系列双轴柱状图 */
 function createProductOption(series: ProductSeries): EChartsOption {
   const labelStyle = { show: true, position: 'top' as const, color: '#dff8ff', fontSize: 10 }
@@ -438,12 +581,19 @@ const inboundOverview = computed(() => inboundOverviewData[inboundTab.value])
 
 const outputPieOption = computed(() => createPieOption(outputAnalysisData[outputAnalysisKey.value]))
 const inboundPieOption = computed(() => createPieOption(inboundAnalysisData[inboundAnalysisKey.value]))
+const monthlyOption = createMonthlyOption()
 const yearlyOption = createYearlyOption()
+const planOption = createPlanOption()
 
 const productCharts = productSeriesList.map((series) => ({
   series,
   option: createProductOption(series)
 }))
+
+const activeProductKey = ref(productSeriesList[0].key)
+const activeProductChart = computed(
+  () => productCharts.find((item) => item.series.key === activeProductKey.value) ?? productCharts[0]
+)
 </script>
 
 <template>
@@ -454,72 +604,36 @@ const productCharts = productSeriesList.map((series) => ({
       variant="fui"
     />
 
+    <!-- 核心生产指标独立置顶 -->
+    <div class="top-indicators">
+      <div
+        v-for="item in productionIndicators"
+        :key="item.label"
+        class="top-indicator-card"
+        :class="`tone-${item.tone}`"
+      >
+        <div class="top-indicator-content">
+          <div class="top-indicator-label">{{ item.label }}</div>
+          <div class="top-indicator-value">
+            {{ item.value }}<span class="top-indicator-unit">{{ item.unit }}</span>
+          </div>
+        </div>
+        <div class="top-indicator-icon" aria-hidden="true">
+          <svg width="28" height="28" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+
     <!-- 主要内容区域 -->
     <div class="main-content">
       <!-- 左侧列 -->
       <div class="column">
-        <!-- 出产概况 -->
-        <div class="data-panel" style="height: 200px">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z"
-                />
-              </svg>
-            </div>
-            <h3 class="panel-title">出产概况</h3>
-            <div class="tab-buttons">
-              <button
-                v-for="tab in outputTabs"
-                :key="tab.key"
-                class="tab-button"
-                :class="{ active: outputTab === tab.key }"
-                @click="outputTab = tab.key"
-              >
-                {{ tab.label }}
-              </button>
-            </div>
-          </div>
-
-          <div class="data-cards">
-            <div class="data-card">
-              <div class="data-card-label">当月产量</div>
-              <div class="data-card-value">
-                {{ outputOverview.monthly }}<span class="data-card-unit">吨</span>
-              </div>
-            </div>
-            <div class="data-card">
-              <div class="data-card-label">年度产量</div>
-              <div class="data-card-value">
-                {{ outputOverview.yearly }}<span class="data-card-unit">吨</span>
-              </div>
-            </div>
-            <div class="data-card">
-              <div class="data-card-label">同期产量</div>
-              <div class="data-card-value">
-                {{ outputOverview.sameperiod }}<span class="data-card-unit">吨</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="progress-container">
-            <div class="progress-header">
-              <span>占去年同期比例</span>
-              <span>{{ outputOverview.ratio }}%</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: `${outputOverview.ratio}%` }"></div>
-            </div>
-          </div>
-        </div>
-
         <!-- 出产分析 -->
-        <div class="data-panel" style="height: 280px">
+        <div class="data-panel" style="height: 386px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -546,72 +660,12 @@ const productCharts = productSeriesList.map((series) => ({
             </div>
           </div>
           <div class="chart-container">
-            <EChart :option="outputPieOption" height="200px" />
-          </div>
-        </div>
-
-        <!-- 入库概况 -->
-        <div class="data-panel" style="height: 200px">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                />
-              </svg>
-            </div>
-            <h3 class="panel-title">入库概况</h3>
-            <div class="tab-buttons">
-              <button
-                v-for="tab in inboundTabs"
-                :key="tab.key"
-                class="tab-button"
-                :class="{ active: inboundTab === tab.key }"
-                @click="inboundTab = tab.key"
-              >
-                {{ tab.label }}
-              </button>
-            </div>
-          </div>
-
-          <div class="data-cards">
-            <div class="data-card">
-              <div class="data-card-label">当月入库</div>
-              <div class="data-card-value">
-                {{ inboundOverview.monthly }}<span class="data-card-unit">吨</span>
-              </div>
-            </div>
-            <div class="data-card">
-              <div class="data-card-label">年度入库</div>
-              <div class="data-card-value">
-                {{ inboundOverview.yearly }}<span class="data-card-unit">吨</span>
-              </div>
-            </div>
-            <div class="data-card">
-              <div class="data-card-label">同期入库</div>
-              <div class="data-card-value">
-                {{ inboundOverview.sameperiod }}<span class="data-card-unit">吨</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="progress-container">
-            <div class="progress-header">
-              <span>占去年同期比例</span>
-              <span>{{ inboundOverview.ratio }}%</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: `${inboundOverview.ratio}%` }"></div>
-            </div>
+            <EChart :option="outputPieOption" height="100%" />
           </div>
         </div>
 
         <!-- 入库分析 -->
-        <div class="data-panel" style="height: 280px">
+        <div class="data-panel" style="height: 386px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -638,15 +692,15 @@ const productCharts = productSeriesList.map((series) => ({
             </div>
           </div>
           <div class="chart-container">
-            <EChart :option="inboundPieOption" height="200px" />
+            <EChart :option="inboundPieOption" height="100%" />
           </div>
         </div>
       </div>
 
       <!-- 中间列 -->
       <div class="column">
-        <!-- 生产指标 -->
-        <div class="data-panel" style="height: 288px">
+        <!-- 月度分析 -->
+        <div class="data-panel" style="height: 386px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -657,96 +711,15 @@ const productCharts = productSeriesList.map((series) => ({
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="panel-title">生产指标</h3>
+            <h3 class="panel-title">月度分析</h3>
           </div>
-
-          <div class="production-indicators">
-            <div v-for="item in productionIndicators" :key="item.label" class="indicator-card">
-              <div class="indicator-label">{{ item.label }}</div>
-              <div class="indicator-value" :class="item.colorClass">{{ item.value }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 年度产量 -->
-        <div class="data-panel" style="height: 380px">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 class="panel-title">年度产量</h3>
-          </div>
-
-          <div class="annual-production">
-            <div class="daily-card">
-              <div class="daily-label">当日出产</div>
-              <div class="daily-value indicator-green">80吨</div>
-            </div>
-            <div class="daily-card">
-              <div class="daily-label">当日入库</div>
-              <div class="daily-value indicator-blue">80吨</div>
-            </div>
-          </div>
-
-          <div class="production-summary">
-            <div class="summary-card">
-              <div class="summary-title indicator-green">年度出产总量</div>
-              <div class="summary-grid">
-                <div class="summary-item">
-                  <div class="summary-item-label">累计</div>
-                  <div class="summary-item-value">{{ productionSummary.output.cumulative }}</div>
-                  <div class="summary-item-unit">吨</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-item-label">当月</div>
-                  <div class="summary-item-value">{{ productionSummary.output.monthly }}</div>
-                  <div class="summary-item-unit">吨</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-item-label">环比</div>
-                  <div class="summary-item-percent">{{ productionSummary.output.mom }}</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-item-label">同比</div>
-                  <div class="summary-item-percent">{{ productionSummary.output.yoy }}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="summary-card">
-              <div class="summary-title indicator-blue">年度入库总量</div>
-              <div class="summary-grid">
-                <div class="summary-item">
-                  <div class="summary-item-label">累计</div>
-                  <div class="summary-item-value">{{ productionSummary.inbound.cumulative }}</div>
-                  <div class="summary-item-unit">吨</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-item-label">当月</div>
-                  <div class="summary-item-value">{{ productionSummary.inbound.monthly }}</div>
-                  <div class="summary-item-unit">吨</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-item-label">环比</div>
-                  <div class="summary-item-percent">{{ productionSummary.inbound.mom }}</div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-item-label">同比</div>
-                  <div class="summary-item-percent">{{ productionSummary.inbound.yoy }}</div>
-                </div>
-              </div>
-            </div>
+          <div class="chart-container">
+            <EChart :option="monthlyOption" height="100%" />
           </div>
         </div>
 
         <!-- 年度分析 -->
-        <div class="data-panel" style="height: 308px">
+        <div class="data-panel" style="height: 386px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -770,7 +743,7 @@ const productCharts = productSeriesList.map((series) => ({
       <!-- 右侧列 -->
       <div class="column">
         <!-- 生产详情 -->
-        <div class="data-panel" style="height: 712px; overflow: hidden">
+        <div class="data-panel" style="height: 386px; overflow: hidden">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -789,27 +762,32 @@ const productCharts = productSeriesList.map((series) => ({
               </svg>
             </div>
             <h3 class="panel-title">生产详情</h3>
+            <div class="tab-buttons product-tabs">
+              <button
+                v-for="item in productCharts"
+                :key="item.series.key"
+                type="button"
+                class="tab-button"
+                :class="{ active: activeProductKey === item.series.key }"
+                @click="activeProductKey = item.series.key"
+              >
+                {{ item.series.name }}
+              </button>
+            </div>
           </div>
 
-          <div class="production-details-scroll" style="flex: 1; overflow-y: auto; padding-right: 8px">
-            <div v-for="item in productCharts" :key="item.series.key" style="margin-bottom: 20px">
-              <div
-                :style="{
-                  color: item.series.color,
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  marginBottom: '12px'
-                }"
-              >
-                {{ item.series.name }}系列
-              </div>
-              <EChart :option="item.option" height="280px" />
-            </div>
+          <div class="product-detail-chart">
+            <EChart
+              v-if="activeProductChart"
+              :key="activeProductChart.series.key"
+              :option="activeProductChart.option"
+              height="100%"
+            />
           </div>
         </div>
 
-        <!-- 考核计划完工情况 -->
-        <div class="data-panel" style="height: 280px">
+        <!-- 计划分析 -->
+        <div class="data-panel" style="height: 386px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -820,37 +798,11 @@ const productCharts = productSeriesList.map((series) => ({
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="panel-title">考核计划完工情况</h3>
+            <h3 class="panel-title">计划分析</h3>
           </div>
 
-          <div class="assessment-scroll" style="flex: 1; overflow-y: auto">
-            <table class="assessment-table">
-              <thead>
-                <tr>
-                  <th>计划项目</th>
-                  <th>计划量</th>
-                  <th>实际完工</th>
-                  <th>完成率</th>
-                  <th>未完成原因</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in assessmentRows" :key="row.project">
-                  <td>{{ row.project }}</td>
-                  <td>{{ row.plan }}</td>
-                  <td>{{ row.actual }}</td>
-                  <td>
-                    <span :class="row.passed ? 'completion-success' : 'completion-warning'">
-                      {{ row.rate }}
-                    </span>
-                  </td>
-                  <td>
-                    <span v-if="row.reason !== '-'" class="abnormal-issue">{{ row.reason }}</span>
-                    <template v-else>-</template>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="chart-container">
+            <EChart :option="planOption" height="100%" />
           </div>
         </div>
       </div>
@@ -875,9 +827,112 @@ const productCharts = productSeriesList.map((series) => ({
 /* 主要内容区域 */
 .main-content {
   display: grid;
-  grid-template-columns: 1fr 1.4fr 1fr;
-  gap: 16px;
-  height: calc(100vh - 200px);
+  grid-template-columns: repeat(3, 608px);
+  gap: 24px;
+  height: auto;
+  min-height: calc(100vh - 310px);
+}
+
+.top-indicators {
+  display: grid;
+  grid-template-columns: repeat(6, 292px);
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.top-indicator-card {
+  position: relative;
+  width: 292px;
+  height: 125px;
+  min-height: 125px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  color: #dff8ff;
+  background-color: #082532;
+  background-image:
+    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
+    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%);
+  border: 1px solid rgba(0, 190, 235, 0.56);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 22px rgba(0, 154, 201, 0.09),
+    0 0 10px rgba(0, 0, 0, 0.24);
+}
+
+.top-indicator-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58%;
+  height: 2px;
+  background: linear-gradient(90deg, #26d9ff, transparent);
+  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
+}
+
+.top-indicator-card::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 34%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
+}
+
+.top-indicator-content {
+  position: relative;
+  z-index: 1;
+}
+
+.top-indicator-label {
+  margin-bottom: 8px;
+  color: #a9c9d4;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.top-indicator-value {
+  color: #ffd91a;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px rgba(255, 217, 26, 0.36);
+}
+
+.top-indicator-unit {
+  margin-left: 7px;
+  color: #b8d6df;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.top-indicator-icon {
+  position: relative;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #62e8ff;
+  background: rgba(0, 174, 220, 0.15);
+  border: 1px solid rgba(55, 220, 255, 0.68);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  box-shadow: inset 0 0 16px rgba(55, 220, 255, 0.16);
+}
+
+.top-indicator-card.tone-inbound .top-indicator-icon {
+  color: #8fffd0;
+  background: rgba(43, 214, 157, 0.12);
+  border-color: rgba(83, 255, 197, 0.58);
 }
 
 .column {
@@ -1004,6 +1059,24 @@ const productCharts = productSeriesList.map((series) => ({
 
 .tab-button:hover {
   color: #70ad47;
+}
+
+.product-tabs {
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.product-tabs .tab-button {
+  padding: 4px 6px;
+  font-size: 10px;
+}
+
+.product-detail-chart {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* 数据卡片样式 */
@@ -1619,13 +1692,29 @@ const productCharts = productSeriesList.map((series) => ({
 */
 
 /* 修正 Vue scoped 编译后的选择器，确保卡片背景实际生效 */
+.dashboard-container {
+  width: 100%;
+  min-height: calc(100vh - 132px) !important;
+  padding: 10px !important;
+  color: #dff8ff !important;
+  background-color: #041019 !important;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px);
+  background-size: auto, auto, 32px 32px, 32px 32px;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46);
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
+}
+
 .dashboard-container .dash-header {
   margin-bottom: 10px !important;
 }
 
 .dashboard-container .main-content,
 .dashboard-container .column {
-  gap: 12px !important;
+  gap: 24px !important;
 }
 
 .dashboard-container .data-panel {
@@ -1919,6 +2008,10 @@ const productCharts = productSeriesList.map((series) => ({
 
 /* 响应式设计 */
 @media (max-width: 1200px) {
+  .top-indicators {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .main-content {
     grid-template-columns: 1fr;
     gap: 12px;

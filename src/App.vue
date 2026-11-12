@@ -265,7 +265,7 @@
         <!-- 主内容区域 -->
         <a-layout-content class="app-content">
           <!-- 面包屑导航 -->
-          <Breadcrumb />
+          <Breadcrumb v-if="!route.path.startsWith('/binhai-dashboard')" />
 
           <!-- 路由页面 -->
           <router-view />

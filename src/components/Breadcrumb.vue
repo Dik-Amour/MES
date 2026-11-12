@@ -24,7 +24,6 @@ import {
   KeyOutlined,
   CalendarOutlined,
   InboxOutlined,
-  FundOutlined
 } from '@ant-design/icons-vue'
 
 interface BreadcrumbItem {
@@ -114,13 +113,6 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/dashboard/virtual-line': { title: '设备弹框', path: '/dashboard/virtual-line', icon: InboxOutlined },
     '/dashboard/plant-virtual-line': { title: '厂区虚拟产线大屏', path: '/dashboard/plant-virtual-line', icon: InboxOutlined },
     '/dashboard/plant-virtual-kw': { title: '造型三线KW', path: '/dashboard/plant-virtual-kw', icon: InboxOutlined },
-    // 滨海可视化路径
-    '/binhai-dashboard': { title: '滨海可视化', path: '/binhai-dashboard/production-ops', icon: FundOutlined },
-    '/binhai-dashboard/production-ops': { title: '生产运营管理大屏', path: '/binhai-dashboard/production-ops', icon: FundOutlined },
-    '/binhai-dashboard/equipment': { title: '设备管理大屏', path: '/binhai-dashboard/equipment', icon: FundOutlined },
-    '/binhai-dashboard/quality': { title: '质量管理大屏', path: '/binhai-dashboard/quality', icon: FundOutlined },
-    '/binhai-dashboard/personnel': { title: '人员管理大屏', path: '/binhai-dashboard/personnel', icon: FundOutlined },
-    '/binhai-dashboard/cost': { title: '成本管理大屏', path: '/binhai-dashboard/cost', icon: FundOutlined },
     // 现场管理路径
     '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
     '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },
@@ -174,10 +166,6 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     items.push(pathMap['/site'])
   }
 
-  // 添加滨海可视化父级菜单
-  if (route.path.startsWith('/binhai-dashboard')) {
-    items.push(pathMap['/binhai-dashboard'])
-  }
   // 添加大屏数据管理父级菜单
   if (route.path.startsWith('/screen-data')) {
     items.push(pathMap['/screen-data'])
