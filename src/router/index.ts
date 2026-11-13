@@ -285,6 +285,24 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/binhai-dashboard/CostDashboard.vue'),
     meta: { requiresAuth: true, title: '成本管理大屏' }
   },
+  {
+    path: '/binhai-dashboard/molding-line',
+    name: 'BinhaiMoldingLineDashboard',
+    component: () => import('@/views/binhai-dashboard/MoldingLineDashboard.vue'),
+    meta: { requiresAuth: true, title: '造型产线可视化' }
+  },
+  {
+    path: '/binhai-dashboard/cleaning-line',
+    name: 'BinhaiCleaningLineDashboard',
+    component: () => import('@/views/binhai-dashboard/CleaningLineDashboard.vue'),
+    meta: { requiresAuth: true, title: '清理产线可视化' }
+  },
+  {
+    path: '/binhai-dashboard/team-line',
+    name: 'BinhaiTeamLineDashboard',
+    component: () => import('@/views/binhai-dashboard/TeamLineDashboard.vue'),
+    meta: { requiresAuth: true, title: '班组产线可视化' }
+  },
   // 大屏数据管理路由
   {
     path: '/screen-data/equipment',

@@ -13,12 +13,10 @@
       <span v-if="variant === 'fui'" class="title-wing title-wing-right">◆ ◆ ◆</span>
     </div>
     <div class="header-right">
-      <nav v-if="variant === 'fui'" class="fui-nav" aria-label="大屏导航">
-        <button type="button" class="fui-nav-item active">生产运营</button>
-        <button type="button" class="fui-nav-item">设备管理</button>
-        <button type="button" class="fui-nav-item">质量管理</button>
-        <button type="button" class="fui-nav-item">人员成本</button>
-      </nav>
+      <div v-if="variant === 'fui'" class="fui-logo">
+        <!-- 纯装饰：页面标题已表达语义，空 alt 避免读屏重复播报 -->
+        <img :src="logoUrl" alt="" class="fui-logo-image" />
+      </div>
       <div v-else class="logo-box">
         <img v-if="logoSrc" :src="logoSrc" :alt="logoAlt" class="logo-image" />
         <span v-else>LOGO</span>
@@ -29,6 +27,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+import logoUrl from '@/assets/image/logo.png'
 
 withDefaults(
   defineProps<{
@@ -164,36 +164,6 @@ onBeforeUnmount(() => {
   transform: scaleX(-1);
 }
 
-.fui-header .header-right {
-  align-items: center;
-}
-
-.fui-nav {
-  display: flex;
-  gap: 8px;
-}
-
-.fui-nav-item {
-  min-width: 82px;
-  height: 34px;
-  padding: 0 12px;
-  color: #9ad8e9;
-  font-size: 13px;
-  background: linear-gradient(180deg, rgba(8, 51, 67, 0.92), rgba(5, 29, 40, 0.92));
-  border: 1px solid rgba(0, 186, 230, 0.52);
-  border-radius: 2px;
-  cursor: pointer;
-  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-}
-
-.fui-nav-item:hover,
-.fui-nav-item.active {
-  color: #e9fcff;
-  background: linear-gradient(180deg, rgba(0, 174, 218, 0.46), rgba(0, 96, 130, 0.36));
-  border-color: #25d5ff;
-  box-shadow: inset 0 0 12px rgba(37, 213, 255, 0.2);
-}
-
 .header-left {
   flex: 1;
   display: flex;
@@ -238,7 +208,21 @@ onBeforeUnmount(() => {
 .header-right {
   flex: 1;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+}
+
+/* fui 标题栏右上角 logo */
+.fui-logo {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.fui-logo-image {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
 }
 
 .logo-box {

@@ -2,6 +2,9 @@
 
 import { computed, ref } from 'vue'
 
+import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
+
 import EChart from '@/components/EChart.vue'
 import DashboardHeader from '@/views/dashboard/DashboardHeader.vue'
 import type { EChartsOption } from 'echarts'
@@ -11,15 +14,7 @@ import type { EChartsOption } from 'echarts'
    ========================= */
 /** 生产运营大屏静态数据（迁移自 production-ops-dashboard.html 内联脚本） */
 
-type IronType = 'gray' | 'ball' | 'vermicular'
-type AnalysisKey = 'onlineOffline' | 'ironTypes' | 'productSeries'
-
-interface OverviewItem {
-  monthly: number
-  yearly: number
-  sameperiod: number
-  ratio: number
-}
+type AnalysisKey = 'ironTypes' | 'productSeries'
 
 interface PieDatum {
   value: number
@@ -49,23 +44,7 @@ interface AssessmentRow {
   reason: string
 }
 
-const outputOverviewData: Record<IronType, OverviewItem> = {
-  gray: { monthly: 60, yearly: 600, sameperiod: 100, ratio: 60 },
-  ball: { monthly: 45, yearly: 480, sameperiod: 85, ratio: 53 },
-  vermicular: { monthly: 35, yearly: 380, sameperiod: 70, ratio: 50 }
-}
-
-const inboundOverviewData: Record<IronType, OverviewItem> = {
-  gray: { monthly: 58, yearly: 580, sameperiod: 98, ratio: 59 },
-  ball: { monthly: 43, yearly: 460, sameperiod: 82, ratio: 52 },
-  vermicular: { monthly: 33, yearly: 360, sameperiod: 68, ratio: 49 }
-}
-
 const outputAnalysisData: Record<AnalysisKey, PieDatum[]> = {
-  onlineOffline: [
-    { value: 60, name: '线上', itemStyle: { color: '#20cfff' } },
-    { value: 40, name: '线下', itemStyle: { color: '#4ee6a6' } }
-  ],
   ironTypes: [
     { value: 45, name: '灰铁', itemStyle: { color: '#20cfff' } },
     { value: 30, name: '球铁', itemStyle: { color: '#4ee6a6' } },
@@ -79,26 +58,32 @@ const outputAnalysisData: Record<AnalysisKey, PieDatum[]> = {
   ]
 }
 
-const inboundAnalysisData: Record<AnalysisKey, PieDatum[]> = {
-  onlineOffline: [
-    { value: 55, name: '线上', itemStyle: { color: '#20cfff' } },
-    { value: 45, name: '线下', itemStyle: { color: '#4ee6a6' } }
-  ],
+/**
+ * 入库概况指标：指标项 = 当前 tab 下的分项本身
+ * 毛坯材质 tab → 灰铁 / 球铁 / 蠕铁；产品系列 tab → 中速机 / 博杜安 / 重潍柴 / 大机
+ * 数值为各分项入库量（吨），与出产分析的分项口径保持一致
+ */
+const inboundIndicators: Record<AnalysisKey, { label: string; value: string; unit: string }[]> = {
   ironTypes: [
-    { value: 42, name: '灰铁', itemStyle: { color: '#20cfff' } },
-    { value: 32, name: '球铁', itemStyle: { color: '#4ee6a6' } },
-    { value: 26, name: '蠕铁', itemStyle: { color: '#ffd52a' } }
+    { label: '灰铁', value: '42', unit: '吨' },
+    { label: '球铁', value: '32', unit: '吨' },
+    { label: '蠕铁', value: '26', unit: '吨' }
   ],
   productSeries: [
-    { value: 33, name: '中速机', itemStyle: { color: '#20cfff' } },
-    { value: 27, name: '博杜安', itemStyle: { color: '#4ee6a6' } },
-    { value: 24, name: '重潍柴', itemStyle: { color: '#ffd52a' } },
-    { value: 16, name: '大机', itemStyle: { color: '#9b8cff' } }
+    { label: '中速机', value: '33', unit: '吨' },
+    { label: '博杜安', value: '27', unit: '吨' },
+    { label: '重潍柴', value: '24', unit: '吨' },
+    { label: '大机', value: '16', unit: '吨' }
   ]
 }
 
+/** 近 7 年：横轴年份随当年滚动，末位为当前年份（末值与顶部"年度出产 3,400 / 年度入库 3,350"对应） */
+const YEAR_RANGE = 7
 const yearlyAnalysis = {
-  categories: ['2019年', '2020年', '2021年', '2022年', '2023年', '2024年', '2025年'],
+  categories: Array.from(
+    { length: YEAR_RANGE },
+    (_, index) => `${dayjs().year() - YEAR_RANGE + 1 + index}年`
+  ),
   output: [2800, 3100, 3350, 3200, 3500, 3650, 3400],
   inbound: [2750, 3050, 3300, 3150, 3450, 3600, 3350]
 }
@@ -198,148 +183,184 @@ const tooltipBase = {
   textStyle: { color: '#dff8ff' }
 }
 
-/** 出产 / 入库分析环形图 */
-function createPieOption(data: PieDatum[]): EChartsOption {
+/**
+ * 出产分析横向柱状图
+ * X 轴为吨位，Y 轴为毛坯材质 / 产品系列（随 analysisTabs 切换）
+ */
+function createOutputBarOption(data: PieDatum[]): EChartsOption {
   const total = data.reduce((sum, item) => sum + item.value, 0)
 
   return {
     tooltip: {
-      trigger: 'item',
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
       ...tooltipBase,
-      formatter: '{b}: {c}吨 ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      right: '5%',
-      top: 'center',
-      textStyle: { color: '#a9c9d4', fontSize: 12 },
-      itemWidth: 14,
-      itemHeight: 14,
-      itemGap: 10,
-      formatter: (name: string) => {
-        const item = data.find((d) => d.name === name)
-        if (!item) return name
-        const percent = ((item.value / total) * 100).toFixed(1)
-        return `${name} ${item.value}吨 (${percent}%)`
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        const item = list[0]
+        if (!item) return ''
+        const value = Number(item.value)
+        const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0'
+        return `${item.name}<br/>出产量: ${value} 吨 (${percent}%)`
       }
+    },
+    grid: { left: '2%', right: '10%', bottom: '2%', top: '2%', containLabel: true },
+    xAxis: {
+      type: 'value',
+      name: '吨',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { type: 'dashed', color: 'rgba(72, 164, 194, 0.24)' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: data.map((item) => item.name),
+      inverse: true,
+      axisLabel: { color: '#dff8ff', fontSize: 13 },
+      axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
+      axisTick: { show: false }
     },
     series: [
       {
-        type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['35%', '50%'],
-        data,
-        label: { show: false }
+        type: 'bar',
+        barWidth: '55%',
+        data: data.map((item) => ({
+          value: item.value,
+          itemStyle: { color: item.itemStyle.color }
+        })),
+        itemStyle: { borderRadius: [0, 3, 3, 0] },
+        label: {
+          show: true,
+          position: 'right',
+          formatter: '{c} 吨',
+          color: '#ffd91a',
+          fontSize: 13
+        },
+        emphasis: {
+          itemStyle: { shadowBlur: 12, shadowColor: 'rgba(32, 207, 255, 0.55)' }
+        }
       }
     ]
   } as EChartsOption
 }
 
-/** 年度出产 / 入库趋势图 */
-function createYearlyOption(): EChartsOption {
+interface InboundDailyPoint {
+  label: string
+  value: number
+  isToday: boolean
+}
+
+/**
+ * 入库概况：近 N 天入库量柱状图
+ * X 轴为日期（MM-DD），当天柱子用高亮黄区分
+ */
+function createInboundDailyOption(points: InboundDailyPoint[]): EChartsOption {
   return {
     tooltip: {
       trigger: 'axis',
+      axisPointer: { type: 'shadow' },
       ...tooltipBase,
       formatter: (params: any) => {
         const list = Array.isArray(params) ? params : [params]
-        let result = `${list[0]?.axisValue ?? ''}<br/>`
-        list.forEach((item: any) => {
-          result += `${item.marker} ${item.seriesName}: ${item.value} 吨<br/>`
-        })
-        return result
+        const item = list[0]
+        if (!item) return ''
+        return `${item.name}<br/>入库量: ${item.value} 吨`
       }
     },
-    legend: {
-      data: ['出产量', '入库量'],
-      textStyle: { color: '#a9c9d4', fontSize: 11 },
-      top: 5
-    },
-    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+    grid: { left: '3%', right: '4%', bottom: '2%', top: '14%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: yearlyAnalysis.categories,
-      axisLabel: { color: '#a9c9d4', fontSize: 10 },
+      data: points.map((point) => point.label),
+      axisLabel: { color: '#a9c9d4', fontSize: 11, interval: 0, margin: 8 },
       axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
-      axisTick: { show: false },
-      boundaryGap: false
+      axisTick: { show: false }
     },
     yAxis: {
       type: 'value',
       name: '吨',
       nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
-      axisLabel: { color: '#a9c9d4', fontSize: 10, formatter: '{value}' },
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
       splitLine: { lineStyle: { type: 'dashed', color: 'rgba(72, 164, 194, 0.24)' } },
       axisLine: { show: false },
       axisTick: { show: false }
     },
     series: [
       {
-        name: '出产量',
-        type: 'line',
-        data: yearlyAnalysis.output,
-        lineStyle: { color: '#20cfff', width: 3 },
-        itemStyle: { color: '#20cfff', borderWidth: 2, borderColor: '#061821' },
-        symbol: 'circle',
-        symbolSize: 8,
-        smooth: true,
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(32, 207, 255, 0.36)' },
-              { offset: 1, color: 'rgba(32, 207, 255, 0.02)' }
-            ]
+        type: 'bar',
+        barWidth: '55%',
+        data: points.map((point) => ({
+          value: point.value,
+          itemStyle: {
+            color: point.isToday ? '#ffd91a' : '#20cfff',
+            borderRadius: [3, 3, 0, 0]
           }
-        }
-      },
-      {
-        name: '入库量',
-        type: 'line',
-        data: yearlyAnalysis.inbound,
-        lineStyle: { color: '#ffd52a', width: 3 },
-        itemStyle: { color: '#ffd52a', borderWidth: 2, borderColor: '#061821' },
-        symbol: 'circle',
-        symbolSize: 8,
-        smooth: true,
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(255, 213, 42, 0.3)' },
-              { offset: 1, color: 'rgba(255, 213, 42, 0.02)' }
-            ]
-          }
+        })),
+        label: {
+          show: true,
+          position: 'top',
+          color: '#a9c9d4',
+          fontSize: 10,
+          formatter: '{c}'
         }
       }
     ]
   } as EChartsOption
 }
 
-/** 月度出产 / 入库柱状图 */
-function createMonthlyOption(): EChartsOption {
+interface OutputSplit {
+  name: string
+  color: string
+  data: number[]
+}
+
+/**
+ * 通用配置：柱 = 出产（按毛坯材质 / 产品系列堆叠），折线 = 入库合计
+ * 月度分析与年度分析共用，保证两者图例、配色、tooltip 完全一致
+ */
+function createStackedOutputOption(params: {
+  categories: string[]
+  splits: OutputSplit[]
+  inbound: number[]
+}): EChartsOption {
+  const { categories, splits, inbound } = params
+
   return {
     tooltip: {
       trigger: 'axis',
-      ...tooltipBase
+      axisPointer: { type: 'shadow' },
+      ...tooltipBase,
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        if (!list.length) return ''
+        let outputTotal = 0
+        let body = ''
+        list.forEach((item: any) => {
+          if (item.seriesType === 'line') return
+          outputTotal += Number(item.value)
+          body += `${item.marker} ${item.seriesName}: ${item.value} 吨<br/>`
+        })
+        body += `<b>出产量合计: ${outputTotal} 吨</b>`
+        list
+          .filter((item: any) => item.seriesType === 'line')
+          .forEach((item: any) => {
+            body += `<br/>${item.marker} ${item.seriesName}: ${item.value} 吨`
+          })
+        return `${list[0]?.axisValue ?? ''}<br/>${body}`
+      }
     },
     legend: {
-      data: ['出产量', '入库量'],
+      data: [...splits.map((split) => split.name), '入库量'],
       textStyle: { color: '#a9c9d4', fontSize: 11 },
-      top: 5
+      top: 5,
+      itemWidth: 14,
+      itemHeight: 8
     },
     grid: { left: '3%', right: '3%', bottom: '3%', top: '15%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: monthlyAnalysis.categories,
+      data: categories,
       axisLabel: { color: '#a9c9d4', fontSize: 10 },
       axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
       axisTick: { show: false }
@@ -354,32 +375,73 @@ function createMonthlyOption(): EChartsOption {
       axisTick: { show: false }
     },
     series: [
-      {
-        name: '出产量',
-        type: 'bar',
-        data: monthlyAnalysis.output,
-        barWidth: '34%',
+      ...splits.map((split, index) => ({
+        name: split.name,
+        type: 'bar' as const,
+        stack: 'output',
+        data: split.data,
+        barWidth: '50%',
         itemStyle: {
-          color: '#20cfff',
-          borderRadius: [3, 3, 0, 0],
-          shadowColor: 'rgba(32, 207, 255, 0.35)',
-          shadowBlur: 8
+          color: split.color,
+          ...(index === splits.length - 1 ? { borderRadius: [3, 3, 0, 0] } : {})
         }
-      },
+      })),
       {
         name: '入库量',
-        type: 'bar',
-        data: monthlyAnalysis.inbound,
-        barWidth: '34%',
-        itemStyle: {
-          color: '#ffd52a',
-          borderRadius: [3, 3, 0, 0],
-          shadowColor: 'rgba(255, 213, 42, 0.28)',
-          shadowBlur: 8
-        }
+        type: 'line' as const,
+        data: inbound,
+        z: 5,
+        lineStyle: { color: '#f4fdff', width: 2, type: 'dashed' as const },
+        itemStyle: { color: '#f4fdff', borderWidth: 2, borderColor: '#061821' },
+        symbol: 'circle',
+        symbolSize: 7,
+        smooth: true
       }
     ]
   } as EChartsOption
+}
+
+/** 年度分析：近 7 年，横轴为年份 */
+function createYearlyOption(splits: OutputSplit[], inbound: number[]): EChartsOption {
+  return createStackedOutputOption({
+    categories: yearlyAnalysis.categories,
+    splits,
+    inbound
+  })
+}
+
+/**
+ * 按分项占比拆分单个总量，最后一项吸收舍入差，保证各段之和 = 原总量
+ */
+function splitByShare(total: number, shares: number[]): number[] {
+  const parts = shares.slice(0, -1).map((share) => Math.round(total * share))
+  const last = total - parts.reduce((sum, part) => sum + part, 0)
+  return [...parts, last]
+}
+
+/**
+ * 按当前 tab 的分项占比拆分一组总量（月度 / 年度共用）
+ * 占比取自出产分析的分项数值，保证跨面板口径一致
+ */
+function splitTotalsByAnalysis(key: AnalysisKey, totals: number[]): OutputSplit[] {
+  const items = outputAnalysisData[key]
+  const shareSum = items.reduce((sum, item) => sum + item.value, 0)
+  const shares = items.map((item) => item.value / shareSum)
+  const perTotal = totals.map((total) => splitByShare(total, shares))
+  return items.map((item, index) => ({
+    name: item.name,
+    color: item.itemStyle.color,
+    data: perTotal.map((values) => values[index])
+  }))
+}
+
+/** 月度分析：横轴为月份 */
+function createMonthlyOption(splits: OutputSplit[], inbound: number[]): EChartsOption {
+  return createStackedOutputOption({
+    categories: monthlyAnalysis.categories,
+    splits,
+    inbound
+  })
 }
 
 /** 计划量、实际完工与完成率组合图 */
@@ -553,36 +615,67 @@ function createProductOption(series: ProductSeries): EChartsOption {
    页面状态与交互
    ========================= */
 
-const outputTabs: { key: IronType; label: string }[] = [
-  { key: 'gray', label: '灰铁产量' },
-  { key: 'ball', label: '球铁产量' },
-  { key: 'vermicular', label: '蠕铁产量' }
-]
-
-const inboundTabs: { key: IronType; label: string }[] = [
-  { key: 'gray', label: '灰铁入库' },
-  { key: 'ball', label: '球铁入库' },
-  { key: 'vermicular', label: '蠕铁入库' }
-]
-
 const analysisTabs: { key: AnalysisKey; label: string }[] = [
-  { key: 'onlineOffline', label: '线上线下' },
-  { key: 'ironTypes', label: '灰铁球铁蠕铁' },
+  { key: 'ironTypes', label: '毛坯材质' },
   { key: 'productSeries', label: '产品系列' }
 ]
 
-const outputTab = ref<IronType>('gray')
-const inboundTab = ref<IronType>('gray')
-const outputAnalysisKey = ref<AnalysisKey>('onlineOffline')
-const inboundAnalysisKey = ref<AnalysisKey>('onlineOffline')
+const outputAnalysisKey = ref<AnalysisKey>('ironTypes')
+const inboundAnalysisKey = ref<AnalysisKey>('ironTypes')
+const monthlyAnalysisKey = ref<AnalysisKey>('ironTypes')
+const yearlyAnalysisKey = ref<AnalysisKey>('ironTypes')
 
-const outputOverview = computed(() => outputOverviewData[outputTab.value])
-const inboundOverview = computed(() => inboundOverviewData[inboundTab.value])
+const outputBarOption = computed(() => createOutputBarOption(outputAnalysisData[outputAnalysisKey.value]))
+/** 入库概况当前 tab 对应的指标项 */
+const currentInboundIndicators = computed(() => inboundIndicators[inboundAnalysisKey.value])
 
-const outputPieOption = computed(() => createPieOption(outputAnalysisData[outputAnalysisKey.value]))
-const inboundPieOption = computed(() => createPieOption(inboundAnalysisData[inboundAnalysisKey.value]))
-const monthlyOption = createMonthlyOption()
-const yearlyOption = createYearlyOption()
+/* 入库概况：近 7 天入库量柱状图，可按 7 天为步长前后切换 */
+const INBOUND_RANGE_DAYS = 7
+const todayStart = dayjs().startOf('day')
+const inboundRangeEnd = ref<Dayjs>(todayStart)
+
+/** 按日期确定性生成 mock 入库量，保证来回切换窗口时数值稳定不跳变 */
+function mockDailyInbound(date: Dayjs): number {
+  const seed = date.year() + date.month() * 31 + date.date()
+  const base = 62 + ((seed * 37) % 39)
+  const weekend = date.day() === 0 || date.day() === 6
+  return weekend ? Math.max(30, base - 18) : base
+}
+
+const inboundDailyPoints = computed<InboundDailyPoint[]>(() => {
+  const points: InboundDailyPoint[] = []
+  for (let offset = INBOUND_RANGE_DAYS - 1; offset >= 0; offset--) {
+    const date = inboundRangeEnd.value.subtract(offset, 'day')
+    points.push({
+      label: date.format('MM-DD'),
+      value: mockDailyInbound(date),
+      isToday: date.isSame(todayStart, 'day')
+    })
+  }
+  return points
+})
+
+const inboundDailyOption = computed(() => createInboundDailyOption(inboundDailyPoints.value))
+
+const inboundRangeLabel = computed(() => {
+  const points = inboundDailyPoints.value
+  return `${points[0].label} ~ ${points[points.length - 1].label}`
+})
+
+/** 最多向后翻到今天 */
+const canShiftInboundRangeNext = computed(() => inboundRangeEnd.value.isBefore(todayStart, 'day'))
+
+const shiftInboundRange = (delta: number) => {
+  const next = inboundRangeEnd.value.add(delta * INBOUND_RANGE_DAYS, 'day')
+  inboundRangeEnd.value = next.isAfter(todayStart, 'day') ? todayStart : next
+}
+
+/* 月度 / 年度分析：分项堆叠数据随各自 tab 切换，占比与出产分析同源 */
+const monthlySplits = computed(() => splitTotalsByAnalysis(monthlyAnalysisKey.value, monthlyAnalysis.output))
+const monthlyOption = computed(() => createMonthlyOption(monthlySplits.value, monthlyAnalysis.inbound))
+
+const yearlySplits = computed(() => splitTotalsByAnalysis(yearlyAnalysisKey.value, yearlyAnalysis.output))
+const yearlyOption = computed(() => createYearlyOption(yearlySplits.value, yearlyAnalysis.inbound))
 const planOption = createPlanOption()
 
 const productCharts = productSeriesList.map((series) => ({
@@ -660,11 +753,11 @@ const activeProductChart = computed(
             </div>
           </div>
           <div class="chart-container">
-            <EChart :option="outputPieOption" height="100%" />
+            <EChart :option="outputBarOption" height="100%" />
           </div>
         </div>
 
-        <!-- 入库分析 -->
+        <!-- 入库概况 -->
         <div class="data-panel" style="height: 386px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -678,7 +771,7 @@ const activeProductChart = computed(
                 />
               </svg>
             </div>
-            <h3 class="panel-title">入库分析</h3>
+            <h3 class="panel-title">入库概况</h3>
             <div class="tab-buttons">
               <button
                 v-for="tab in analysisTabs"
@@ -691,8 +784,50 @@ const activeProductChart = computed(
               </button>
             </div>
           </div>
-          <div class="chart-container">
-            <EChart :option="inboundPieOption" height="100%" />
+
+          <div class="inbound-overview">
+            <!-- 指标：项目 = 当前 tab 下的分项，随 tab 切换 -->
+            <div
+              class="inbound-kpi-row"
+              :style="{ gridTemplateColumns: `repeat(${currentInboundIndicators.length}, minmax(0, 1fr))` }"
+            >
+              <div v-for="item in currentInboundIndicators" :key="item.label" class="inbound-kpi">
+                <div class="inbound-kpi-label">{{ item.label }}</div>
+                <div class="inbound-kpi-value">
+                  {{ item.value }}<span class="inbound-kpi-unit">{{ item.unit }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 近 7 天入库量：X 轴为日期，可按 7 天为步长前后切换 -->
+            <div class="inbound-range">
+              <div class="inbound-range-head">
+                <button
+                  type="button"
+                  class="inbound-range-nav"
+                  aria-label="前 7 天"
+                  @click="shiftInboundRange(-1)"
+                >
+                  ‹
+                </button>
+                <span class="inbound-range-title">
+                  {{ canShiftInboundRangeNext ? inboundRangeLabel : `近 7 天 · ${inboundRangeLabel}` }}
+                </span>
+                <button
+                  type="button"
+                  class="inbound-range-nav"
+                  :disabled="!canShiftInboundRangeNext"
+                  aria-label="后 7 天"
+                  @click="shiftInboundRange(1)"
+                >
+                  ›
+                </button>
+              </div>
+
+              <div class="inbound-range-chart">
+                <EChart :option="inboundDailyOption" height="100%" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -712,6 +847,17 @@ const activeProductChart = computed(
               </svg>
             </div>
             <h3 class="panel-title">月度分析</h3>
+            <div class="tab-buttons">
+              <button
+                v-for="tab in analysisTabs"
+                :key="tab.key"
+                class="tab-button"
+                :class="{ active: monthlyAnalysisKey === tab.key }"
+                @click="monthlyAnalysisKey = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
           </div>
           <div class="chart-container">
             <EChart :option="monthlyOption" height="100%" />
@@ -733,6 +879,17 @@ const activeProductChart = computed(
               </svg>
             </div>
             <h3 class="panel-title">年度分析</h3>
+            <div class="tab-buttons">
+              <button
+                v-for="tab in analysisTabs"
+                :key="tab.key"
+                class="tab-button"
+                :class="{ active: yearlyAnalysisKey === tab.key }"
+                @click="yearlyAnalysisKey = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
           </div>
           <div class="chart-container">
             <EChart :option="yearlyOption" height="100%" />
@@ -810,1211 +967,4 @@ const activeProductChart = computed(
   </div>
 </template>
 
-<style scoped>
-/* 生产运营管理大屏样式（迁移自 production-ops-dashboard.html） */
-
-.dashboard-container {
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  box-sizing: border-box;
-  position: relative;
-  overflow-y: auto;
-}
-
-/* 顶部标题栏样式 */
-.title-decoration-left,
-/* 主要内容区域 */
-.main-content {
-  display: grid;
-  grid-template-columns: repeat(3, 608px);
-  gap: 24px;
-  height: auto;
-  min-height: calc(100vh - 310px);
-}
-
-.top-indicators {
-  display: grid;
-  grid-template-columns: repeat(6, 292px);
-  gap: 24px;
-  margin-bottom: 12px;
-}
-
-.top-indicator-card {
-  position: relative;
-  width: 292px;
-  height: 125px;
-  min-height: 125px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  color: #dff8ff;
-  background-color: #082532;
-  background-image:
-    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%);
-  border: 1px solid rgba(0, 190, 235, 0.56);
-  border-radius: 3px;
-  box-shadow:
-    inset 0 0 22px rgba(0, 154, 201, 0.09),
-    0 0 10px rgba(0, 0, 0, 0.24);
-}
-
-.top-indicator-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 58%;
-  height: 2px;
-  background: linear-gradient(90deg, #26d9ff, transparent);
-  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
-}
-
-.top-indicator-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 34%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
-}
-
-.top-indicator-content {
-  position: relative;
-  z-index: 1;
-}
-
-.top-indicator-label {
-  margin-bottom: 8px;
-  color: #a9c9d4;
-  font-size: 14px;
-  letter-spacing: 1px;
-}
-
-.top-indicator-value {
-  color: #ffd91a;
-  font-size: 36px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 2px;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 14px rgba(255, 217, 26, 0.36);
-}
-
-.top-indicator-unit {
-  margin-left: 7px;
-  color: #b8d6df;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-
-.top-indicator-icon {
-  position: relative;
-  z-index: 1;
-  width: 56px;
-  height: 56px;
-  flex: 0 0 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #62e8ff;
-  background: rgba(0, 174, 220, 0.15);
-  border: 1px solid rgba(55, 220, 255, 0.68);
-  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-  box-shadow: inset 0 0 16px rgba(55, 220, 255, 0.16);
-}
-
-.top-indicator-card.tone-inbound .top-indicator-icon {
-  color: #8fffd0;
-  background: rgba(43, 214, 157, 0.12);
-  border-color: rgba(83, 255, 197, 0.58);
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* 数据面板样式 */
-.data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1px solid rgba(68, 114, 196, 0.4);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
-  width: 100%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.panel-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(68, 114, 196, 0.2);
-  border-radius: 6px;
-  margin-right: 12px;
-  color: #4472c4;
-}
-
-.panel-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
-}
-
-/* 角装饰 */
-.corner-tl,
-.corner-tr,
-.corner-bl,
-.corner-br {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  z-index: 10;
-}
-
-.corner-tl {
-  top: 0;
-  left: 0;
-  border-top: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-}
-
-.corner-tr {
-  top: 0;
-  right: 0;
-  border-top: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-}
-
-.corner-bl {
-  bottom: 0;
-  left: 0;
-  border-bottom: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-}
-
-.corner-br {
-  bottom: 0;
-  right: 0;
-  border-bottom: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-}
-
-/* 切换按钮样式 */
-.tab-buttons {
-  display: flex;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.tab-button {
-  background: rgba(242, 242, 242, 0.5);
-  border: 1px solid rgba(68, 114, 196, 0.3);
-  color: #666;
-  font-size: 11px;
-  padding: 4px 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  white-space: nowrap;
-}
-
-.tab-button:first-child {
-  border-radius: 4px 0 0 4px;
-}
-
-.tab-button:last-child {
-  border-radius: 0 4px 4px 0;
-}
-
-.tab-button.active {
-  background: rgba(112, 173, 71, 0.2);
-  border-color: #70ad47;
-  color: #70ad47;
-}
-
-.tab-button:hover {
-  color: #70ad47;
-}
-
-.product-tabs {
-  gap: 4px;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.product-tabs .tab-button {
-  padding: 4px 6px;
-  font-size: 10px;
-}
-
-.product-detail-chart {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* 数据卡片样式 */
-.data-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.data-card {
-  text-align: center;
-  padding: 12px;
-  background: rgba(242, 242, 242, 0.3);
-  border-radius: 6px;
-}
-
-.data-card-label {
-  color: #666;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.data-card-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.data-card-unit {
-  font-size: 14px;
-  margin-left: 4px;
-}
-
-/* 进度条样式 */
-.progress-container {
-  margin-top: 0;
-  width: 100%;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #666 !important;
-  margin-bottom: 8px;
-  width: 100%;
-}
-
-.progress-header span {
-  color: #666 !important;
-  display: inline-block;
-  line-height: 1.2;
-}
-
-.progress-header span:first-child {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-.progress-header span:last-child {
-  flex: 0 0 auto;
-  margin-left: 8px;
-  font-weight: bold;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: rgba(242, 242, 242, 0.6);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #70ad47;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-  position: relative;
-}
-
-/* 图表容器 */
-.chart-container {
-  flex: 1;
-  min-height: 200px;
-  position: relative;
-}
-
-/* 生产指标样式 */
-.production-indicators {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  flex: 1;
-  align-items: center;
-}
-
-.indicator-card {
-  text-align: center;
-  padding: 10px;
-  background: rgba(242, 242, 242, 0.3);
-  border-radius: 6px;
-}
-
-.indicator-label {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.indicator-value {
-  font-size: 26px;
-  font-weight: bold;
-}
-
-.indicator-green {
-  color: #70ad47;
-}
-
-.indicator-blue {
-  color: #4472c4;
-}
-
-.indicator-yellow {
-  color: #ffc000;
-}
-
-/* 年度产量样式 */
-.annual-production {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.daily-card {
-  text-align: center;
-  padding: 16px;
-  background: rgba(242, 242, 242, 0.3);
-  border-radius: 6px;
-}
-
-.daily-label {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.daily-value {
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.production-summary {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.summary-card {
-  padding: 16px;
-  background: rgba(242, 242, 242, 0.3);
-  border-radius: 6px;
-}
-
-.summary-title {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.summary-item {
-  text-align: center;
-}
-
-.summary-item-label {
-  color: #666;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.summary-item-value {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-
-.summary-item-unit {
-  color: #666;
-  font-size: 12px;
-}
-
-.summary-item-percent {
-  font-size: 16px;
-  font-weight: bold;
-  color: #70ad47;
-}
-
-/* 表格样式 */
-.assessment-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.assessment-table th {
-  background: rgba(242, 242, 242, 0.8);
-  color: #475569;
-  padding: 8px 4px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.3);
-  font-weight: 500;
-  text-align: center;
-}
-
-.assessment-table td {
-  background: rgba(255, 255, 255, 0.6);
-  color: #333;
-  padding: 8px 4px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.1);
-  text-align: center;
-}
-
-.assessment-table tr:hover td {
-  background: rgba(242, 242, 242, 0.7);
-}
-
-.completion-success {
-  color: #70ad47;
-  font-weight: 500;
-}
-
-.completion-warning {
-  color: #ff4d4f;
-  font-weight: 500;
-}
-
-.abnormal-issue {
-  color: #ff4d4f;
-  font-weight: 500;
-}
-
-/* 滚动条样式 */
-.production-details-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.production-details-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.production-details-scroll::-webkit-scrollbar-thumb {
-  background: rgba(68, 114, 196, 0.3);
-  border-radius: 2px;
-}
-
-.production-details-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(68, 114, 196, 0.5);
-}
-
-.assessment-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.assessment-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.assessment-scroll::-webkit-scrollbar-thumb {
-  background: rgba(68, 114, 196, 0.3);
-  border-radius: 2px;
-}
-
-.assessment-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(68, 114, 196, 0.5);
-}
-
-/* =========================
-   FUI 数据大屏视觉风格
-   旧选择器保留用于对照，实际生效规则见下方修正区块
-.dashboard-container {
-  width: 100%;
-  min-height: calc(100vh - 132px) !important;
-  padding: 10px !important;
-  color: #dff8ff !important;
-  background-color: #041019 !important;
-  background-image:
-    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
-    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
-    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px);
-  background-size: auto, auto, 32px 32px, 32px 32px;
-  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46);
-  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
-}
-
-.dashboard-container .dash-header[data-v] {
-  margin-bottom: 10px !important;
-}
-
-.dashboard-container .main-content[data-v] {
-  gap: 12px !important;
-}
-
-.dashboard-container .column[data-v] {
-  gap: 12px !important;
-}
-
-.dashboard-container .data-panel[data-v] {
-  color: #dff8ff !important;
-  background-color: #061821 !important;
-  background-image:
-    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
-    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%) !important;
-  border: 1px solid rgba(0, 191, 235, 0.48) !important;
-  border-radius: 2px !important;
-  padding: 12px 14px !important;
-  box-shadow:
-    inset 0 0 24px rgba(0, 157, 205, 0.055),
-    0 0 12px rgba(0, 0, 0, 0.24) !important;
-}
-
-.dashboard-container .data-panel[data-v]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 14px;
-  width: 74px;
-  height: 2px;
-  background: #18d2ff;
-  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9);
-}
-
-.dashboard-container .data-panel[data-v]::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  bottom: 14px;
-  width: 3px;
-  height: 42px;
-  background: linear-gradient(180deg, transparent, #18d2ff, transparent);
-  opacity: 0.75;
-}
-
-.dashboard-container .data-panel > .panel-header[data-v] {
-  min-height: 34px;
-  margin-bottom: 10px !important;
-  padding-bottom: 8px !important;
-  border-bottom: 1px dashed rgba(0, 185, 226, 0.34) !important;
-}
-
-.dashboard-container .data-panel .panel-icon[data-v] {
-  display: flex !important;
-  width: 28px;
-  height: 28px;
-  margin-right: 9px;
-  color: #40e3ff;
-  background: rgba(0, 176, 220, 0.14);
-  border: 1px solid rgba(35, 211, 255, 0.48);
-  border-radius: 2px;
-  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
-}
-
-.dashboard-container .data-panel .panel-title[data-v] {
-  display: inline-block;
-  margin: 0;
-  padding: 0;
-  color: #f4fdff !important;
-  background: transparent;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
-}
-
-.dashboard-container .data-panel .panel-title[data-v]::after {
-  content: '';
-  display: inline-block;
-  width: 28px;
-  height: 1px;
-  margin-left: 10px;
-  vertical-align: middle;
-  background: linear-gradient(90deg, #17cfff, transparent);
-}
-
-.dashboard-container .corner-tl[data-v],
-.dashboard-container .corner-tr[data-v],
-.dashboard-container .corner-bl[data-v],
-.dashboard-container .corner-br[data-v] {
-  display: block !important;
-  width: 14px;
-  height: 14px;
-  border-color: #1bd5ff !important;
-  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
-}
-
-.dashboard-container .tab-button[data-v] {
-  color: #9cc8d5 !important;
-  background: rgba(4, 24, 33, 0.88) !important;
-  border-color: rgba(0, 184, 225, 0.4) !important;
-}
-
-.dashboard-container .tab-button.active[data-v],
-.dashboard-container .tab-button:hover[data-v] {
-  color: #effcff !important;
-  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34)) !important;
-  border-color: #26d5ff !important;
-  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18);
-}
-
-.dashboard-container .data-card[data-v],
-.dashboard-container .indicator-card[data-v],
-.dashboard-container .daily-card[data-v],
-.dashboard-container .summary-card[data-v] {
-  color: #dff8ff;
-  position: relative;
-  overflow: hidden;
-  background-color: #071e29 !important;
-  background-image:
-    linear-gradient(180deg, rgba(11, 55, 72, 0.96), rgba(5, 27, 37, 0.98)),
-    linear-gradient(135deg, rgba(0, 196, 240, 0.14), transparent 44%) !important;
-  border: 1px solid rgba(0, 190, 235, 0.52) !important;
-  border-radius: 3px;
-  box-shadow:
-    inset 0 0 18px rgba(0, 154, 201, 0.1),
-    0 0 8px rgba(0, 0, 0, 0.26) !important;
-}
-
-.dashboard-container .data-card[data-v]::before,
-.dashboard-container .indicator-card[data-v]::before,
-.dashboard-container .daily-card[data-v]::before,
-.dashboard-container .summary-card[data-v]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 46%;
-  height: 2px;
-  background: linear-gradient(90deg, #24d8ff, transparent);
-  box-shadow: 0 0 7px rgba(36, 216, 255, 0.78);
-}
-
-.dashboard-container .data-card[data-v]::after,
-.dashboard-container .indicator-card[data-v]::after,
-.dashboard-container .daily-card[data-v]::after,
-.dashboard-container .summary-card[data-v]::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 28%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(36, 216, 255, 0.8));
-}
-
-.dashboard-container .data-card[data-v] {
-  background-color: #082532 !important;
-  background-image:
-    linear-gradient(180deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    repeating-linear-gradient(90deg, transparent 0 10px, rgba(38, 211, 255, 0.035) 10px 11px) !important;
-}
-
-.dashboard-container .indicator-card[data-v] {
-  background-color: #071f2b !important;
-}
-
-.dashboard-container .daily-card[data-v] {
-  background-color: #082532 !important;
-  background-image:
-    linear-gradient(180deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    linear-gradient(90deg, rgba(0, 196, 240, 0.08), transparent) !important;
-}
-
-.dashboard-container .summary-card[data-v] {
-  background-color: #061c27 !important;
-  background-image:
-    linear-gradient(180deg, rgba(8, 43, 57, 0.96), rgba(5, 24, 33, 0.98)),
-    repeating-linear-gradient(0deg, transparent 0 15px, rgba(38, 211, 255, 0.025) 15px 16px) !important;
-}
-
-.dashboard-container .data-card-label[data-v],
-.dashboard-container .indicator-label[data-v],
-.dashboard-container .daily-label[data-v],
-.dashboard-container .summary-item-label[data-v] {
-  color: #9fc3cf !important;
-}
-
-.dashboard-container .data-card-value[data-v],
-.dashboard-container .daily-value[data-v] {
-  color: #ffd91a;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36);
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-container .data-card-unit[data-v],
-.dashboard-container .summary-item-unit[data-v] {
-  color: #a7cad5 !important;
-  font-size: 11px;
-}
-
-.dashboard-container .progress-header[data-v],
-.dashboard-container .progress-header span[data-v] {
-  color: #a8cbd6 !important;
-}
-
-.dashboard-container .progress-header span:last-child[data-v] {
-  color: #ffd91a !important;
-}
-
-.dashboard-container .progress-bar[data-v] {
-  height: 7px;
-  background: rgba(0, 126, 165, 0.2);
-  border: 1px solid rgba(0, 181, 224, 0.26);
-  border-radius: 1px;
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.45);
-}
-
-.dashboard-container .progress-fill[data-v] {
-  background: linear-gradient(90deg, #0aaad9, #35e4ff 72%, #ffd91a);
-  border-radius: 1px;
-  box-shadow: 0 0 9px rgba(53, 228, 255, 0.72);
-}
-
-.dashboard-container .indicator-green[data-v],
-.dashboard-container .summary-title.indicator-green[data-v],
-.dashboard-container .summary-item-percent[data-v] {
-  color: #4ee6a6 !important;
-  text-shadow: 0 0 10px rgba(78, 230, 166, 0.25);
-}
-
-.dashboard-container .indicator-blue[data-v],
-.dashboard-container .summary-title.indicator-blue[data-v] {
-  color: #31d7ff !important;
-  text-shadow: 0 0 10px rgba(49, 215, 255, 0.28);
-}
-
-.dashboard-container .indicator-yellow[data-v] {
-  color: #ffd91a !important;
-  text-shadow: 0 0 10px rgba(255, 217, 26, 0.28);
-}
-
-.dashboard-container .indicator-value[data-v] {
-  font-size: 28px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-container .summary-title[data-v] {
-  padding: 6px 8px;
-  background: rgba(0, 156, 201, 0.09);
-  border-bottom: 1px solid rgba(0, 184, 225, 0.24);
-}
-
-.dashboard-container .summary-item-value[data-v] {
-  color: #f4fdff;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-container .assessment-table[data-v] {
-  color: #cde7ee;
-}
-
-.dashboard-container .assessment-table th[data-v] {
-  color: #75dff7 !important;
-  background: rgba(0, 143, 184, 0.17) !important;
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
-}
-
-.dashboard-container .assessment-table td[data-v] {
-  color: #cde7ee !important;
-  background: rgba(5, 27, 37, 0.72) !important;
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
-}
-
-.dashboard-container .assessment-table tbody tr:nth-child(odd) td[data-v] {
-  background: rgba(7, 36, 48, 0.78) !important;
-}
-
-.dashboard-container .assessment-table tbody tr:hover td[data-v] {
-  background: rgba(0, 169, 215, 0.13) !important;
-}
-
-.dashboard-container .completion-success[data-v] {
-  color: #4ee6a6 !important;
-}
-
-.dashboard-container .completion-warning[data-v],
-.dashboard-container .abnormal-issue[data-v] {
-  color: #ff5f87 !important;
-}
-
-.dashboard-container .production-details-scroll[data-v]::-webkit-scrollbar-thumb,
-.dashboard-container .assessment-scroll[data-v]::-webkit-scrollbar-thumb {
-  background: rgba(26, 202, 242, 0.5) !important;
-}
-
-.dashboard-container .production-details-scroll[data-v]::-webkit-scrollbar-track,
-.dashboard-container .assessment-scroll[data-v]::-webkit-scrollbar-track {
-  background: rgba(0, 108, 145, 0.1) !important;
-}
-
-*/
-
-/* 修正 Vue scoped 编译后的选择器，确保卡片背景实际生效 */
-.dashboard-container {
-  width: 100%;
-  min-height: calc(100vh - 132px) !important;
-  padding: 10px !important;
-  color: #dff8ff !important;
-  background-color: #041019 !important;
-  background-image:
-    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
-    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
-    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px);
-  background-size: auto, auto, 32px 32px, 32px 32px;
-  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46);
-  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
-}
-
-.dashboard-container .dash-header {
-  margin-bottom: 10px !important;
-}
-
-.dashboard-container .main-content,
-.dashboard-container .column {
-  gap: 24px !important;
-}
-
-.dashboard-container .data-panel {
-  color: #dff8ff !important;
-  background-color: #061821 !important;
-  background-image:
-    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
-    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%) !important;
-  border: 1px solid rgba(0, 191, 235, 0.48) !important;
-  border-radius: 2px !important;
-  padding: 12px 14px !important;
-  box-shadow:
-    inset 0 0 24px rgba(0, 157, 205, 0.055),
-    0 0 12px rgba(0, 0, 0, 0.24) !important;
-}
-
-.dashboard-container .data-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 14px;
-  width: 74px;
-  height: 2px;
-  background: #18d2ff;
-  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9);
-}
-
-.dashboard-container .data-panel::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  bottom: 14px;
-  width: 3px;
-  height: 42px;
-  background: linear-gradient(180deg, transparent, #18d2ff, transparent);
-  opacity: 0.75;
-}
-
-.dashboard-container .data-panel > .panel-header {
-  min-height: 34px;
-  margin-bottom: 10px !important;
-  padding-bottom: 8px !important;
-  border-bottom: 1px dashed rgba(0, 185, 226, 0.34) !important;
-}
-
-.dashboard-container .data-panel .panel-icon {
-  display: flex !important;
-  width: 28px;
-  height: 28px;
-  margin-right: 9px;
-  color: #40e3ff;
-  background: rgba(0, 176, 220, 0.14);
-  border: 1px solid rgba(35, 211, 255, 0.48);
-  border-radius: 2px;
-  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
-}
-
-.dashboard-container .data-panel .panel-title {
-  display: inline-block;
-  margin: 0;
-  padding: 0;
-  color: #f4fdff !important;
-  background: transparent !important;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
-}
-
-.dashboard-container .data-panel .panel-title::after {
-  content: '';
-  display: inline-block;
-  width: 28px;
-  height: 1px;
-  margin-left: 10px;
-  vertical-align: middle;
-  background: linear-gradient(90deg, #17cfff, transparent);
-}
-
-.dashboard-container .corner-tl,
-.dashboard-container .corner-tr,
-.dashboard-container .corner-bl,
-.dashboard-container .corner-br {
-  display: block !important;
-  width: 14px;
-  height: 14px;
-  border-color: #1bd5ff !important;
-  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
-}
-
-.dashboard-container .tab-button {
-  color: #9cc8d5 !important;
-  background: rgba(4, 24, 33, 0.88) !important;
-  border-color: rgba(0, 184, 225, 0.4) !important;
-}
-
-.dashboard-container .tab-button.active,
-.dashboard-container .tab-button:hover {
-  color: #effcff !important;
-  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34)) !important;
-  border-color: #26d5ff !important;
-  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18);
-}
-
-.dashboard-container .data-card,
-.dashboard-container .indicator-card,
-.dashboard-container .daily-card,
-.dashboard-container .summary-card {
-  position: relative;
-  overflow: hidden;
-  color: #dff8ff;
-  background-color: #071e29 !important;
-  background-image:
-    linear-gradient(180deg, rgba(11, 55, 72, 0.96), rgba(5, 27, 37, 0.98)),
-    linear-gradient(135deg, rgba(0, 196, 240, 0.14), transparent 44%) !important;
-  border: 1px solid rgba(0, 190, 235, 0.52) !important;
-  border-radius: 3px !important;
-  box-shadow:
-    inset 0 0 18px rgba(0, 154, 201, 0.1),
-    0 0 8px rgba(0, 0, 0, 0.26) !important;
-}
-
-.dashboard-container .data-card::before,
-.dashboard-container .indicator-card::before,
-.dashboard-container .daily-card::before,
-.dashboard-container .summary-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 46%;
-  height: 2px;
-  background: linear-gradient(90deg, #24d8ff, transparent);
-  box-shadow: 0 0 7px rgba(36, 216, 255, 0.78);
-}
-
-.dashboard-container .data-card::after,
-.dashboard-container .indicator-card::after,
-.dashboard-container .daily-card::after,
-.dashboard-container .summary-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 28%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(36, 216, 255, 0.8));
-}
-
-.dashboard-container .data-card,
-.dashboard-container .daily-card {
-  background-color: #082532 !important;
-  background-image:
-    linear-gradient(180deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    repeating-linear-gradient(90deg, transparent 0 10px, rgba(38, 211, 255, 0.035) 10px 11px) !important;
-}
-
-.dashboard-container .indicator-card {
-  background-color: #071f2b !important;
-}
-
-.dashboard-container .summary-card {
-  background-color: #061c27 !important;
-  background-image:
-    linear-gradient(180deg, rgba(8, 43, 57, 0.96), rgba(5, 24, 33, 0.98)),
-    repeating-linear-gradient(0deg, transparent 0 15px, rgba(38, 211, 255, 0.025) 15px 16px) !important;
-}
-
-.dashboard-container .data-card-label,
-.dashboard-container .indicator-label,
-.dashboard-container .daily-label,
-.dashboard-container .summary-item-label {
-  color: #9fc3cf !important;
-}
-
-.dashboard-container .data-card-value,
-.dashboard-container .daily-value {
-  color: #ffd91a !important;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36);
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-container .data-card-unit,
-.dashboard-container .summary-item-unit {
-  color: #a7cad5 !important;
-  font-size: 11px;
-}
-
-.dashboard-container .progress-header,
-.dashboard-container .progress-header span {
-  color: #a8cbd6 !important;
-}
-
-.dashboard-container .progress-header span:last-child {
-  color: #ffd91a !important;
-}
-
-.dashboard-container .progress-bar {
-  height: 7px;
-  background: rgba(0, 126, 165, 0.2) !important;
-  border: 1px solid rgba(0, 181, 224, 0.26);
-  border-radius: 1px;
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.45);
-}
-
-.dashboard-container .progress-fill {
-  background: linear-gradient(90deg, #0aaad9, #35e4ff 72%, #ffd91a) !important;
-  border-radius: 1px;
-  box-shadow: 0 0 9px rgba(53, 228, 255, 0.72);
-}
-
-.dashboard-container .indicator-green,
-.dashboard-container .summary-title.indicator-green,
-.dashboard-container .summary-item-percent {
-  color: #4ee6a6 !important;
-  text-shadow: 0 0 10px rgba(78, 230, 166, 0.25);
-}
-
-.dashboard-container .indicator-blue,
-.dashboard-container .summary-title.indicator-blue {
-  color: #31d7ff !important;
-  text-shadow: 0 0 10px rgba(49, 215, 255, 0.28);
-}
-
-.dashboard-container .indicator-yellow {
-  color: #ffd91a !important;
-  text-shadow: 0 0 10px rgba(255, 217, 26, 0.28);
-}
-
-.dashboard-container .indicator-value {
-  font-size: 28px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-container .summary-title {
-  padding: 6px 8px;
-  background: rgba(0, 156, 201, 0.09) !important;
-  border-bottom: 1px solid rgba(0, 184, 225, 0.24);
-}
-
-.dashboard-container .summary-item-value {
-  color: #f4fdff;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-container .assessment-table {
-  color: #cde7ee;
-}
-
-.dashboard-container .assessment-table th {
-  color: #75dff7 !important;
-  background: rgba(0, 143, 184, 0.17) !important;
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
-}
-
-.dashboard-container .assessment-table td {
-  color: #cde7ee !important;
-  background: rgba(5, 27, 37, 0.72) !important;
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
-}
-
-.dashboard-container .assessment-table tbody tr:nth-child(odd) td {
-  background: rgba(7, 36, 48, 0.78) !important;
-}
-
-.dashboard-container .assessment-table tbody tr:hover td {
-  background: rgba(0, 169, 215, 0.13) !important;
-}
-
-.dashboard-container .completion-success {
-  color: #4ee6a6 !important;
-}
-
-.dashboard-container .completion-warning,
-.dashboard-container .abnormal-issue {
-  color: #ff5f87 !important;
-}
-
-.dashboard-container .production-details-scroll::-webkit-scrollbar-thumb,
-.dashboard-container .assessment-scroll::-webkit-scrollbar-thumb {
-  background: rgba(26, 202, 242, 0.5) !important;
-}
-
-.dashboard-container .production-details-scroll::-webkit-scrollbar-track,
-.dashboard-container .assessment-scroll::-webkit-scrollbar-track {
-  background: rgba(0, 108, 145, 0.1) !important;
-}
-
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .top-indicators {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .main-content {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-</style>
+<style scoped src="./dashboard-theme.css"></style>
