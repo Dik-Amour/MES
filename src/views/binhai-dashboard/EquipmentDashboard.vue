@@ -65,46 +65,37 @@ const iconEquipment =
   'M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z'
 const iconInfo =
   'M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+const iconCheck =
+  'M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+const iconClock =
+  'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+const iconWarn =
+  'M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
+const iconMoney =
+  'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'
+const iconGauge =
+  'M12 2a10 10 0 100 20 10 10 0 000-20zm1 17.93A8.01 8.01 0 014 12c0-.62.08-1.21.21-1.79L9 15v1a2 2 0 002 2v1.93zm6.9-2.54A7.96 7.96 0 0019 12c0-.62-.08-1.21-.21-1.79L15 12h-2V9l4.9-4.9A7.96 7.96 0 0013 4.07V6h-2V4.07A7.96 7.96 0 006.1 6.21L11 11H9v2h2v2l-4.79 4.79A7.96 7.96 0 0011 19.93V18h2v1.93A7.96 7.96 0 0017.9 17.39z'
 
+/** 顶部 12 项设备指标 */
 const kpiCards: KpiCard[] = [
-  { title: '设备总数', value: '85', unit: '台', iconPath: iconEquipment },
-  {
-    title: '设备可动率',
-    value: '99',
-    unit: '%',
-    iconPath:
-      'M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-  },
-  {
-    title: '主要设备完好率',
-    value: '98',
-    unit: '%',
-    iconPath:
-      'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-  },
-  {
-    title: '故障停机率',
-    value: '2.2',
-    unit: '%',
-    iconPath:
-      'M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
-  },
-  { title: '平均间隔时间', value: '220', unit: 'Min', iconPath: iconInfo },
-  { title: '平均维修时间', value: '4.2', unit: 'Min', iconPath: iconInfo },
-  {
-    title: '原值/净值（万元）',
-    value: '5,178/3,896',
-    iconPath:
-      'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'
-  },
-  { title: '异常数量', value: '4', unit: '个', iconPath: iconInfo }
+  { title: '设备台数', value: '85', unit: '台', iconPath: iconEquipment },
+  { title: '主要设备台数', value: '42', unit: '台', iconPath: iconEquipment },
+  { title: '设备原值', value: '5,178', unit: '万元', iconPath: iconMoney },
+  { title: '设备净值', value: '3,896', unit: '万元', iconPath: iconMoney },
+  { title: '设备可动率', value: '99', unit: '%', iconPath: iconCheck },
+  { title: '主要设备完好率', value: '98', unit: '%', iconPath: iconClock },
+  { title: '设备停机率', value: '2.2', unit: '%', iconPath: iconWarn },
+  { title: '设备停机时间', value: '186', unit: 'h', iconPath: iconInfo },
+  { title: '平均故障时间', value: '220', unit: 'Min', iconPath: iconInfo },
+  { title: '平均故障修复时间', value: '4.2', unit: 'Min', iconPath: iconClock },
+  { title: '设备故障次数', value: '16', unit: '次', iconPath: iconWarn },
+  { title: '设备OEE', value: '86', unit: '%', iconPath: iconGauge }
 ]
 
-/** 设备总览：各产线设备分布 */
+/** 设备总览：各产线设备分布（不含制芯） */
 const equipmentDistribution: PieDatum[] = [
   { value: 28, name: '熔炼', color: '#ffd52a' },
   { value: 32, name: '造型', color: '#4ee6a6' },
-  { value: 15, name: '制芯', color: '#31d7ff' },
   { value: 10, name: '清理', color: '#3bd6c6' }
 ]
 
@@ -241,8 +232,8 @@ function createEquipmentCountOption(data: PieDatum[]): EChartsOption {
       {
         name: '产线设备分布',
         type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['35%', '50%'],
+        radius: ['38%', '66%'],
+        center: ['41%', '50%'],
         data: data.map((item) => ({
           value: item.value,
           name: item.name,
@@ -701,18 +692,18 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 
 .kpi-grid-container {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
 .dashboard-container .kpi-card {
   position: relative;
   height: 100px;
-  padding: 16px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   overflow: hidden;
   color: #dff8ff;
   background-color: #082532 !important;
@@ -749,8 +740,8 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 
 .dashboard-container .kpi-icon {
   display: flex !important;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   align-items: center;
   justify-content: center;
@@ -762,12 +753,13 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 }
 
 .dashboard-container .kpi-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .dashboard-container .kpi-content {
   flex: 1;
+  min-width: 0;
 }
 
 .dashboard-container .kpi-title {
@@ -775,16 +767,22 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   font-size: 12px;
   margin-bottom: 6px;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-container .kpi-value {
   color: #ffd91a !important;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
   text-shadow: 0 0 12px rgba(255, 217, 26, 0.36);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-container .kpi-unit {
@@ -1061,9 +1059,16 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 }
 
 /* 响应式设计 */
+@media (max-width: 1500px) {
+  .kpi-grid-container {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
 @media (max-width: 1200px) {
   .kpi-grid-container {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -1074,6 +1079,12 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 }
 
 @media (max-width: 768px) {
+  .kpi-grid-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
   .kpi-grid-container {
     grid-template-columns: minmax(0, 1fr);
   }
