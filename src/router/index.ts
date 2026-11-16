@@ -259,19 +259,19 @@ const routes: RouteRecordRaw[] = [
     path: '/binhai-dashboard/production-ops',
     name: 'BinhaiProductionOpsDashboard',
     component: () => import('@/views/binhai-dashboard/ProductionOpsDashboard.vue'),
-    meta: { requiresAuth: true, title: '生产运营管理大屏' }
+    meta: { requiresAuth: true, title: '生产可视化大屏' }
   },
   {
     path: '/binhai-dashboard/equipment',
     name: 'BinhaiEquipmentDashboard',
     component: () => import('@/views/binhai-dashboard/EquipmentDashboard.vue'),
-    meta: { requiresAuth: true, title: '设备管理大屏' }
+    meta: { requiresAuth: true, title: '设备可视化大屏' }
   },
   {
     path: '/binhai-dashboard/quality',
     name: 'BinhaiQualityDashboard',
     component: () => import('@/views/binhai-dashboard/QualityDashboard.vue'),
-    meta: { requiresAuth: true, title: '质量管理大屏' }
+    meta: { requiresAuth: true, title: '质量可视化大屏' }
   },
   {
     path: '/binhai-dashboard/personnel',

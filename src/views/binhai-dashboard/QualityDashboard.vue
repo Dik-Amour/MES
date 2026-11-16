@@ -9,7 +9,7 @@ import type { EChartsOption } from 'echarts'
 /* =========================
    页面静态数据
    ========================= */
-/** 质量管理大屏静态数据 */
+/** 质量可视化大屏静态数据 */
 
 interface DefectRateRow {
   label: string
@@ -69,13 +69,13 @@ const processCheckData = {
 
 /** 产线质量分析：废品率（折线）与废品损失（堆叠柱）共用产线清单 */
 const productionLines: LineSeries[] = [
-  { name: '熔炼线', color: '#4472c4', data: [2.8, 2.6, 2.9, 2.7, 2.5, 2.8, 2.6, 2.7, 2.9, 2.8, 2.6, 2.7] },
-  { name: '大机', color: '#0284c7', data: [3.2, 3.0, 3.3, 3.1, 2.9, 3.2, 3.0, 3.1, 3.3, 3.2, 3.0, 3.1] },
-  { name: '曲轴', color: '#4472c4', data: [2.5, 2.3, 2.6, 2.4, 2.2, 2.5, 2.3, 2.4, 2.6, 2.5, 2.3, 2.4] },
-  { name: '重潍柴', color: '#4472c4', data: [2.9, 2.7, 3.0, 2.8, 2.6, 2.9, 2.7, 2.8, 3.0, 2.9, 2.7, 2.8] },
-  { name: '新产品', color: '#4472c4', data: [3.5, 3.3, 3.6, 3.4, 3.2, 3.5, 3.3, 3.4, 3.6, 3.5, 3.3, 3.4] },
-  { name: '制芯', color: '#4472c4', data: [2.2, 2.0, 2.3, 2.1, 1.9, 2.2, 2.0, 2.1, 2.3, 2.2, 2.0, 2.1] },
-  { name: '清理', color: '#4472c4', data: [2.6, 2.4, 2.7, 2.5, 2.3, 2.6, 2.4, 2.5, 2.7, 2.6, 2.4, 2.5] }
+  { name: '熔炼线', color: '#31d7ff', data: [2.8, 2.6, 2.9, 2.7, 2.5, 2.8, 2.6, 2.7, 2.9, 2.8, 2.6, 2.7] },
+  { name: '大机', color: '#189fd9', data: [3.2, 3.0, 3.3, 3.1, 2.9, 3.2, 3.0, 3.1, 3.3, 3.2, 3.0, 3.1] },
+  { name: '曲轴', color: '#31d7ff', data: [2.5, 2.3, 2.6, 2.4, 2.2, 2.5, 2.3, 2.4, 2.6, 2.5, 2.3, 2.4] },
+  { name: '重潍柴', color: '#31d7ff', data: [2.9, 2.7, 3.0, 2.8, 2.6, 2.9, 2.7, 2.8, 3.0, 2.9, 2.7, 2.8] },
+  { name: '新产品', color: '#31d7ff', data: [3.5, 3.3, 3.6, 3.4, 3.2, 3.5, 3.3, 3.4, 3.6, 3.5, 3.3, 3.4] },
+  { name: '制芯', color: '#31d7ff', data: [2.2, 2.0, 2.3, 2.1, 1.9, 2.2, 2.0, 2.1, 2.3, 2.2, 2.0, 2.1] },
+  { name: '清理', color: '#31d7ff', data: [2.6, 2.4, 2.7, 2.5, 2.3, 2.6, 2.4, 2.5, 2.7, 2.6, 2.4, 2.5] }
 ]
 
 const productionLineLoss: Record<string, number[]> = {
@@ -113,17 +113,17 @@ const top15Parts = [
 const mainProductDefectRate: ProductSeries[] = [
   {
     name: '造型',
-    color: '#4472c4',
+    color: '#31d7ff',
     value: [1.2, 1.5, 1.8, 1.3, 1.6, 1.4, 1.7, 1.5, 1.9, 1.4, 1.6, 1.3, 1.8, 1.5, 1.7]
   },
   {
     name: '熔炼',
-    color: '#70ad47',
+    color: '#4ee6a6',
     value: [0.8, 1.0, 1.2, 0.9, 1.1, 1.0, 1.3, 1.1, 1.4, 1.0, 1.2, 0.9, 1.3, 1.1, 1.2]
   },
   {
     name: '清理',
-    color: '#ffc000',
+    color: '#ffd52a',
     value: [0.5, 0.7, 0.9, 0.6, 0.8, 0.7, 1.0, 0.8, 1.1, 0.7, 0.9, 0.6, 1.0, 0.8, 0.9]
   }
 ]
@@ -131,17 +131,17 @@ const mainProductDefectRate: ProductSeries[] = [
 const mainProductRepairRate: ProductSeries[] = [
   {
     name: '造型',
-    color: '#4472c4',
+    color: '#31d7ff',
     value: [2.1, 2.4, 2.7, 2.2, 2.5, 2.3, 2.6, 2.4, 2.8, 2.3, 2.5, 2.2, 2.7, 2.4, 2.6]
   },
   {
     name: '熔炼',
-    color: '#70ad47',
+    color: '#4ee6a6',
     value: [1.5, 1.8, 2.0, 1.6, 1.9, 1.7, 2.1, 1.9, 2.3, 1.7, 2.0, 1.6, 2.1, 1.9, 2.0]
   },
   {
     name: '清理',
-    color: '#ffc000',
+    color: '#ffd52a',
     value: [1.0, 1.2, 1.5, 1.1, 1.4, 1.2, 1.6, 1.4, 1.8, 1.2, 1.5, 1.1, 1.6, 1.4, 1.5]
   }
 ]
@@ -150,30 +150,30 @@ const mainProductRepairRate: ProductSeries[] = [
    ECharts 配置
    ========================= */
 const tooltipBase = {
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderColor: 'rgba(68, 114, 196, 0.3)',
-  textStyle: { color: '#333' }
+  backgroundColor: 'rgba(5, 24, 34, 0.96)',
+  borderColor: 'rgba(0, 198, 239, 0.55)',
+  textStyle: { color: '#dff8ff' }
 }
 
 const categoryAxis = {
   type: 'category' as const,
-  axisLine: { lineStyle: { color: '#cbd5e1' } },
-  axisLabel: { color: '#666', fontSize: 10 },
+  axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
+  axisLabel: { color: '#a9c9d4', fontSize: 10 },
   axisTick: { show: false }
 }
 
 const valueAxis = {
   type: 'value' as const,
-  nameTextStyle: { color: '#666', fontSize: 10 },
+  nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
   axisLine: { show: false },
   axisTick: { show: false },
   splitLine: {
     lineStyle: {
       type: 'dashed' as const,
-      color: 'rgba(148, 163, 184, 0.3)'
+      color: 'rgba(72, 164, 194, 0.24)'
     }
   },
-  axisLabel: { color: '#666', fontSize: 10 }
+  axisLabel: { color: '#a9c9d4', fontSize: 10 }
 }
 
 /** 产品质量指标：单折线，按产品系列切换 */
@@ -199,7 +199,7 @@ function createQualityIndicatorOption(product: QualityProduct): EChartsOption {
         show: true,
         lineStyle: {
           type: 'dashed',
-          color: 'rgba(148, 163, 184, 0.2)'
+          color: 'rgba(72, 164, 194, 0.18)'
         }
       }
     },
@@ -207,7 +207,7 @@ function createQualityIndicatorOption(product: QualityProduct): EChartsOption {
       ...valueAxis,
       name: '%',
       axisLabel: {
-        color: '#666',
+        color: '#a9c9d4',
         fontSize: 10,
         formatter: '{value}%'
       }
@@ -226,7 +226,7 @@ function createQualityIndicatorOption(product: QualityProduct): EChartsOption {
         itemStyle: {
           color: '#ff4d4f',
           borderWidth: 2,
-          borderColor: '#FFFFFF',
+          borderColor: '#061821',
           shadowColor: 'rgba(255, 77, 79, 0.5)',
           shadowBlur: 8
         },
@@ -281,8 +281,8 @@ function createDefectLossOption(year: DefectLossYear): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#4472c4' },
-              { offset: 1, color: '#4472c4' }
+              { offset: 0, color: '#31d7ff' },
+              { offset: 1, color: '#31d7ff' }
             ]
           },
           borderRadius: [4, 4, 0, 0]
@@ -327,7 +327,7 @@ function createProcessCheckOption(): EChartsOption {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        color: '#666',
+        color: '#a9c9d4',
         fontSize: 11
       }
     },
@@ -357,7 +357,7 @@ function createProcessCheckOption(): EChartsOption {
         type: 'bar',
         data: processCheckData.closed,
         itemStyle: {
-          color: '#4472c4',
+          color: '#31d7ff',
           borderRadius: [0, 4, 4, 0]
         },
         barWidth: '25%',
@@ -383,7 +383,7 @@ function createProductionDefectRateOption(): EChartsOption {
     },
     legend: {
       data: productionLines.map((line) => line.name),
-      textStyle: { color: '#666', fontSize: 10 },
+      textStyle: { color: '#a9c9d4', fontSize: 10 },
       top: 0,
       left: 'center'
     },
@@ -401,9 +401,9 @@ function createProductionDefectRateOption(): EChartsOption {
     yAxis: {
       ...valueAxis,
       name: '废品率(%)',
-      nameTextStyle: { color: '#666', fontSize: 11 },
+      nameTextStyle: { color: '#a9c9d4', fontSize: 11 },
       axisLabel: {
-        color: '#666',
+        color: '#a9c9d4',
         fontSize: 10,
         formatter: '{value}%'
       }
@@ -429,7 +429,7 @@ function createProductionDefectLossOption(): EChartsOption {
     },
     legend: {
       data: productionLines.map((line) => line.name),
-      textStyle: { color: '#666', fontSize: 10 },
+      textStyle: { color: '#a9c9d4', fontSize: 10 },
       top: 0,
       left: 'center'
     },
@@ -447,7 +447,7 @@ function createProductionDefectLossOption(): EChartsOption {
     yAxis: {
       ...valueAxis,
       name: '损失(元/吨)',
-      nameTextStyle: { color: '#666', fontSize: 11 }
+      nameTextStyle: { color: '#a9c9d4', fontSize: 11 }
     },
     series: productionLines.map((line) => ({
       name: line.name,
@@ -478,13 +478,13 @@ function createZeroPpmOption(): EChartsOption {
     xAxis: {
       ...categoryAxis,
       data: months,
-      axisLabel: { color: '#666', fontSize: 11 }
+      axisLabel: { color: '#a9c9d4', fontSize: 11 }
     },
     yAxis: {
       ...valueAxis,
       name: 'PPM',
-      nameTextStyle: { color: '#666', fontSize: 11 },
-      axisLabel: { color: '#666', fontSize: 11 }
+      nameTextStyle: { color: '#a9c9d4', fontSize: 11 },
+      axisLabel: { color: '#a9c9d4', fontSize: 11 }
     },
     series: [
       {
@@ -503,8 +503,8 @@ function createZeroPpmOption(): EChartsOption {
                 x2: 0,
                 y2: 1,
                 colorStops: [
-                  { offset: 0, color: '#70ad47' },
-                  { offset: 1, color: '#2F9E7E' }
+                  { offset: 0, color: '#4ee6a6' },
+                  { offset: 1, color: '#20b98a' }
                 ]
               }
             }
@@ -516,8 +516,8 @@ function createZeroPpmOption(): EChartsOption {
                 x2: 0,
                 y2: 1,
                 colorStops: [
-                  { offset: 0, color: '#ffc000' },
-                  { offset: 1, color: '#D89614' }
+                  { offset: 0, color: '#ffd52a' },
+                  { offset: 1, color: '#d69a0e' }
                 ]
               }
             }
@@ -538,7 +538,7 @@ function createZeroPpmOption(): EChartsOption {
         label: {
           show: true,
           position: 'top',
-          color: '#333',
+          color: '#dff8ff',
           fontSize: 11,
           fontWeight: 'bold'
         }
@@ -564,7 +564,7 @@ function createMainProductOption(series: ProductSeries[]): EChartsOption {
     },
     legend: {
       data: series.map((item) => item.name),
-      textStyle: { color: '#666', fontSize: 12 },
+      textStyle: { color: '#a9c9d4', fontSize: 12 },
       top: 10,
       right: 20
     },
@@ -579,7 +579,7 @@ function createMainProductOption(series: ProductSeries[]): EChartsOption {
       ...categoryAxis,
       data: top15Parts,
       axisLabel: {
-        color: '#666',
+        color: '#a9c9d4',
         fontSize: 10,
         rotate: 30,
         interval: 0
@@ -588,9 +588,9 @@ function createMainProductOption(series: ProductSeries[]): EChartsOption {
     yAxis: {
       ...valueAxis,
       name: '%',
-      nameTextStyle: { color: '#666', fontSize: 12 },
+      nameTextStyle: { color: '#a9c9d4', fontSize: 12 },
       axisLabel: {
-        color: '#666',
+        color: '#a9c9d4',
         fontSize: 10,
         formatter: '{value}%'
       }
@@ -630,8 +630,9 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 <template>
   <div class="dashboard-container">
     <DashboardHeader
-      title="质量管理大屏"
+      title="质量可视化大屏"
       weather="潍坊 18℃ 晴"
+      variant="fui"
     />
 
     <!-- 第一行：年度废品率、产品质量指标、吨均废品损失 -->
@@ -909,119 +910,169 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 <style scoped>
 .dashboard-container {
   width: 100%;
-  height: 100%;
-  padding: 16px;
+  min-height: calc(100vh - 132px) !important;
+  padding: 10px !important;
+  box-sizing: border-box;
   position: relative;
   overflow-y: auto;
+  /* 背景沿用生产 / 设备可视化大屏 */
+  color: #dff8ff !important;
+  background-color: #041019 !important;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px) !important;
+  background-size: auto, auto, 32px 32px, 32px 32px;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46) !important;
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
 }
 
-/* 顶部标题栏样式 */
-/* 左侧时间 */
-/* 中间标题 */
-.title-decoration-left,
-/* 右侧区域 */
-/* 右侧天气 */
-/* Logo样式 */
 /* 网格布局 */
 .dashboard-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px !important;
   margin-bottom: 16px;
 }
 
-.dashboard-row.two-columns {
-  grid-template-columns: 1fr 2fr;
-}
-
+.dashboard-row.two-columns,
 .dashboard-row.wide-columns {
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
 }
 
-/* 数据面板 */
-.data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1px solid rgba(68, 114, 196, 0.4);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+/* 数据面板：沿用生产 / 设备可视化大屏 */
+.dashboard-container .data-panel {
+  color: #dff8ff !important;
+  background-color: #061821 !important;
+  background-image:
+    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
+    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%) !important;
+  border: 1px solid rgba(0, 191, 235, 0.48) !important;
+  border-radius: 2px !important;
+  padding: 12px 14px !important;
+  box-shadow:
+    inset 0 0 24px rgba(0, 157, 205, 0.055),
+    0 0 12px rgba(0, 0, 0, 0.24) !important;
   display: flex;
   flex-direction: column;
   position: relative;
   height: 360px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.panel-header {
+.dashboard-container .data-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  width: 74px;
+  height: 2px;
+  background: #18d2ff;
+  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9);
+}
+
+.dashboard-container .data-panel::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  bottom: 14px;
+  width: 3px;
+  height: 42px;
+  background: linear-gradient(180deg, transparent, #18d2ff, transparent);
+  opacity: 0.75;
+}
+
+.dashboard-container .data-panel > .panel-header {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
+  width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
+  min-height: 34px;
+  margin-bottom: 10px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px dashed rgba(0, 185, 226, 0.34) !important;
 }
 
-.panel-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
+.dashboard-container .data-panel .panel-icon {
+  display: flex !important;
+  width: 28px;
+  height: 28px;
+  margin-right: 9px;
   align-items: center;
   justify-content: center;
-  background: rgba(68, 114, 196, 0.2);
-  border-radius: 6px;
-  margin-right: 12px;
-  color: #4472c4;
+  color: #40e3ff;
+  background: rgba(0, 176, 220, 0.14);
+  border: 1px solid rgba(35, 211, 255, 0.48);
+  border-radius: 2px;
+  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
 }
 
-.panel-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
+.dashboard-container .data-panel .panel-title {
+  display: inline-block;
   margin: 0;
+  padding: 0;
+  color: #f4fdff !important;
+  background: transparent !important;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
   flex: 1;
 }
 
+.dashboard-container .data-panel .panel-title::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin-left: 10px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, #17cfff, transparent);
+}
+
 /* data-panel 角装饰 */
-.corner-tl {
+.dashboard-container .data-panel .corner-tl,
+.dashboard-container .data-panel .corner-tr,
+.dashboard-container .data-panel .corner-bl,
+.dashboard-container .data-panel .corner-br {
+  display: block !important;
   position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: #1bd5ff !important;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
+  z-index: 10;
+}
+
+.corner-tl {
   top: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-  z-index: 10;
+  border-top: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .corner-tr {
-  position: absolute;
   top: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-  z-index: 10;
+  border-top: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 .corner-bl {
-  position: absolute;
   bottom: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-  z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .corner-br {
-  position: absolute;
   bottom: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-  z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 /* 废品率表格样式 */
@@ -1029,9 +1080,11 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   font-family: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
   flex: 1;
   min-height: 0;
+  color: #cde7ee;
 }
 
 .table-header {
+  background: rgba(0, 143, 184, 0.17) !important;
   margin-bottom: 4px;
 }
 
@@ -1040,7 +1093,7 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   grid-template-columns: 80px 1fr 1fr;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.3);
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44);
 }
 
 .header-cell {
@@ -1050,7 +1103,7 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 .column-title {
-  color: #4472c4;
+  color: #75dff7;
   font-size: 14px;
   font-weight: bold;
   text-align: center;
@@ -1068,12 +1121,16 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   grid-template-columns: 80px 1fr 1fr;
   gap: 8px;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.1);
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16);
   transition: background-color 0.2s ease;
 }
 
+.data-row:nth-child(odd) {
+  background: rgba(7, 36, 48, 0.5);
+}
+
 .data-row:hover {
-  background: rgba(68, 114, 196, 0.05);
+  background: rgba(0, 169, 215, 0.13);
 }
 
 .product-label {
@@ -1084,7 +1141,7 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 .product-name {
-  color: #333;
+  color: #cde7ee;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
@@ -1099,10 +1156,11 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
 }
 
 .rate-value {
-  color: #ffffff;
-  font-weight: bold;
+  color: #f4fdff;
+  font-weight: 700;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
   font-size: 16px;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
 }
 
 /* 切换按钮样式 */
@@ -1112,10 +1170,10 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   margin-left: auto;
 }
 
-.tab-button {
-  background: rgba(242, 242, 242, 0.5);
-  border: 1px solid rgba(68, 114, 196, 0.3);
-  color: #666;
+.dashboard-container .tab-button {
+  color: #9cc8d5 !important;
+  background: rgba(4, 24, 33, 0.88) !important;
+  border: 1px solid rgba(0, 184, 225, 0.4) !important;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -1126,17 +1184,12 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   white-space: nowrap;
 }
 
-.tab-button:hover {
-  color: #4472c4;
-  border-color: rgba(68, 114, 196, 0.5);
-  background: rgba(68, 114, 196, 0.1);
-}
-
-.tab-button.active {
-  background: rgba(68, 114, 196, 0.2);
-  border-color: #4472c4;
-  color: #4472c4;
-  box-shadow: 0 0 10px rgba(68, 114, 196, 0.3);
+.dashboard-container .tab-button:hover,
+.dashboard-container .tab-button.active {
+  color: #effcff !important;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34)) !important;
+  border-color: #26d5ff !important;
+  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18);
 }
 
 /* 质量指标tab样式 */
@@ -1165,11 +1218,11 @@ const mainRepairRateOption = createMainProductOption(mainProductRepairRate)
   width: 100%;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1200px) {
   .dashboard-row,
   .dashboard-row.two-columns,
   .dashboard-row.wide-columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

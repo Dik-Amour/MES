@@ -104,9 +104,9 @@
               <FundOutlined />
             </template>
             <template #title>滨海可视化</template>
-            <a-menu-item key="/binhai-dashboard/production-ops">生产运营管理大屏</a-menu-item>
-            <a-menu-item key="/binhai-dashboard/equipment">设备管理大屏</a-menu-item>
-            <a-menu-item key="/binhai-dashboard/quality">质量管理大屏</a-menu-item>
+            <a-menu-item key="/binhai-dashboard/production-ops">生产可视化大屏</a-menu-item>
+            <a-menu-item key="/binhai-dashboard/equipment">设备可视化大屏</a-menu-item>
+            <a-menu-item key="/binhai-dashboard/quality">质量可视化大屏</a-menu-item>
             <a-menu-item key="/binhai-dashboard/personnel">人员管理大屏</a-menu-item>
             <a-menu-item key="/binhai-dashboard/cost">成本管理大屏</a-menu-item>
             <a-menu-item key="/binhai-dashboard/molding-line">造型产线可视化</a-menu-item>

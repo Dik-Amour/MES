@@ -9,7 +9,7 @@ import type { EChartsOption } from 'echarts'
 /* =========================
    页面静态数据
    ========================= */
-/** 设备管理大屏静态数据 */
+/** 设备可视化大屏静态数据 */
 
 interface KpiCard {
   title: string
@@ -102,10 +102,10 @@ const kpiCards: KpiCard[] = [
 
 /** 设备总览：各产线设备分布 */
 const equipmentDistribution: PieDatum[] = [
-  { value: 28, name: '熔炼', color: '#ffc000' },
-  { value: 32, name: '造型', color: '#70ad47' },
-  { value: 15, name: '制芯', color: '#4472c4' },
-  { value: 10, name: '清理', color: '#3ba8a0' }
+  { value: 28, name: '熔炼', color: '#ffd52a' },
+  { value: 32, name: '造型', color: '#4ee6a6' },
+  { value: 15, name: '制芯', color: '#31d7ff' },
+  { value: 10, name: '清理', color: '#3bd6c6' }
 ]
 
 /** 主要生产设备完好率 */
@@ -187,26 +187,26 @@ const abnormalRows: AbnormalRow[] = [
    ECharts 配置
    ========================= */
 const tooltipBase = {
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderColor: 'rgba(68, 114, 196, 0.3)',
-  textStyle: { color: '#333' }
+  backgroundColor: 'rgba(5, 24, 34, 0.96)',
+  borderColor: 'rgba(0, 198, 239, 0.55)',
+  textStyle: { color: '#dff8ff' }
 }
 
 const legendBase = {
-  textStyle: { color: '#666', fontSize: 11 },
+  textStyle: { color: '#a9c9d4', fontSize: 11 },
   itemWidth: 12,
   itemHeight: 12
 }
 
 /** 各产线柱体配色，与原页面保持一致 */
 const seriesColors: Record<string, [string, string]> = {
-  造型: ['#70ad47', '#3ba8a0'],
-  熔炼: ['#ffc000', '#D69A0E'],
-  制芯: ['#4472c4', '#4472c4'],
-  清理: ['#3ba8a0', '#3ba8a0']
+  造型: ['#4ee6a6', '#20b98a'],
+  熔炼: ['#ffd52a', '#d69a0e'],
+  制芯: ['#31d7ff', '#189fd9'],
+  清理: ['#3bd6c6', '#2a8c86']
 }
 
-const fallbackColors: [string, string] = ['#4472c4', '#4472c4']
+const fallbackColors: [string, string] = ['#31d7ff', '#189fd9']
 
 function barGradient(name: string) {
   const [start, end] = seriesColors[name] ?? fallbackColors
@@ -249,7 +249,7 @@ function createEquipmentCountOption(data: PieDatum[]): EChartsOption {
           itemStyle: { color: item.color }
         })),
         label: {
-          color: '#333',
+          color: '#dff8ff',
           fontSize: 11
         }
       }
@@ -287,34 +287,34 @@ function createRateOption(data: RateChartData, config: RateOptionConfig): EChart
     xAxis: {
       type: 'category',
       data: data.months,
-      axisLine: { lineStyle: { color: '#cbd5e1' } },
-      axisLabel: { color: '#666', fontSize: 10 },
+      axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
       axisTick: { show: false }
     },
     yAxis: [
       {
         type: 'value',
         name: config.valueAxisName,
-        nameTextStyle: { color: '#666', fontSize: 10 },
+        nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
         axisLine: { show: false },
         axisTick: { show: false },
         splitLine: {
           lineStyle: {
             type: 'dashed',
-            color: 'rgba(148, 163, 184, 0.3)'
+            color: 'rgba(72, 164, 194, 0.24)'
           }
         },
-        axisLabel: { color: '#666', fontSize: 10 }
+        axisLabel: { color: '#a9c9d4', fontSize: 10 }
       },
       {
         type: 'value',
         name: config.rateAxisName,
-        nameTextStyle: { color: '#666', fontSize: 10 },
+        nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
         axisLine: { show: false },
         axisTick: { show: false },
         splitLine: { show: false },
         axisLabel: {
-          color: '#666',
+          color: '#a9c9d4',
           fontSize: 10,
           formatter: '{value}%'
         },
@@ -360,7 +360,7 @@ function createIntactRateOption(data: RateChartData): EChartsOption {
     valueAxisName: '设备数量',
     rateAxisName: '完好率 %',
     barWidth: '15%',
-    lineColor: '#FFFFFF'
+    lineColor: '#f4fdff'
   })
 }
 
@@ -370,7 +370,7 @@ function createAvailabilityRateOption(data: RateChartData): EChartsOption {
     valueAxisName: '异常时间',
     rateAxisName: '可动率 %',
     barWidth: '40%',
-    lineColor: '#70ad47'
+    lineColor: '#4ee6a6'
   })
 }
 
@@ -398,23 +398,23 @@ function createFaultAnalysisOption(key: FaultAnalysisKey): EChartsOption {
     xAxis: {
       type: 'category',
       data: data.xAxisData,
-      axisLine: { lineStyle: { color: '#cbd5e1' } },
-      axisLabel: { color: '#666', fontSize: 10 },
+      axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
       axisTick: { show: false }
     },
     yAxis: {
       type: 'value',
       name: data.unit,
-      nameTextStyle: { color: '#666', fontSize: 10 },
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
       axisLine: { show: false },
       axisTick: { show: false },
       splitLine: {
         lineStyle: {
           type: 'dashed',
-          color: 'rgba(148, 163, 184, 0.3)'
+          color: 'rgba(72, 164, 194, 0.24)'
         }
       },
-      axisLabel: { color: '#666', fontSize: 10 }
+      axisLabel: { color: '#a9c9d4', fontSize: 10 }
     },
     series: data.series.map((item) => ({
       name: item.name,
@@ -449,8 +449,9 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 <template>
   <div class="dashboard-container">
     <DashboardHeader
-      title="设备管理大屏"
+      title="设备可视化大屏"
       weather="潍坊 18℃ 晴"
+      variant="fui"
     />
 
     <!-- 设备总览 KPI 区 -->
@@ -676,8 +677,19 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   width: 100%;
   height: 100%;
   padding: 16px;
+  box-sizing: border-box;
   position: relative;
   overflow-y: auto;
+  /* 背景沿用生产可视化大屏 */
+  color: #dff8ff !important;
+  background-color: #041019 !important;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px) !important;
+  background-size: auto, auto, 32px 32px, 32px 32px;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46) !important;
 }
 
 /* 顶部标题栏样式 */
@@ -689,64 +701,94 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 
 .kpi-grid-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: repeat(2, 1fr);
   gap: 12px;
 }
 
-.kpi-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
-  border: 1px solid rgba(68, 114, 196, 0.4);
-  border-radius: 8px;
-  padding: 16px;
+.dashboard-container .kpi-card {
+  position: relative;
   height: 100px;
+  padding: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  color: #dff8ff;
+  background-color: #082532 !important;
+  background-image:
+    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
+    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%) !important;
+  border: 1px solid rgba(0, 190, 235, 0.56) !important;
+  border-radius: 3px !important;
+  box-shadow:
+    inset 0 0 22px rgba(0, 154, 201, 0.09),
+    0 0 10px rgba(0, 0, 0, 0.24) !important;
 }
 
-.kpi-icon {
+.dashboard-container .kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58%;
+  height: 2px;
+  background: linear-gradient(90deg, #26d9ff, transparent);
+  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
+}
+
+.dashboard-container .kpi-card::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 34%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
+}
+
+.dashboard-container .kpi-icon {
+  display: flex !important;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(68, 114, 196, 0.2) 0%, rgba(68, 114, 196, 0.2) 100%);
-  border: 2px solid rgba(68, 114, 196, 0.4);
-  display: flex;
   align-items: center;
   justify-content: center;
-  color: #4472c4;
   flex-shrink: 0;
+  color: #40e3ff;
+  background: rgba(0, 176, 220, 0.14);
+  border: 1px solid rgba(35, 211, 255, 0.48);
+  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
 }
 
-.kpi-icon svg {
+.dashboard-container .kpi-icon svg {
   width: 24px;
   height: 24px;
 }
 
-.kpi-content {
+.dashboard-container .kpi-content {
   flex: 1;
 }
 
-.kpi-title {
-  color: #666;
+.dashboard-container .kpi-title {
+  color: #9fc3cf !important;
   font-size: 12px;
   margin-bottom: 6px;
   line-height: 1.2;
 }
 
-.kpi-value {
-  color: #4472c4;
+.dashboard-container .kpi-value {
+  color: #ffd91a !important;
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 800;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  text-shadow: 0 0 10px rgba(68, 114, 196, 0.5);
+  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36);
   line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
 
-.kpi-unit {
+.dashboard-container .kpi-unit {
+  color: #a7cad5 !important;
   font-size: 14px;
   margin-left: 2px;
 }
@@ -754,9 +796,10 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 /* 主要内容区域 */
 .main-content {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  height: calc(100vh - 300px);
+  height: auto;
+  min-height: calc(100vh - 310px);
 }
 
 .column {
@@ -765,13 +808,19 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   gap: 16px;
 }
 
-/* 数据面板样式 */
-.data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1px solid rgba(68, 114, 196, 0.4);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+/* 数据面板样式：沿用生产可视化大屏 */
+.dashboard-container .data-panel {
+  color: #dff8ff !important;
+  background-color: #061821 !important;
+  background-image:
+    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
+    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%) !important;
+  border: 1px solid rgba(0, 191, 235, 0.48) !important;
+  border-radius: 2px !important;
+  padding: 12px 14px !important;
+  box-shadow:
+    inset 0 0 24px rgba(0, 157, 205, 0.055),
+    0 0 12px rgba(0, 0, 0, 0.24) !important;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -781,34 +830,74 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   height: 360px;
 }
 
-.panel-header {
+.dashboard-container .data-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  width: 74px;
+  height: 2px;
+  background: #18d2ff;
+  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9);
+}
+
+.dashboard-container .data-panel::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  bottom: 14px;
+  width: 3px;
+  height: 42px;
+  background: linear-gradient(180deg, transparent, #18d2ff, transparent);
+  opacity: 0.75;
+}
+
+.dashboard-container .data-panel > .panel-header {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
   width: 100%;
   overflow: hidden;
   flex-shrink: 0;
+  min-height: 34px;
+  margin-bottom: 10px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px dashed rgba(0, 185, 226, 0.34) !important;
 }
 
-.panel-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
+.dashboard-container .data-panel .panel-icon {
+  display: flex !important;
+  width: 28px;
+  height: 28px;
+  margin-right: 9px;
   align-items: center;
   justify-content: center;
-  background: rgba(68, 114, 196, 0.2);
-  border-radius: 6px;
-  margin-right: 12px;
-  color: #4472c4;
+  color: #40e3ff;
+  background: rgba(0, 176, 220, 0.14);
+  border: 1px solid rgba(35, 211, 255, 0.48);
+  border-radius: 2px;
+  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
 }
 
-.panel-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
+.dashboard-container .data-panel .panel-title {
+  display: inline-block;
   margin: 0;
+  padding: 0;
+  color: #f4fdff !important;
+  background: transparent !important;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
+}
+
+.dashboard-container .data-panel .panel-title::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin-left: 10px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, #17cfff, transparent);
 }
 
 /* 角装饰 */
@@ -822,32 +911,45 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   z-index: 10;
 }
 
+.dashboard-container .data-panel .corner-tl,
+.dashboard-container .data-panel .corner-tr,
+.dashboard-container .data-panel .corner-bl,
+.dashboard-container .data-panel .corner-br,
+.dashboard-container .kpi-card .corner-bl,
+.dashboard-container .kpi-card .corner-br {
+  display: block !important;
+  width: 14px;
+  height: 14px;
+  border-color: #1bd5ff !important;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
+}
+
 .corner-tl {
   top: 0;
   left: 0;
-  border-top: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
+  border-top: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .corner-tr {
   top: 0;
   right: 0;
-  border-top: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
+  border-top: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 .corner-bl {
   bottom: 0;
   left: 0;
-  border-bottom: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
+  border-bottom: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .corner-br {
   bottom: 0;
   right: 0;
-  border-bottom: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
+  border-bottom: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 /* 切换按钮样式 */
@@ -857,10 +959,10 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   flex-shrink: 0;
 }
 
-.tab-button {
-  background: rgba(242, 242, 242, 0.5);
-  border: 1px solid rgba(68, 114, 196, 0.3);
-  color: #666;
+.dashboard-container .tab-button {
+  color: #9cc8d5 !important;
+  background: rgba(4, 24, 33, 0.88) !important;
+  border: 1px solid rgba(0, 184, 225, 0.4) !important;
   font-size: 11px;
   padding: 4px 8px;
   cursor: pointer;
@@ -876,14 +978,12 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   border-radius: 0 4px 4px 0;
 }
 
-.tab-button.active {
-  background: rgba(112, 173, 71, 0.2);
-  border-color: #70ad47;
-  color: #70ad47;
-}
-
-.tab-button:hover {
-  color: #70ad47;
+.dashboard-container .tab-button.active,
+.dashboard-container .tab-button:hover {
+  color: #effcff !important;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34)) !important;
+  border-color: #26d5ff !important;
+  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18);
 }
 
 /* 图表容器 */
@@ -898,7 +998,7 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(68, 114, 196, 0.3) transparent;
+  scrollbar-color: rgba(26, 202, 242, 0.5) transparent;
   min-height: 0;
 }
 
@@ -908,34 +1008,38 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   font-size: 12px;
 }
 
-.equipment-table table thead th {
-  background: rgba(242, 242, 242, 0.8);
-  color: #475569;
+.dashboard-container .equipment-table table thead th {
+  background: rgba(0, 143, 184, 0.17) !important;
+  color: #75dff7 !important;
   padding: 8px 4px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.3);
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
   font-weight: 500;
   text-align: center;
 }
 
-.equipment-table table tbody td {
-  background: rgba(255, 255, 255, 0.6);
-  color: #333;
+.dashboard-container .equipment-table table tbody td {
+  background: rgba(5, 27, 37, 0.72) !important;
+  color: #cde7ee !important;
   padding: 8px 4px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.1);
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
   text-align: center;
 }
 
-.equipment-table table tbody tr:hover td {
-  background: rgba(242, 242, 242, 0.7);
+.dashboard-container .equipment-table table tbody tr:nth-child(odd) td {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .equipment-table table tbody tr:hover td {
+  background: rgba(0, 169, 215, 0.13) !important;
 }
 
 .abnormal-rate {
-  color: #ff4d4f;
+  color: #ff5f87;
   font-weight: bold;
 }
 
 .abnormal-issue {
-  color: #ff4d4f;
+  color: #ff5f87;
   font-weight: 500;
 }
 
@@ -948,30 +1052,30 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 }
 
 .equipment-table::-webkit-scrollbar-thumb {
-  background: rgba(68, 114, 196, 0.3);
+  background: rgba(26, 202, 242, 0.5);
   border-radius: 2px;
 }
 
 .equipment-table::-webkit-scrollbar-thumb:hover {
-  background: rgba(68, 114, 196, 0.5);
+  background: rgba(38, 213, 255, 0.72);
 }
 
 /* 响应式设计 */
-@media (max-width: 1400px) {
+@media (max-width: 1200px) {
   .kpi-grid-container {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 
   .main-content {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
 }
 
 @media (max-width: 768px) {
   .kpi-grid-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

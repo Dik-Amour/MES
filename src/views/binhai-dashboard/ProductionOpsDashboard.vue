@@ -29,19 +29,18 @@ interface ProductSeries {
   data: {
     outputUnits: number[]
     inboundUnits: number[]
-    outputTons: number[]
-    inboundTons: number[]
   }
 }
 
-interface AssessmentRow {
-  project: string
-  plan: string
-  actual: string
-  rate: string
-  /** 完成率是否达标，决定数字颜色 */
-  passed: boolean
-  reason: string
+interface PlanDailyPoint {
+  label: string
+  /** 当天计划浇筑箱数 */
+  plan: number
+  /** 实际浇筑箱数 */
+  actual: number
+  /** 计划完成率（%） */
+  rate: number
+  isToday: boolean
 }
 
 const outputAnalysisData: Record<AnalysisKey, PieDatum[]> = {
@@ -114,10 +113,8 @@ const productSeriesList: ProductSeries[] = [
     name: '中速机',
     color: '#4ee6a6',
     data: {
-      outputUnits: [100, 110],
-      inboundUnits: [150, 165],
-      outputTons: [103, 115],
-      inboundTons: [131, 145]
+      outputUnits: [82, 91, 100, 110, 118],
+      inboundUnits: [124, 136, 150, 165, 176]
     }
   },
   {
@@ -125,10 +122,8 @@ const productSeriesList: ProductSeries[] = [
     name: '博杜安',
     color: '#20cfff',
     data: {
-      outputUnits: [85, 95],
-      inboundUnits: [125, 138],
-      outputTons: [88, 98],
-      inboundTons: [115, 128]
+      outputUnits: [68, 76, 85, 95, 103],
+      inboundUnits: [101, 112, 125, 138, 149]
     }
   },
   {
@@ -136,10 +131,8 @@ const productSeriesList: ProductSeries[] = [
     name: '重潍柴',
     color: '#ffd52a',
     data: {
-      outputUnits: [75, 85],
-      inboundUnits: [110, 122],
-      outputTons: [78, 88],
-      inboundTons: [102, 115]
+      outputUnits: [60, 67, 75, 85, 92],
+      inboundUnits: [90, 100, 110, 122, 131]
     }
   },
   {
@@ -147,10 +140,8 @@ const productSeriesList: ProductSeries[] = [
     name: '大机',
     color: '#9b8cff',
     data: {
-      outputUnits: [65, 75],
-      inboundUnits: [95, 108],
-      outputTons: [68, 78],
-      inboundTons: [90, 103]
+      outputUnits: [52, 58, 65, 75, 81],
+      inboundUnits: [77, 85, 95, 108, 116]
     }
   },
   {
@@ -158,21 +149,18 @@ const productSeriesList: ProductSeries[] = [
     name: 'M55',
     color: '#ff4f8b',
     data: {
-      outputUnits: [55, 65],
-      inboundUnits: [82, 95],
-      outputTons: [58, 68],
-      inboundTons: [78, 90]
+      outputUnits: [44, 49, 55, 65, 70],
+      inboundUnits: [64, 72, 82, 95, 102]
     }
   }
 ]
 
-const assessmentRows: AssessmentRow[] = [
-  { project: '蠕铁产量', plan: '850', actual: '820', rate: '96.5%', passed: false, reason: '设备故障' },
-  { project: '灰铁产量', plan: '1200', actual: '1180', rate: '98.3%', passed: false, reason: '-' },
-  { project: '球铁产量', plan: '800', actual: '765', rate: '95.6%', passed: false, reason: '原料短缺' },
-  { project: '合格率', plan: '98', actual: '98.2', rate: '100.2%', passed: true, reason: '-' },
-  { project: '能耗指标', plan: '470', actual: '485', rate: '96.9%', passed: false, reason: '设备老化' }
-]
+/** 生产详情：近 5 年，末位为当前年份 */
+const PRODUCT_YEAR_RANGE = 5
+const productYearCategories = Array.from(
+  { length: PRODUCT_YEAR_RANGE },
+  (_, index) => `${dayjs().year() - PRODUCT_YEAR_RANGE + 1 + index}`
+)
 
 /* =========================
    ECharts 配置
@@ -444,35 +432,57 @@ function createMonthlyOption(splits: OutputSplit[], inbound: number[]): EChartsO
   })
 }
 
-/** 计划量、实际完工与完成率组合图 */
-function createPlanOption(): EChartsOption {
-  const categories = ['蠕铁产量', '灰铁产量', '球铁产量', '合格率', '能耗指标']
-  const plan = assessmentRows.map((row) => Number(row.plan))
-  const actual = assessmentRows.map((row) => Number(row.actual))
-  const rate = assessmentRows.map((row) => Number(row.rate.replace('%', '')))
+/**
+ * 计划分析：近 7 天实际浇筑箱数、计划箱数与完成率
+ * 横轴为日期（MM-DD），左轴为箱数（柱），右轴为计划完成率（%）
+ */
+function createPlanOption(points: PlanDailyPoint[]): EChartsOption {
+  const labelStyle = { show: true, position: 'top' as const, fontSize: 9, distance: 2 }
 
   return {
     tooltip: {
       trigger: 'axis',
-      ...tooltipBase
+      axisPointer: { type: 'shadow' },
+      ...tooltipBase,
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        if (!list.length) return ''
+        const body = list
+          .map((item: any) => {
+            const unit = item.seriesName === '计划完成率' ? '%' : ' 箱'
+            return `${item.marker} ${item.seriesName}: ${item.value}${unit}`
+          })
+          .join('<br/>')
+        return `${list[0]?.axisValue ?? ''}<br/>${body}`
+      }
     },
     legend: {
-      data: ['计划量', '实际完工', '完成率'],
+      data: ['实际浇筑箱数', '当天计划箱数', '计划完成率'],
       textStyle: { color: '#a9c9d4', fontSize: 10 },
-      top: 2
+      top: 2,
+      itemWidth: 14,
+      itemHeight: 8,
+      itemGap: 8
     },
-    grid: { left: '4%', right: '5%', bottom: '4%', top: '20%', containLabel: true },
+    grid: { left: '4%', right: '4%', bottom: '3%', top: '20%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: categories,
-      axisLabel: { color: '#a9c9d4', fontSize: 9, interval: 0, rotate: 18 },
+      data: points.map((point) => point.label),
+      axisLabel: {
+        color: '#a9c9d4',
+        fontSize: 9,
+        interval: 0,
+        formatter: (value: string) =>
+          points.find((point) => point.label === value && point.isToday) ? `{today|${value}}` : value,
+        rich: { today: { color: '#ffd52a', fontSize: 9, fontWeight: 'bold' } }
+      },
       axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
       axisTick: { show: false }
     },
     yAxis: [
       {
         type: 'value',
-        name: '数量',
+        name: '箱数',
         nameTextStyle: { color: '#a9c9d4', fontSize: 9 },
         axisLabel: { color: '#a9c9d4', fontSize: 9 },
         splitLine: { lineStyle: { type: 'dashed', color: 'rgba(72, 164, 194, 0.22)' } },
@@ -482,10 +492,11 @@ function createPlanOption(): EChartsOption {
       {
         type: 'value',
         name: '%',
-        min: 90,
-        max: 105,
+        min: 80,
+        max: 110,
+        interval: 10,
         nameTextStyle: { color: '#a9c9d4', fontSize: 9 },
-        axisLabel: { color: '#a9c9d4', fontSize: 9 },
+        axisLabel: { color: '#a9c9d4', fontSize: 9, formatter: '{value}%' },
         splitLine: { show: false },
         axisLine: { show: false },
         axisTick: { show: false }
@@ -493,24 +504,26 @@ function createPlanOption(): EChartsOption {
     ],
     series: [
       {
-        name: '计划量',
+        name: '实际浇筑箱数',
         type: 'bar',
-        data: plan,
-        barWidth: '24%',
-        itemStyle: { color: 'rgba(32, 207, 255, 0.48)', borderRadius: [3, 3, 0, 0] }
+        data: points.map((point) => point.actual),
+        barWidth: '28%',
+        itemStyle: { color: '#4ee6a6', borderRadius: [3, 3, 0, 0] },
+        label: { ...labelStyle, color: '#dff8ff' }
       },
       {
-        name: '实际完工',
+        name: '当天计划箱数',
         type: 'bar',
-        data: actual,
-        barWidth: '24%',
-        itemStyle: { color: '#4ee6a6', borderRadius: [3, 3, 0, 0] }
+        data: points.map((point) => point.plan),
+        barWidth: '28%',
+        itemStyle: { color: 'rgba(32, 207, 255, 0.48)', borderRadius: [3, 3, 0, 0] },
+        label: { ...labelStyle, color: '#a9c9d4' }
       },
       {
-        name: '完成率',
+        name: '计划完成率',
         type: 'line',
         yAxisIndex: 1,
-        data: rate,
+        data: points.map((point) => point.rate),
         smooth: true,
         symbol: 'circle',
         symbolSize: 7,
@@ -521,7 +534,10 @@ function createPlanOption(): EChartsOption {
   } as EChartsOption
 }
 
-/** 产品系列双轴柱状图 */
+/**
+ * 生产详情：近 5 年出产 / 入库台数对比（分组柱状图）
+ * X 轴为年份（随当年滚动，末位为当前年份），Y 轴为台数
+ */
 function createProductOption(series: ProductSeries): EChartsOption {
   const labelStyle = { show: true, position: 'top' as const, color: '#dff8ff', fontSize: 10 }
 
@@ -530,81 +546,56 @@ function createProductOption(series: ProductSeries): EChartsOption {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
       ...tooltipBase,
-      textStyle: { color: '#dff8ff', fontSize: 11 }
+      textStyle: { color: '#dff8ff', fontSize: 11 },
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        if (!list.length) return ''
+        const body = list
+          .map((item: any) => `${item.marker} ${item.seriesName}: ${item.value} 台`)
+          .join('<br/>')
+        return `${list[0]?.axisValue ?? ''}年<br/>${body}`
+      }
     },
     legend: {
-      data: ['出产台数', '入库台数', '出产吨位', '入库吨位'],
-      textStyle: { color: '#a9c9d4', fontSize: 9 },
+      data: ['出产台数', '入库台数'],
+      textStyle: { color: '#a9c9d4', fontSize: 10 },
       top: 5,
       itemWidth: 12,
-      itemHeight: 12,
-      itemGap: 6
+      itemHeight: 8,
+      itemGap: 10
     },
-    grid: { left: '12%', right: '12%', bottom: '10%', top: '18%', containLabel: false },
+    grid: { left: '4%', right: '4%', bottom: '3%', top: '20%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: ['2024', '2025'],
-      axisLabel: { color: '#a9c9d4', fontSize: 12, fontWeight: 'bold' },
+      data: productYearCategories,
+      axisLabel: { color: '#a9c9d4', fontSize: 11, fontWeight: 'bold' },
       axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
       axisTick: { show: false }
     },
-    yAxis: [
-      {
-        type: 'value',
-        name: '台数',
-        nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
-        position: 'left',
-        axisLabel: { color: '#a9c9d4', fontSize: 10 },
-        axisLine: { show: true, lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
-        axisTick: { show: false },
-        splitLine: { show: false }
-      },
-      {
-        type: 'value',
-        name: '吨数',
-        nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
-        position: 'right',
-        axisLabel: { color: '#a9c9d4', fontSize: 10 },
-        axisLine: { show: true, lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
-        axisTick: { show: false },
-        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(72, 164, 194, 0.24)' } }
-      }
-    ],
+    yAxis: {
+      type: 'value',
+      name: '台数',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
+      splitLine: { lineStyle: { type: 'dashed', color: 'rgba(72, 164, 194, 0.24)' } },
+      axisLine: { show: false },
+      axisTick: { show: false }
+    },
     series: [
       {
         name: '出产台数',
         type: 'bar',
-        yAxisIndex: 0,
         data: series.data.outputUnits,
         itemStyle: { color: '#20cfff', borderRadius: [4, 4, 0, 0] },
-        barWidth: 15,
+        barWidth: '26%',
         label: labelStyle
       },
       {
         name: '入库台数',
         type: 'bar',
-        yAxisIndex: 0,
         data: series.data.inboundUnits,
         itemStyle: { color: '#4ee6a6', borderRadius: [4, 4, 0, 0] },
-        barWidth: 15,
-        label: labelStyle
-      },
-      {
-        name: '出产吨位',
-        type: 'bar',
-        yAxisIndex: 1,
-        data: series.data.outputTons,
-        itemStyle: { color: '#ffd52a', borderRadius: [4, 4, 0, 0] },
-        barWidth: 15,
-        label: labelStyle
-      },
-      {
-        name: '入库吨位',
-        type: 'bar',
-        yAxisIndex: 1,
-        data: series.data.inboundTons,
-        itemStyle: { color: '#ff4f8b', borderRadius: [4, 4, 0, 0] },
-        barWidth: 15,
+        barWidth: '26%',
         label: labelStyle
       }
     ]
@@ -670,13 +661,39 @@ const shiftInboundRange = (delta: number) => {
   inboundRangeEnd.value = next.isAfter(todayStart, 'day') ? todayStart : next
 }
 
+/* 计划分析：近 7 天实际 / 计划浇筑箱数，按日期确定性生成，避免刷新跳变 */
+const PLAN_RANGE_DAYS = 7
+
+function mockDailyPlan(date: Dayjs): { plan: number; actual: number } {
+  const seed = date.year() * 101 + date.month() * 31 + date.date()
+  const plan = 118 + ((seed * 53 + 7) % 34)
+  const factor = 0.9 + ((seed * 29) % 16) / 100
+  return { plan, actual: Math.round(plan * factor) }
+}
+
+const planDailyPoints = computed<PlanDailyPoint[]>(() => {
+  const points: PlanDailyPoint[] = []
+  for (let offset = PLAN_RANGE_DAYS - 1; offset >= 0; offset--) {
+    const date = todayStart.subtract(offset, 'day')
+    const { plan, actual } = mockDailyPlan(date)
+    points.push({
+      label: date.format('MM-DD'),
+      plan,
+      actual,
+      rate: Number(((actual / plan) * 100).toFixed(1)),
+      isToday: date.isSame(todayStart, 'day')
+    })
+  }
+  return points
+})
+
 /* 月度 / 年度分析：分项堆叠数据随各自 tab 切换，占比与出产分析同源 */
 const monthlySplits = computed(() => splitTotalsByAnalysis(monthlyAnalysisKey.value, monthlyAnalysis.output))
 const monthlyOption = computed(() => createMonthlyOption(monthlySplits.value, monthlyAnalysis.inbound))
 
 const yearlySplits = computed(() => splitTotalsByAnalysis(yearlyAnalysisKey.value, yearlyAnalysis.output))
 const yearlyOption = computed(() => createYearlyOption(yearlySplits.value, yearlyAnalysis.inbound))
-const planOption = createPlanOption()
+const planOption = computed(() => createPlanOption(planDailyPoints.value))
 
 const productCharts = productSeriesList.map((series) => ({
   series,
@@ -692,7 +709,7 @@ const activeProductChart = computed(
 <template>
   <div class="dashboard-container">
     <DashboardHeader
-      title="生产运营管理大屏"
+      title="生产可视化大屏"
       weather="潍坊 18℃ 晴"
       variant="fui"
     />
