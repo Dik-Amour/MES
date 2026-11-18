@@ -130,6 +130,18 @@
       <div class="col">
         <div class="chart-card">
           <div class="chart-header">
+            <span class="chart-title">设备中心</span>
+          </div>
+          <div class="device-grid">
+            <div class="device-box" v-for="d in deviceItems" :key="d.label">
+              <div class="device-label">{{ d.label }}<span v-if="d.unit">（{{ d.unit }}）</span></div>
+              <div class="device-value">{{ d.value }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
             <span class="chart-title">人力中心</span>
           </div>
           <div class="hr-panel">
@@ -144,18 +156,6 @@
                   <i class="dot" :style="{ background: l.color }"></i>{{ l.name }}
                 </span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-header">
-            <span class="chart-title">设备中心</span>
-          </div>
-          <div class="device-grid">
-            <div class="device-box" v-for="d in deviceItems" :key="d.label">
-              <div class="device-label">{{ d.label }}<span v-if="d.unit">（{{ d.unit }}）</span></div>
-              <div class="device-value">{{ d.value }}</div>
             </div>
           </div>
         </div>

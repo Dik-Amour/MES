@@ -1318,8 +1318,9 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  /* minmax(0, ...)：避免画布固有宽度把单列撑出视口（ECharts 尺寸反馈环） */
   .main-content {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
 }

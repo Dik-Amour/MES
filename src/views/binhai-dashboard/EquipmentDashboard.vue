@@ -25,40 +25,49 @@ interface PieDatum {
   color: string
 }
 
-interface DowntimeRow {
-  dept: string
-  device: string
-  rate: string
+interface EquipmentStatRow {
+  code: string
+  name: string
+  runtime: string
+  availability: string
 }
 
 interface AbnormalRow {
-  line: string
+  /** 部门车间 */
+  dept: string
   device: string
   issue: string
   handler: string
+  /** 异常时长，如 2.5h */
   duration: string
+  /** 最近异常时间 */
   time: string
 }
 
-interface BarSeries {
+type ProductionLineKey = 'smelting' | 'molding' | 'cleaning'
+
+/** MTBF / MTTR 分析维度：汇总显示三条产线，单产线只显示对应曲线 */
+type MetricScopeKey = 'summary' | ProductionLineKey
+
+type DowntimeYearKey = 'thisYear' | 'lastYear'
+
+interface DowntimeAnalysis {
+  months: string[]
+  /** 完成值（实际停机率） */
+  actual: number[]
+  /** 目标值 */
+  target: number
+}
+
+interface MtbfSeries {
   name: string
   data: number[]
+  color: string
 }
 
-interface RateChartData {
+interface LineAnalysis {
   months: string[]
-  bars: BarSeries[]
-  lineName: string
-  line: number[]
-}
-
-type FaultAnalysisKey = 'mtbf' | 'mttr'
-
-interface FaultAnalysis {
-  title: string
-  unit: string
-  xAxisData: string[]
-  series: BarSeries[]
+  series: MtbfSeries[]
 }
 
 const iconEquipment =
@@ -99,80 +108,147 @@ const equipmentDistribution: PieDatum[] = [
   { value: 10, name: '清理', color: '#3bd6c6' }
 ]
 
-/** 主要生产设备完好率 */
-const intactRateData: RateChartData = {
-  months: ['1月', '2月', '3月', '4月', '5月', '6月'],
-  bars: [
-    { name: '造型', data: [230, 135, 220, 130, 135, 175] },
-    { name: '熔炼', data: [180, 95, 200, 135, 135, 110] },
-    { name: '制芯', data: [210, 125, 195, 125, 130, 165] },
-    { name: '清理', data: [195, 110, 185, 120, 125, 155] }
-  ],
-  lineName: '综合完好率',
-  line: [320, 230, 100, 100, 100, 100]
-}
-
-/** 设备可动率 */
-const availabilityRateData: RateChartData = {
-  months: ['1月', '2月', '3月', '4月', '5月', '6月'],
-  bars: [{ name: '设备异常时间', data: [190, 95, 195, 135, 135, 110] }],
-  lineName: '设备可动率',
-  line: [280, 300, 100, 100, 100, 100]
-}
-
-/** 设备故障分析（MTBF / MTTR 切换） */
-const faultAnalysisData: Record<FaultAnalysisKey, FaultAnalysis> = {
-  mtbf: {
-    title: '平均间隔时间(MTBF)',
-    unit: '小时',
-    xAxisData: ['7月', '8月', '9月', '10月', '11月', '12月'],
-    series: [
-      { name: '造型', data: [130, 220, 150, 95, 70, 110] },
-      { name: '熔炼', data: [125, 200, 145, 130, 75, 115] },
-      { name: '制芯', data: [120, 210, 155, 125, 65, 105] },
-      { name: '清理', data: [115, 195, 140, 120, 60, 100] }
-    ]
+/** 设备停机率分析（今年 / 去年） */
+const downtimeAnalysisData: Record<DowntimeYearKey, DowntimeAnalysis> = {
+  thisYear: {
+    months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+    actual: [2.8, 2.5, 3.1, 2.4, 2.2, 2.6, 2.3, 2.1, 2.4, 2.0, 2.2, 2.3],
+    target: 3.0
   },
-  mttr: {
-    title: '平均修复时间(MTTR)',
-    unit: '分钟',
-    xAxisData: ['1日', '2日', '3日', '4日', '5日', '6日'],
-    series: [
-      { name: '造型', data: [22, 35, 12, 28, 45, 35] },
-      { name: '熔炼', data: [25, 35, 25, 45, 35, 35] },
-      { name: '制芯', data: [20, 32, 10, 25, 42, 32] },
-      { name: '清理', data: [18, 30, 8, 22, 40, 30] }
-    ]
+  lastYear: {
+    months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+    actual: [3.4, 3.2, 3.5, 3.0, 2.9, 3.2, 3.1, 2.8, 3.0, 2.7, 2.9, 3.1],
+    target: 3.5
   }
 }
 
-/** 主要生产设备故障停机率 */
-const downtimeRows: DowntimeRow[] = [
-  { dept: '造型四线', device: '大件造型线', rate: '22.22%' },
-  { dept: '造型四线', device: '中件造型线', rate: '22.22%' },
-  { dept: '造型四线', device: '中件造型线', rate: '22.22%' },
-  { dept: '造型四线', device: '中件造型线', rate: '22.22%' },
-  { dept: '造型四线', device: '中件造型线', rate: '22.22%' },
-  { dept: '熔炼车间', device: '熔炼炉设备', rate: '18.50%' },
-  { dept: '制芯车间', device: '制芯机组', rate: '15.30%' },
-  { dept: '清理车间', device: '清理设备1号', rate: '12.80%' },
-  { dept: '清理车间', device: '清理设备2号', rate: '10.50%' },
-  { dept: '造型三线', device: '小件造型线', rate: '8.90%' },
-  { dept: '熔炼车间', device: '熔炼炉2号', rate: '7.60%' },
-  { dept: '制芯车间', device: '制芯机2号', rate: '6.30%' }
+/** 设备MTBF分析：12个月 × 熔炼/造型/清理 */
+const mtbfAnalysisData: LineAnalysis = {
+  months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  series: [
+    {
+      name: '熔炼',
+      color: '#ffd52a',
+      data: [186, 192, 178, 205, 214, 198, 188, 221, 209, 230, 218, 226]
+    },
+    {
+      name: '造型',
+      color: '#4ee6a6',
+      data: [162, 175, 168, 188, 196, 182, 171, 203, 194, 210, 201, 208]
+    },
+    {
+      name: '清理',
+      color: '#3bd6c6',
+      data: [148, 156, 152, 169, 178, 164, 158, 185, 176, 192, 184, 190]
+    }
+  ]
+}
+
+/** 设备MTTR分析：12个月 × 熔炼/造型/清理 */
+const mttrAnalysisData: LineAnalysis = {
+  months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  series: [
+    {
+      name: '熔炼',
+      color: '#ffd52a',
+      data: [28, 26, 31, 24, 22, 27, 25, 21, 23, 20, 22, 21]
+    },
+    {
+      name: '造型',
+      color: '#4ee6a6',
+      data: [32, 30, 35, 28, 26, 31, 29, 25, 27, 24, 26, 25]
+    },
+    {
+      name: '清理',
+      color: '#3bd6c6',
+      data: [36, 34, 38, 32, 30, 35, 33, 29, 31, 28, 30, 29]
+    }
+  ]
+}
+
+function createEquipmentStats(prefix: string, names: string[], runtimeBase: number, availBase: number): EquipmentStatRow[] {
+  return names.map((name, index) => {
+    const runtime = Math.max(120, runtimeBase + ((index * 37) % 180) - 60)
+    const availability = Math.min(99.8, Math.max(82, availBase + ((index * 13) % 15) - 6))
+    return {
+      code: `${prefix}-${String(index + 1).padStart(3, '0')}`,
+      name,
+      runtime: `${runtime} h`,
+      availability: `${availability.toFixed(1)}%`
+    }
+  })
+}
+
+/** 主要生产设备统计（按产线切换） */
+const equipmentStatsData: Record<ProductionLineKey, EquipmentStatRow[]> = {
+  smelting: createEquipmentStats(
+    'SM',
+    [
+      '1#熔炼炉', '2#熔炼炉', '3#熔炼炉', '4#熔炼炉', '5#熔炼炉',
+      '中频炉A', '中频炉B', '中频炉C', '保温炉1号', '保温炉2号',
+      '加料车1号', '加料车2号', '扒渣机1号', '扒渣机2号', '测温仪1号',
+      '测温仪2号', '除尘风机1号', '除尘风机2号', '冷却水泵1号', '冷却水泵2号',
+      '液压站1号', '液压站2号', '炉前吊车1号', '炉前吊车2号', '原料称重秤',
+      '合金料斗1号', '合金料斗2号', '废钢输送线', '炉衬打结机', '炉盖升降机',
+      '烟气净化器', '余热回收装置', '出铁槽1号', '出铁槽2号', '流槽预热器',
+      '电磁搅拌器', '真空脱气装置', '光谱分析仪', '直读光谱仪', '炉前取样器'
+    ],
+    680,
+    94.5
+  ),
+  molding: createEquipmentStats(
+    'MD',
+    [
+      '大件造型线', '中件造型线', '小件造型线', '静压造型线', '气冲造型线',
+      '造型线1号', '造型线2号', '造型线3号', '造型线4号', '造型线5号',
+      '射芯机1号', '射芯机2号', '射芯机3号', '制芯机1号', '制芯机2号',
+      '制芯机3号', '制芯机4号', '混砂机1号', '混砂机2号', '旧砂再生机',
+      '砂处理线', '输送皮带1号', '输送皮带2号', '输送皮带3号', '落砂机',
+      '振动给料机', '磁选机', '筛砂机', '松砂机', '型砂试验仪',
+      '模板更换装置', '合箱机', '下芯机械手', '压铁机', '翻箱机',
+      '修型工作台', '涂料搅拌机', '烘干炉', '冷却通道', '砂箱堆垛机'
+    ],
+    620,
+    93.2
+  ),
+  cleaning: createEquipmentStats(
+    'CL',
+    [
+      '清理设备1号', '清理设备2号', '清理设备3号', '清理设备4号', '抛丸机1号',
+      '抛丸机2号', '抛丸机3号', '抛丸机4号', '喷砂机1号', '喷砂机2号',
+      '砂轮机1号', '砂轮机2号', '砂轮机3号', '切割机1号', '切割机2号',
+      '打磨台1号', '打磨台2号', '打磨台3号', '打磨台4号', '气动工具站',
+      '打磨机械手', '切割机械手', '除尘器1号', '除尘器2号', '除尘器3号',
+      '输送辊道1号', '输送辊道2号', '料框吊具', '翻转台', '分拣台',
+      '清洗机1号', '清洗机2号', '烘干线', '喷涂线', '烘干炉',
+      '悬挂输送链', '积放链', '转运车', '废料收集器', '磁力分选器'
+    ],
+    590,
+    92.8
+  )
+}
+
+/** 设备异常处理明细（按异常时长降序） */
+const abnormalRows: AbnormalRow[] = [
+  { dept: '熔炼车间', device: '熔炼炉1号', issue: '电气故障', handler: '陈明', duration: '4.5h', time: '11-17 12:30' },
+  { dept: '制芯车间', device: '制芯机2号', issue: '设备故障', handler: '张三', duration: '3.2h', time: '11-17 15:31' },
+  { dept: '造型车间', device: '造型线1号', issue: '运行中断', handler: '李岩', duration: '2.5h', time: '11-17 15:26' },
+  { dept: '造型车间', device: '造型线2号', issue: '压力不足', handler: '刘芳', duration: '2.0h', time: '11-17 13:45' },
+  { dept: '熔炼车间', device: '熔炼炉3号', issue: '温度异常', handler: '王力', duration: '1.8h', time: '11-17 15:29' },
+  { dept: '清理车间', device: '清理设备', issue: '振动异常', handler: '赵强', duration: '1.5h', time: '11-17 14:15' },
+  { dept: '制芯车间', device: '制芯机1号', issue: '液压异常', handler: '周杰', duration: '1.2h', time: '11-16 11:20' },
+  { dept: '造型车间', device: '造型线3号', issue: '传感器故障', handler: '吴涛', duration: '0.8h', time: '11-16 10:50' }
 ]
 
-/** 设备异常处理明细 */
-const abnormalRows: AbnormalRow[] = [
-  { line: '造型', device: '造型线1号', issue: '运行中断', handler: '李岩', duration: '2.5h', time: '11-17 15:26' },
-  { line: '熔炼', device: '熔炼炉3号', issue: '温度异常', handler: '王力', duration: '1.8h', time: '11-17 15:29' },
-  { line: '制芯', device: '制芯机2号', issue: '设备故障', handler: '张三', duration: '3.2h', time: '11-17 15:31' },
-  { line: '清理', device: '清理设备', issue: '振动异常', handler: '赵强', duration: '1.5h', time: '11-17 14:15' },
-  { line: '造型', device: '造型线2号', issue: '压力不足', handler: '刘芳', duration: '2.0h', time: '11-17 13:45' },
-  { line: '熔炼', device: '熔炼炉1号', issue: '电气故障', handler: '陈明', duration: '4.5h', time: '11-17 12:30' },
-  { line: '制芯', device: '制芯机1号', issue: '液压异常', handler: '周杰', duration: '1.2h', time: '11-16 11:20' },
-  { line: '造型', device: '造型线3号', issue: '传感器故障', handler: '吴涛', duration: '0.8h', time: '11-16 10:50' }
-]
+function parseDurationHours(duration: string): number {
+  const matched = duration.match(/^([\d.]+)/)
+  return matched ? Number(matched[1]) : 0
+}
+
+/** 异常时长最大在前 */
+const sortedAbnormalRows = computed(() =>
+  [...abnormalRows].sort((a, b) => parseDurationHours(b.duration) - parseDurationHours(a.duration))
+)
 
 /* =========================
    ECharts 配置
@@ -187,31 +263,6 @@ const legendBase = {
   textStyle: { color: '#a9c9d4', fontSize: 11 },
   itemWidth: 12,
   itemHeight: 12
-}
-
-/** 各产线柱体配色，与原页面保持一致 */
-const seriesColors: Record<string, [string, string]> = {
-  造型: ['#4ee6a6', '#20b98a'],
-  熔炼: ['#ffd52a', '#d69a0e'],
-  制芯: ['#31d7ff', '#189fd9'],
-  清理: ['#3bd6c6', '#2a8c86']
-}
-
-const fallbackColors: [string, string] = ['#31d7ff', '#189fd9']
-
-function barGradient(name: string) {
-  const [start, end] = seriesColors[name] ?? fallbackColors
-  return {
-    type: 'linear',
-    x: 0,
-    y: 0,
-    x2: 0,
-    y2: 1,
-    colorStops: [
-      { offset: 0, color: start },
-      { offset: 1, color: end }
-    ]
-  }
 }
 
 /** 设备总览：各产线设备分布环形图 */
@@ -248,24 +299,21 @@ function createEquipmentCountOption(data: PieDatum[]): EChartsOption {
   } as EChartsOption
 }
 
-interface RateOptionConfig {
-  valueAxisName: string
-  rateAxisName: string
-  barWidth: string
-  lineColor: string
-}
-
-/** 双 Y 轴：柱状数量 + 折线比率 */
-function createRateOption(data: RateChartData, config: RateOptionConfig): EChartsOption {
+/** 设备停机率分析：完成值曲线 + 目标值横向虚线 */
+function createDowntimeAnalysisOption(data: DowntimeAnalysis): EChartsOption {
   return {
     tooltip: {
       ...tooltipBase,
       trigger: 'axis',
-      axisPointer: { type: 'cross' }
+      axisPointer: { type: 'cross' },
+      formatter: (params: any) => {
+        const lines = params.map((p: any) => `${p.marker}${p.seriesName}: ${p.value}%`)
+        return `${params[0].axisValue}<br/>${lines.join('<br/>')}`
+      }
     },
     legend: {
       ...legendBase,
-      data: [...data.bars.map((bar) => bar.name), data.lineName],
+      data: ['完成值', '目标值'],
       top: 5
     },
     grid: {
@@ -280,99 +328,105 @@ function createRateOption(data: RateChartData, config: RateOptionConfig): EChart
       data: data.months,
       axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
       axisLabel: { color: '#a9c9d4', fontSize: 10 },
-      axisTick: { show: false }
+      axisTick: { show: false },
+      boundaryGap: false
     },
-    yAxis: [
-      {
-        type: 'value',
-        name: config.valueAxisName,
-        nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
-        axisLine: { show: false },
-        axisTick: { show: false },
-        splitLine: {
-          lineStyle: {
-            type: 'dashed',
-            color: 'rgba(72, 164, 194, 0.24)'
-          }
-        },
-        axisLabel: { color: '#a9c9d4', fontSize: 10 }
-      },
-      {
-        type: 'value',
-        name: config.rateAxisName,
-        nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
-        axisLine: { show: false },
-        axisTick: { show: false },
-        splitLine: { show: false },
-        axisLabel: {
-          color: '#a9c9d4',
-          fontSize: 10,
-          formatter: '{value}%'
-        },
-        min: 0,
-        max: 350
-      }
-    ],
-    series: [
-      ...data.bars.map((bar) => ({
-        name: bar.name,
-        type: 'bar',
-        barWidth: config.barWidth,
-        data: bar.data,
-        itemStyle: {
-          color: barGradient(bar.name),
-          borderRadius: [4, 4, 0, 0]
+    yAxis: {
+      type: 'value',
+      name: '停机率 %',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: {
+        lineStyle: {
+          type: 'dashed',
+          color: 'rgba(72, 164, 194, 0.24)'
         }
-      })),
+      },
+      axisLabel: {
+        color: '#a9c9d4',
+        fontSize: 10,
+        formatter: '{value}%'
+      },
+      min: 0
+    },
+    series: [
       {
-        name: data.lineName,
+        name: '完成值',
         type: 'line',
-        yAxisIndex: 1,
         smooth: true,
-        data: data.line,
+        data: data.actual,
+        symbol: 'circle',
+        symbolSize: 7,
         lineStyle: {
           width: 3,
-          color: config.lineColor
+          color: '#31d7ff',
+          shadowColor: 'rgba(49, 215, 255, 0.45)',
+          shadowBlur: 10
         },
         itemStyle: {
-          color: config.lineColor,
-          borderWidth: 2
+          color: '#31d7ff',
+          borderWidth: 2,
+          borderColor: '#061821'
         },
-        symbol: 'circle',
-        symbolSize: 8
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(49, 215, 255, 0.28)' },
+              { offset: 1, color: 'rgba(49, 215, 255, 0.02)' }
+            ]
+          }
+        }
+      },
+      {
+        name: '目标值',
+        type: 'line',
+        data: data.months.map((_, index) => ({
+          value: data.target,
+          label: {
+            show: index === data.months.length - 1,
+            position: 'insideEndTop',
+            formatter: `目标 ${data.target}%`,
+            color: '#ffd52a',
+            fontSize: 11,
+            backgroundColor: 'rgba(246, 189, 22, 0.16)',
+            padding: [3, 6],
+            borderRadius: 3
+          }
+        })),
+        symbol: 'none',
+        silent: true,
+        lineStyle: {
+          width: 2,
+          type: 'dashed',
+          color: '#ffd52a'
+        },
+        itemStyle: { color: '#ffd52a' },
+        tooltip: { show: false }
       }
     ]
   } as EChartsOption
 }
 
-/** 主要生产设备完好率 */
-function createIntactRateOption(data: RateChartData): EChartsOption {
-  return createRateOption(data, {
-    valueAxisName: '设备数量',
-    rateAxisName: '完好率 %',
-    barWidth: '15%',
-    lineColor: '#f4fdff'
-  })
-}
-
-/** 设备可动率 */
-function createAvailabilityRateOption(data: RateChartData): EChartsOption {
-  return createRateOption(data, {
-    valueAxisName: '异常时间',
-    rateAxisName: '可动率 %',
-    barWidth: '40%',
-    lineColor: '#4ee6a6'
-  })
-}
-
-/** 设备故障分析：MTBF / MTTR */
-function createFaultAnalysisOption(key: FaultAnalysisKey): EChartsOption {
-  const data = faultAnalysisData[key]
+/** 设备MTBF / MTTR 折线分析：横轴月份，纵轴时间，三条产线 */
+function createLineAnalysisOption(
+  data: LineAnalysis,
+  config: { yAxisName: string; valueUnit: string }
+): EChartsOption {
   return {
     tooltip: {
       ...tooltipBase,
       trigger: 'axis',
-      axisPointer: { type: 'shadow' }
+      axisPointer: { type: 'cross' },
+      formatter: (params: any) => {
+        const lines = params.map((p: any) => `${p.marker}${p.seriesName}: ${p.value} ${config.valueUnit}`)
+        return `${params[0].axisValue}<br/>${lines.join('<br/>')}`
+      }
     },
     legend: {
       ...legendBase,
@@ -388,14 +442,15 @@ function createFaultAnalysisOption(key: FaultAnalysisKey): EChartsOption {
     },
     xAxis: {
       type: 'category',
-      data: data.xAxisData,
+      data: data.months,
+      boundaryGap: false,
       axisLine: { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } },
       axisLabel: { color: '#a9c9d4', fontSize: 10 },
       axisTick: { show: false }
     },
     yAxis: {
       type: 'value',
-      name: data.unit,
+      name: config.yAxisName,
       nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
       axisLine: { show: false },
       axisTick: { show: false },
@@ -405,16 +460,43 @@ function createFaultAnalysisOption(key: FaultAnalysisKey): EChartsOption {
           color: 'rgba(72, 164, 194, 0.24)'
         }
       },
-      axisLabel: { color: '#a9c9d4', fontSize: 10 }
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
+      min: 0
     },
     series: data.series.map((item) => ({
       name: item.name,
-      type: 'bar',
-      barWidth: '15%',
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
       data: item.data,
+      lineStyle: {
+        width: 3,
+        color: item.color,
+        shadowColor: `${item.color}66`,
+        shadowBlur: 8
+      },
       itemStyle: {
-        color: barGradient(item.name),
-        borderRadius: [4, 4, 0, 0]
+        color: item.color,
+        borderWidth: 2,
+        borderColor: '#061821'
+      },
+      /** 与设备停机率分析一致：曲线下方面积阴影 */
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
+          colorStops: [
+            { offset: 0, color: `${item.color}59` },
+            { offset: 1, color: `${item.color}05` }
+          ]
+        }
+      },
+      emphasis: {
+        focus: 'series'
       }
     }))
   } as EChartsOption
@@ -424,17 +506,85 @@ function createFaultAnalysisOption(key: FaultAnalysisKey): EChartsOption {
    页面状态与交互
    ========================= */
 
-const faultTabs: { key: FaultAnalysisKey; label: string }[] = [
-  { key: 'mtbf', label: '平均间隔时间' },
-  { key: 'mttr', label: '平均修复时间' }
+const downtimeYearTabs: { key: DowntimeYearKey; label: string }[] = [
+  { key: 'thisYear', label: '今年' },
+  { key: 'lastYear', label: '去年' }
 ]
 
-const faultKey = ref<FaultAnalysisKey>('mtbf')
+const downtimeYearKey = ref<DowntimeYearKey>('thisYear')
+
+const productionLineTabs: { key: ProductionLineKey; label: string }[] = [
+  { key: 'smelting', label: '熔炼' },
+  { key: 'molding', label: '造型' },
+  { key: 'cleaning', label: '清理' }
+]
+
+const productionLineKey = ref<ProductionLineKey>('smelting')
+
+const equipmentStatsRows = computed(() => equipmentStatsData[productionLineKey.value])
+
+const metricScopeTabs: { key: MetricScopeKey; label: string }[] = [
+  { key: 'summary', label: '汇总' },
+  { key: 'smelting', label: '熔炼' },
+  { key: 'molding', label: '造型' },
+  { key: 'cleaning', label: '清理' }
+]
+
+const scopeSeriesName: Record<MetricScopeKey, string | null> = {
+  summary: null,
+  smelting: '熔炼',
+  molding: '造型',
+  cleaning: '清理'
+}
+
+/** 汇总：三条产线按月取平均，合并为全车间一条曲线 */
+function summarizeLineSeries(data: LineAnalysis): LineAnalysis {
+  const months = data.months
+  const monthsCount = months.length
+  const summary = months.map((_, index) => {
+    const total = data.series.reduce((sum, item) => sum + (item.data[index] ?? 0), 0)
+    return Math.round((total / Math.max(data.series.length, 1)) * 10) / 10
+  })
+  return {
+    months,
+    series: [
+      {
+        name: '全车间',
+        color: '#31d7ff',
+        data: summary
+      }
+    ]
+  }
+}
+
+function resolveLineSeries(data: LineAnalysis, scope: MetricScopeKey): LineAnalysis {
+  if (scope === 'summary') return summarizeLineSeries(data)
+  const name = scopeSeriesName[scope]
+  return {
+    months: data.months,
+    series: data.series.filter((item) => item.name === name)
+  }
+}
+
+const mtbfScopeKey = ref<MetricScopeKey>('summary')
+const mttrScopeKey = ref<MetricScopeKey>('summary')
 
 const equipmentCountOption = createEquipmentCountOption(equipmentDistribution)
-const intactOption = createIntactRateOption(intactRateData)
-const availabilityOption = createAvailabilityRateOption(availabilityRateData)
-const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
+const mtbfOption = computed(() =>
+  createLineAnalysisOption(resolveLineSeries(mtbfAnalysisData, mtbfScopeKey.value), {
+    yAxisName: '时',
+    valueUnit: 'h'
+  })
+)
+const mttrOption = computed(() =>
+  createLineAnalysisOption(resolveLineSeries(mttrAnalysisData, mttrScopeKey.value), {
+    yAxisName: '分',
+    valueUnit: 'min'
+  })
+)
+const downtimeAnalysisOption = computed(() =>
+  createDowntimeAnalysisOption(downtimeAnalysisData[downtimeYearKey.value])
+)
 </script>
 
 <template>
@@ -491,7 +641,7 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
           </div>
         </div>
 
-        <!-- 设备故障分析 -->
+        <!-- 设备MTBF分析 -->
         <div class="data-panel">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -507,28 +657,28 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
                 />
               </svg>
             </div>
-            <h3 class="panel-title">设备故障分析</h3>
-            <div class="tab-buttons">
+            <h3 class="panel-title">设备MTBF分析</h3>
+            <div class="tab-buttons tab-buttons-compact">
               <button
-                v-for="tab in faultTabs"
+                v-for="tab in metricScopeTabs"
                 :key="tab.key"
                 class="tab-button"
-                :class="{ active: faultKey === tab.key }"
-                @click="faultKey = tab.key"
+                :class="{ active: mtbfScopeKey === tab.key }"
+                @click="mtbfScopeKey = tab.key"
               >
                 {{ tab.label }}
               </button>
             </div>
           </div>
           <div class="chart-container">
-            <EChart :option="faultOption" />
+            <EChart :option="mtbfOption" />
           </div>
         </div>
       </div>
 
       <!-- 中间列 -->
       <div class="column">
-        <!-- 主要生产设备完好率 -->
+        <!-- 设备停机率分析 -->
         <div class="data-panel">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -544,14 +694,25 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
                 />
               </svg>
             </div>
-            <h3 class="panel-title">主要生产设备完好率</h3>
+            <h3 class="panel-title">设备停机率分析</h3>
+            <div class="tab-buttons">
+              <button
+                v-for="tab in downtimeYearTabs"
+                :key="tab.key"
+                class="tab-button"
+                :class="{ active: downtimeYearKey === tab.key }"
+                @click="downtimeYearKey = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
           </div>
           <div class="chart-container">
-            <EChart :option="intactOption" />
+            <EChart :option="downtimeAnalysisOption" />
           </div>
         </div>
 
-        <!-- 设备可动率 -->
+        <!-- 设备MTTR分析 -->
         <div class="data-panel">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -567,17 +728,28 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
                 />
               </svg>
             </div>
-            <h3 class="panel-title">设备可动率</h3>
+            <h3 class="panel-title">设备MTTR分析</h3>
+            <div class="tab-buttons tab-buttons-compact">
+              <button
+                v-for="tab in metricScopeTabs"
+                :key="tab.key"
+                class="tab-button"
+                :class="{ active: mttrScopeKey === tab.key }"
+                @click="mttrScopeKey = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
           </div>
           <div class="chart-container">
-            <EChart :option="availabilityOption" />
+            <EChart :option="mttrOption" />
           </div>
         </div>
       </div>
 
       <!-- 右侧列 -->
       <div class="column">
-        <!-- 主要生产设备故障停机率 -->
+        <!-- 主要生产设备统计 -->
         <div class="data-panel">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -593,22 +765,47 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
                 />
               </svg>
             </div>
-            <h3 class="panel-title">主要生产设备故障停机率</h3>
+            <h3 class="panel-title">主要生产设备统计</h3>
+            <div class="tab-buttons">
+              <button
+                v-for="tab in productionLineTabs"
+                :key="tab.key"
+                class="tab-button"
+                :class="{ active: productionLineKey === tab.key }"
+                @click="productionLineKey = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
           </div>
-          <div class="equipment-table">
+          <div class="equipment-table equipment-table-scroll">
             <table>
               <thead>
                 <tr>
-                  <th>所属部门</th>
-                  <th>故障设备</th>
-                  <th>本月停机率</th>
+                  <th>设备编号</th>
+                  <th>设备名称</th>
+                  <th>运行时长</th>
+                  <th>可动率</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, index) in downtimeRows" :key="`${row.dept}-${row.device}-${index}`">
-                  <td>{{ row.dept }}</td>
-                  <td>{{ row.device }}</td>
-                  <td><span class="abnormal-rate">{{ row.rate }}</span></td>
+                <tr
+                  v-for="(row, index) in equipmentStatsRows"
+                  :key="`${row.code}-${index}`"
+                >
+                  <td>{{ row.code }}</td>
+                  <td>{{ row.name }}</td>
+                  <td>{{ row.runtime }}</td>
+                  <td>
+                    <span
+                      class="availability-rate"
+                      :class="{
+                        'availability-high': parseFloat(row.availability) >= 95,
+                        'availability-mid': parseFloat(row.availability) >= 90 && parseFloat(row.availability) < 95,
+                        'availability-low': parseFloat(row.availability) < 90
+                      }"
+                    >{{ row.availability }}</span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -637,21 +834,21 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
             <table>
               <thead>
                 <tr>
-                  <th>产线</th>
+                  <th>部门车间</th>
                   <th>设备名称</th>
                   <th>异常类型</th>
                   <th>处理人</th>
                   <th>异常时长</th>
-                  <th>修复时间</th>
+                  <th>最近异常时间</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, index) in abnormalRows" :key="`${row.device}-${index}`">
-                  <td>{{ row.line }}</td>
+                <tr v-for="(row, index) in sortedAbnormalRows" :key="`${row.device}-${index}`">
+                  <td>{{ row.dept }}</td>
                   <td>{{ row.device }}</td>
                   <td><span class="abnormal-issue">{{ row.issue }}</span></td>
                   <td>{{ row.handler }}</td>
-                  <td>{{ row.duration }}</td>
+                  <td><span class="abnormal-rate">{{ row.duration }}</span></td>
                   <td>{{ row.time }}</td>
                 </tr>
               </tbody>
@@ -886,16 +1083,22 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   font-weight: 700;
   letter-spacing: 1px;
   text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .dashboard-container .data-panel .panel-title::after {
   content: '';
   display: inline-block;
-  width: 28px;
+  width: 18px;
   height: 1px;
-  margin-left: 10px;
+  margin-left: 8px;
   vertical-align: middle;
   background: linear-gradient(90deg, #17cfff, transparent);
+}
+
+.dashboard-container .data-panel .panel-header:has(.tab-buttons) .panel-title::after {
+  display: none;
 }
 
 /* 角装饰 */
@@ -966,6 +1169,7 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   cursor: pointer;
   transition: all 0.3s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab-button:first-child {
@@ -974,6 +1178,17 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 
 .tab-button:last-child {
   border-radius: 0 4px 4px 0;
+}
+
+.dashboard-container .tab-buttons-compact .tab-button {
+  font-size: 10px;
+  padding: 4px 6px;
+  letter-spacing: 0;
+}
+
+.dashboard-container .data-panel .panel-header:has(.tab-buttons-compact) .panel-title {
+  font-size: 13px;
+  letter-spacing: 0;
 }
 
 .dashboard-container .tab-button.active,
@@ -998,6 +1213,11 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
   scrollbar-width: thin;
   scrollbar-color: rgba(26, 202, 242, 0.5) transparent;
   min-height: 0;
+}
+
+.equipment-table-scroll {
+  max-height: 280px;
+  overscroll-behavior: contain;
 }
 
 .equipment-table table {
@@ -1034,6 +1254,23 @@ const faultOption = computed(() => createFaultAnalysisOption(faultKey.value))
 .abnormal-rate {
   color: #ff5f87;
   font-weight: bold;
+}
+
+.availability-rate {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.availability-high {
+  color: #4ee6a6;
+}
+
+.availability-mid {
+  color: #ffd52a;
+}
+
+.availability-low {
+  color: #ff5f87;
 }
 
 .abnormal-issue {

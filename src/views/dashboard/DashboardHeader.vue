@@ -7,11 +7,40 @@
       <span class="header-divider"></span>
       <span class="hd-weather">{{ weather }}</span>
     </div>
-    <div class="header-center">
-      <span v-if="variant === 'fui'" class="title-wing title-wing-left">◆ ◆ ◆</span>
-      <span class="title-text">{{ title }}</span>
-      <span v-if="variant === 'fui'" class="title-wing title-wing-right">◆ ◆ ◆</span>
+
+    <!-- 中部：默认居中标题；有班组时在中间区左右分置，避免压到日期天气 -->
+    <div
+      class="header-center"
+      :class="{ 'header-center-wide': hasTeams }"
+    >
+      <template v-if="hasLeftTeams || hasRightTeams">
+        <div class="teams-side teams-side-left">
+          <slot name="headerTeamsLeft" />
+        </div>
+        <div class="title-block">
+          <span v-if="variant === 'fui'" class="title-wing title-wing-left">◆ ◆ ◆</span>
+          <span class="title-text">{{ title }}</span>
+          <span v-if="variant === 'fui'" class="title-wing title-wing-right">◆ ◆ ◆</span>
+        </div>
+        <div class="teams-side teams-side-right">
+          <slot name="headerTeamsRight" />
+        </div>
+      </template>
+      <template v-else-if="$slots.headerTeams">
+        <slot name="headerTeams" />
+        <div class="title-block">
+          <span v-if="variant === 'fui'" class="title-wing title-wing-left">◆ ◆ ◆</span>
+          <span class="title-text">{{ title }}</span>
+          <span v-if="variant === 'fui'" class="title-wing title-wing-right">◆ ◆ ◆</span>
+        </div>
+      </template>
+      <template v-else>
+        <span v-if="variant === 'fui'" class="title-wing title-wing-left">◆ ◆ ◆</span>
+        <span class="title-text">{{ title }}</span>
+        <span v-if="variant === 'fui'" class="title-wing title-wing-right">◆ ◆ ◆</span>
+      </template>
     </div>
+
     <div class="header-right">
       <div v-if="variant === 'fui'" class="fui-logo">
         <!-- 纯装饰：页面标题已表达语义，空 alt 避免读屏重复播报 -->
@@ -26,11 +55,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, useSlots } from 'vue'
 
 import logoUrl from '@/assets/image/logo.png'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title: string
     weather?: string
@@ -45,6 +74,11 @@ withDefaults(
     variant: 'default'
   }
 )
+
+const slots = useSlots()
+const hasLeftTeams = computed(() => !!slots.headerTeamsLeft)
+const hasRightTeams = computed(() => !!slots.headerTeamsRight)
+const hasTeams = computed(() => hasLeftTeams.value || hasRightTeams.value || !!slots.headerTeams)
 
 const timeStr = ref('')
 const dateStr = ref('')
@@ -76,10 +110,11 @@ onBeforeUnmount(() => {
   position: relative;
   border: 1px solid #eee;
   border-radius: 2px;
-  padding: 10px 20px 10px 20px;
+  padding: 10px 20px;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
+  gap: 16px;
 }
 
 .fui-header {
@@ -118,6 +153,9 @@ onBeforeUnmount(() => {
 .fui-header .header-left {
   gap: 12px;
   color: #a9d8e7;
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
 }
 
 .fui-header .hd-time {
@@ -151,6 +189,63 @@ onBeforeUnmount(() => {
   font-weight: 700;
   letter-spacing: 4px;
   text-shadow: 0 0 14px rgba(31, 204, 255, 0.55);
+}
+
+/* 有班组：中间区三列（左班组 | 标题 | 右班组），与左右时间/logo 互不重叠 */
+.fui-header .header-center-wide {
+  position: relative;
+  left: auto;
+  right: auto;
+  transform: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  gap: 16px;
+  pointer-events: none;
+}
+
+.fui-header .header-center-wide .title-block,
+.fui-header .header-center-wide .teams-side {
+  pointer-events: auto;
+}
+
+.fui-header .header-center-wide .title-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: clamp(18px, 1.6vw, 26px);
+  font-weight: 700;
+  letter-spacing: 4px;
+}
+
+.fui-header .header-center-wide .teams-side {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.fui-header .header-center-wide .teams-side-left {
+  justify-content: flex-end;
+}
+
+.fui-header .header-center-wide .teams-side-right {
+  justify-content: flex-start;
+}
+
+/* 兼容整块 headerTeams 插槽（内部自带左右两组） */
+.fui-header .header-center-wide:not(:has(> .title-block)) {
+  gap: 12px;
+}
+
+.fui-header .header-center-wide:not(:has(> .title-block)) > :deep(.team-tags) {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .title-wing {
@@ -206,10 +301,13 @@ onBeforeUnmount(() => {
 }
 
 .header-right {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
 }
 
 /* fui 标题栏右上角 logo */

@@ -24,6 +24,7 @@ import {
   KeyOutlined,
   CalendarOutlined,
   InboxOutlined,
+  ToolOutlined,
 } from '@ant-design/icons-vue'
 
 interface BreadcrumbItem {
@@ -119,6 +120,9 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     // 大屏数据管理路径
     '/screen-data': { title: '大屏数据管理', path: '/screen-data/equipment', icon: InboxOutlined },
     '/screen-data/equipment': { title: '设备数据导入', path: '/screen-data/equipment', icon: InboxOutlined },
+    // 工艺管理路径
+    '/craft': { title: '工艺管理', path: '/craft/common-sand-core', icon: ToolOutlined },
+    '/craft/common-sand-core': { title: '通用砂芯配置', path: '/craft/common-sand-core', icon: ToolOutlined },
   }
 
   const matched = route.matched.filter(item => item.path !== '/')
@@ -169,6 +173,11 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   // 添加大屏数据管理父级菜单
   if (route.path.startsWith('/screen-data')) {
     items.push(pathMap['/screen-data'])
+  }
+
+  // 添加工艺管理父级菜单
+  if (route.path.startsWith('/craft')) {
+    items.push(pathMap['/craft'])
   }
 
   // 添加匹配的路由

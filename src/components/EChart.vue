@@ -19,6 +19,11 @@ const props = withDefaults(
   }
 )
 
+const emit = defineEmits<{
+  /** 图表点击（如折线节点、柱、图例），由父级处理交互 */
+  click: [params: unknown]
+}>()
+
 const container = ref<HTMLDivElement | null>(null)
 let chart: echarts.ECharts | null = null
 let observer: ResizeObserver | null = null
@@ -31,6 +36,7 @@ function render() {
 onMounted(() => {
   if (!container.value) return
   chart = echarts.init(container.value)
+  chart.on('click', (params: unknown) => emit('click', params))
   render()
 
   observer = new ResizeObserver(() => {

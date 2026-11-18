@@ -111,7 +111,7 @@
             <a-menu-item key="/binhai-dashboard/cost">成本管理大屏</a-menu-item>
             <a-menu-item key="/binhai-dashboard/molding-line">造型产线可视化</a-menu-item>
             <a-menu-item key="/binhai-dashboard/cleaning-line">清理产线可视化</a-menu-item>
-            <a-menu-item key="/binhai-dashboard/team-line">班组产线可视化</a-menu-item>
+            <a-menu-item key="/binhai-dashboard/team-line">造型班组可视化</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="screen-data">
@@ -185,6 +185,14 @@
             </template>
             <template #title>现场管理</template>
             <a-menu-item key="/site/safety-inspection">安全巡检</a-menu-item>
+          </a-sub-menu>
+
+          <a-sub-menu key="craft">
+            <template #icon>
+              <ToolOutlined />
+            </template>
+            <template #title>工艺管理</template>
+            <a-menu-item key="/craft/common-sand-core">通用砂芯配置</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="user">
@@ -337,6 +345,7 @@ const parentKeyMap: Array<[string, string]> = [
   ['/core-making', 'core-making'],
   ['/core-production', 'core-production'],
   ['/site', 'site'],
+  ['/craft', 'craft'],
   ['/users', 'user'],
   ['/settings', 'system'],
   ['/security', 'system'],

@@ -301,7 +301,7 @@ const routes: RouteRecordRaw[] = [
     path: '/binhai-dashboard/team-line',
     name: 'BinhaiTeamLineDashboard',
     component: () => import('@/views/binhai-dashboard/TeamLineDashboard.vue'),
-    meta: { requiresAuth: true, title: '班组产线可视化' }
+    meta: { requiresAuth: true, title: '造型班组可视化' }
   },
   // 大屏数据管理路由
   {
@@ -439,6 +439,13 @@ const routes: RouteRecordRaw[] = [
     name: 'SafetyInspection',
     component: () => import('@/views/site/SafetyInspection.vue'),
     meta: { requiresAuth: true }
+  },
+  // 工艺管理路由
+  {
+    path: '/craft/common-sand-core',
+    name: 'CommonSandCoreConfig',
+    component: () => import('@/views/craft/CommonSandCoreConfig.vue'),
+    meta: { requiresAuth: true, title: '通用砂芯配置' }
   },
   // 用户管理路由
   {

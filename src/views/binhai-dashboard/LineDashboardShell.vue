@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import EChart from '@/components/EChart.vue'
 import DashboardHeader from '@/views/dashboard/DashboardHeader.vue'
+import type { EChartsOption } from 'echarts'
 
 /** 顶部指标卡（一行 6 张） */
 interface ShellIndicator {
@@ -11,11 +13,34 @@ interface ShellIndicator {
   tone?: 'output' | 'inbound'
 }
 
+/** 六宫格面板 tab 项 */
+interface ShellPanelTab {
+  key: string
+  label: string
+}
+
 /** 六宫格面板 */
 interface ShellPanel {
   title: string
   /** 图表接入前的占位文案，默认"图表待接入" */
   hint?: string
+  /** 传入 ECharts 配置则渲染图表；缺省时显示占位提示 */
+  option?: EChartsOption
+  /**
+   * 自定义内容槽名（需在页面侧提供 <template #[panel.contentKey]>）。
+   * 有值时优先渲染自定义内容，可与 option 并存（如设备监控不依赖 option）
+   */
+  contentKey?: string
+  /** 面板头部 tab 组（可选） */
+  tabs?: ShellPanelTab[]
+  /** 当前激活的 tab key */
+  activeKey?: string
+  /** 选择器形态：tabs（默认横排按钮）或 select（选项多/文案长时用下拉） */
+  mode?: 'tabs' | 'select'
+  /** 次级选择器（如趋势视图下的成本项下拉），与主 tab / 下拉并存时使用 */
+  subTabs?: ShellPanelTab[]
+  /** 次级选择器当前值 */
+  subActiveKey?: string
 }
 
 const props = withDefaults(
@@ -30,6 +55,23 @@ const props = withDefaults(
   }
 )
 
+const emit = defineEmits<{
+  /** 面板 tab 被点击时抛出，由页面自行切换数据 */
+  tabChange: [payload: { title: string; key: string }]
+  /** 次级下拉（如成本项）切换时抛出 */
+  subChange: [payload: { title: string; key: string }]
+  /** 面板内 ECharts 点击（如日期节点）透传给页面 */
+  chartClick: [payload: { title: string; params: unknown }]
+}>()
+
+defineSlots<{
+  /** 标题左右两侧班组名（各两个时用 left/right 分槽，标题更稳居中） */
+  headerTeamsLeft?: () => unknown
+  headerTeamsRight?: () => unknown
+  /** 或整块班组区（内部自排左右） */
+  headerTeams?: () => unknown
+}>()
+
 /** 6 个面板按 3 列 × 2 行排布，与生产运营大屏一致 */
 const columns = computed(() => {
   const list = props.panels.slice(0, 6)
@@ -39,7 +81,24 @@ const columns = computed(() => {
 
 <template>
   <div class="dashboard-container">
-    <DashboardHeader :title="title" :weather="weather" variant="fui" />
+    <!-- 仅在页面侧传入班组槽时才透传，避免空插槽被 header 误判为有内容 -->
+    <DashboardHeader
+      v-if="$slots.headerTeamsLeft || $slots.headerTeamsRight || $slots.headerTeams"
+      :title="title"
+      :weather="weather"
+      variant="fui"
+    >
+      <template v-if="$slots.headerTeamsLeft" #headerTeamsLeft>
+        <slot name="headerTeamsLeft" />
+      </template>
+      <template v-if="$slots.headerTeamsRight" #headerTeamsRight>
+        <slot name="headerTeamsRight" />
+      </template>
+      <template v-if="$slots.headerTeams" #headerTeams>
+        <slot name="headerTeams" />
+      </template>
+    </DashboardHeader>
+    <DashboardHeader v-else :title="title" :weather="weather" variant="fui" />
 
     <!-- 指标行 -->
     <div class="top-indicators">
@@ -80,11 +139,72 @@ const columns = computed(() => {
               </svg>
             </div>
             <h3 class="panel-title">{{ panel.title }}</h3>
+            <div v-if="panel.mode !== 'select' && panel.tabs?.length" class="tab-buttons">
+              <button
+                v-for="tab in panel.tabs"
+                :key="tab.key"
+                type="button"
+                class="tab-button"
+                :class="{ active: panel.activeKey === tab.key }"
+                @click="emit('tabChange', { title: panel.title, key: tab.key })"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
           </div>
 
-          <!-- 图表占位：接入 EChart 后替换 -->
-          <div class="chart-container shell-placeholder">
-            <span>{{ panel.hint ?? '图表待接入' }}</span>
+          <!-- 内容区工具条：下拉放这里，不与 tab 争头部一行 -->
+          <div
+            v-if="(panel.mode === 'select' && panel.tabs?.length) || panel.subTabs?.length"
+            class="panel-toolbar"
+          >
+            <a-select
+              v-if="panel.mode === 'select' && panel.tabs?.length"
+              class="panel-select"
+              :value="panel.activeKey"
+              size="small"
+              :dropdown-match-select-width="false"
+              @update:value="(value: string) => emit('tabChange', { title: panel.title, key: value })"
+            >
+              <a-select-option v-for="tab in panel.tabs" :key="tab.key" :value="tab.key">
+                {{ tab.label }}
+              </a-select-option>
+            </a-select>
+            <a-select
+              v-if="panel.subTabs?.length"
+              class="panel-select"
+              :value="panel.subActiveKey"
+              size="small"
+              :dropdown-match-select-width="false"
+              @update:value="(value: string) => emit('subChange', { title: panel.title, key: value })"
+            >
+              <a-select-option v-for="tab in panel.subTabs" :key="tab.key" :value="tab.key">
+                {{ tab.label }}
+              </a-select-option>
+            </a-select>
+          </div>
+
+          <!-- 优先自定义内容槽；其次 ECharts；否则占位 -->
+          <div
+            class="chart-container"
+            :class="{
+              'shell-placeholder': !panel.contentKey && !panel.option,
+              'shell-custom': !!panel.contentKey
+            }"
+          >
+            <slot
+              v-if="panel.contentKey"
+              :name="panel.contentKey"
+              :panel="panel"
+            />
+            <EChart
+              v-else-if="panel.option"
+              :key="`${panel.title}-${panel.activeKey ?? 'default'}`"
+              :option="panel.option"
+              height="100%"
+              @click="(params: unknown) => emit('chartClick', { title: panel.title, params })"
+            />
+            <span v-else>{{ panel.hint ?? '图表待接入' }}</span>
           </div>
         </div>
       </div>
@@ -113,5 +233,42 @@ const columns = computed(() => {
   border: 1px dashed rgba(0, 191, 235, 0.35);
   border-radius: 4px;
   pointer-events: none;
+}
+
+/* 自定义内容区：填满 chart-container */
+.shell-custom {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* 内容区工具条：下拉右对齐贴在图表上方 */
+.panel-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding-top: 8px;
+}
+
+/* 面板内下拉：贴合大屏暗色 */
+.panel-select {
+  width: 178px;
+}
+
+.panel-select :deep(.ant-select-selector) {
+  background: rgba(6, 31, 42, 0.92) !important;
+  border-color: rgba(0, 190, 235, 0.5) !important;
+  color: #dff8ff !important;
+}
+
+.panel-select :deep(.ant-select-selection-item) {
+  color: #dff8ff !important;
+  line-height: 22px !important;
+}
+
+.panel-select :deep(.ant-select-arrow) {
+  color: #62e8ff !important;
 }
 </style>
