@@ -23,12 +23,12 @@ function selectTeam(name: TeamName) {
 
 /** 指标栏：6 项指标（数值为 mock，各班组内容一致） */
 const indicators = [
-  { label: '计划数', value: '128', unit: '颗', tone: 'output' as const },
-  { label: '制芯数', value: '116', unit: '颗', tone: 'inbound' as const },
-  { label: '检测数', value: '112', unit: '颗', tone: 'output' as const },
-  { label: '入库数', value: '108', unit: '颗', tone: 'output' as const },
-  { label: '出库数', value: '104', unit: '颗', tone: 'inbound' as const },
-  { label: '合格率', value: '98.6', unit: '%', tone: 'inbound' as const }
+  { label: '制芯设备', value: '12', unit: '台', tone: 'output' as const },
+  { label: '今日制芯计划颗数', value: '128', unit: '颗', tone: 'inbound' as const },
+  { label: '实际生产颗数', value: '116', unit: '颗', tone: 'output' as const },
+  { label: '计划利用率', value: '92.4', unit: '%', tone: 'output' as const },
+  { label: '实际利用率', value: '89.7', unit: '%', tone: 'inbound' as const },
+  { label: '砂芯合格率', value: '98.6', unit: '%', tone: 'inbound' as const }
 ]
 
 /** 任务列表 mock（各班组共用同一套数据） */
