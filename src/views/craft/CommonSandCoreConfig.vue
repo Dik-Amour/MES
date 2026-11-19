@@ -152,12 +152,6 @@
           allow-clear
           style="width: 180px"
         />
-        <a-input
-          v-model:value="coreSearch.productNo"
-          placeholder="搜索产品件号"
-          allow-clear
-          style="width: 180px"
-        />
         <span class="core-tip">同一砂芯物料只能归属一个共用组，已归属的置灰不可勾选</span>
       </div>
 
@@ -440,7 +434,7 @@ const saving = ref(false)
 
 const formData = reactive({ name: '', remark: '' })
 const selectedCoreCodes = ref<string[]>([])
-const coreSearch = reactive({ code: '', name: '', productNo: '' })
+const coreSearch = reactive({ code: '', name: '' })
 
 const nextGroupCode = () => {
   const nums = groups.value
@@ -453,12 +447,10 @@ const nextGroupCode = () => {
 const modalMaterials = computed(() => {
   const codeKw = coreSearch.code.trim().toLowerCase()
   const nameKw = coreSearch.name.trim().toLowerCase()
-  const productKw = coreSearch.productNo.trim().toLowerCase()
   return coreMaterials.filter(
     m =>
       (!codeKw || m.code.toLowerCase().includes(codeKw)) &&
-      (!nameKw || m.name.toLowerCase().includes(nameKw)) &&
-      (!productKw || m.productNo.toLowerCase().includes(productKw))
+      (!nameKw || m.name.toLowerCase().includes(nameKw))
   )
 })
 
@@ -484,7 +476,6 @@ const handleRemoveSelected = (code: string) => {
 const coreColumns = [
   { title: '砂芯物料编码', dataIndex: 'code', key: 'code', width: 150 },
   { title: '砂芯名称', dataIndex: 'name', key: 'name', width: 180 },
-  { title: '产品件号', dataIndex: 'productNo', key: 'productNo', width: 150 },
   { title: '归属共用组', key: 'owner', width: 180 }
 ]
 
@@ -496,7 +487,6 @@ const handleAdd = () => {
   selectedCoreCodes.value = []
   coreSearch.code = ''
   coreSearch.name = ''
-  coreSearch.productNo = ''
   modalVisible.value = true
 }
 
@@ -508,7 +498,6 @@ const handleEdit = (record: SandCoreGroup) => {
   selectedCoreCodes.value = [...record.coreCodes]
   coreSearch.code = ''
   coreSearch.name = ''
-  coreSearch.productNo = ''
   modalVisible.value = true
 }
 
