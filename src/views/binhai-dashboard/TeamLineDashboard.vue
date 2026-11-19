@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 
 import LineDashboardShell from './LineDashboardShell.vue'
@@ -21,11 +21,11 @@ function selectTeam(name: TeamName) {
 
 /** 指标栏：6 项指标（数值为 mock，各班组内容一致） */
 const indicators = [
-  { label: '计划数', value: '128', unit: '件', tone: 'output' as const },
-  { label: '造型数', value: '116', unit: '件', tone: 'inbound' as const },
-  { label: '浇筑数', value: '108', unit: '件', tone: 'output' as const },
+  { label: '计划数', value: '128', unit: '箱', tone: 'output' as const },
+  { label: '造型数', value: '116', unit: '箱', tone: 'inbound' as const },
+  { label: '浇筑数', value: '108', unit: '箱', tone: 'output' as const },
+  { label: '转运数', value: '104', unit: '箱', tone: 'output' as const },
   { label: '过程检验合格率', value: '96.8', unit: '%', tone: 'inbound' as const },
-  { label: '主要生产设备可动率', value: '94.5', unit: '%', tone: 'output' as const },
   { label: '生产人员利用率', value: '91.2', unit: '%', tone: 'inbound' as const }
 ]
 
@@ -140,10 +140,18 @@ const placeholderOption: EChartsOption = {
 }
 
 /** 六宫格：首格为任务列表，其余占位 */
+const productionTrendOption: EChartsOption = {
+  tooltip: { trigger: 'axis' },
+  legend: { data: ['计划数', '造型数', '合箱数', '浇筑数', '转运数'], textStyle: { color: '#a9c9d4' }, top: 4 },
+  grid: { left: '3%', right: '4%', bottom: '3%', top: '18%', containLabel: true },
+  xAxis: { type: 'category', data: ['11-13', '11-14', '11-15', '11-16', '11-17', '11-18', '11-19'], axisLabel: { color: '#a9c9d4' } },
+  yAxis: { type: 'value', name: '箱数', nameTextStyle: { color: '#a9c9d4' }, axisLabel: { color: '#a9c9d4' }, splitLine: { lineStyle: { color: 'rgba(72,164,194,.24)', type: 'dashed' } } },
+  series: ['计划数', '造型数', '合箱数', '浇筑数', '转运数'].map((name, index) => ({ name, type: 'line', smooth: true, data: [[128,132,126,140,136,142,128], [116,121,118,129,124,133,116], [112,118,114,124,120,128,113], [108,114,110,120,116,124,108], [104,110,106,116,112,120,104]][index], lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 5 }))
+}
 const panels = computed(() => [
   { title: '任务列表', contentKey: 'taskList' },
   { title: '浇筑进度分析', option: placeholderOption },
-  { title: '过程质量分析', option: placeholderOption },
+  { title: '生产趋势', option: productionTrendOption },
   { title: '设备可动分析', option: placeholderOption },
   { title: '人员利用分析', option: placeholderOption },
   { title: '班组对比分析', option: placeholderOption }
@@ -452,3 +460,8 @@ const panels = computed(() => [
   border-color: rgba(255, 79, 139, 0.45);
 }
 </style>
+
+
+
+
+
