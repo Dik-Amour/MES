@@ -303,6 +303,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/binhai-dashboard/TeamLineDashboard.vue'),
     meta: { requiresAuth: true, title: '造型班组可视化' }
   },
+  {
+    path: '/binhai-dashboard/core-team',
+    name: 'BinhaiCoreTeamDashboard',
+    component: () => import('@/views/binhai-dashboard/CoreTeamDashboard.vue'),
+    meta: { requiresAuth: true, title: '制芯班组可视化' }
+  },
   // 大屏数据管理路由
   {
     path: '/screen-data/equipment',

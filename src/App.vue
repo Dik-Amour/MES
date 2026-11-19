@@ -112,6 +112,7 @@
             <a-menu-item key="/binhai-dashboard/molding-line">造型产线可视化</a-menu-item>
             <a-menu-item key="/binhai-dashboard/cleaning-line">清理产线可视化</a-menu-item>
             <a-menu-item key="/binhai-dashboard/team-line">造型班组可视化</a-menu-item>
+            <a-menu-item key="/binhai-dashboard/core-team">制芯班组可视化</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="screen-data">

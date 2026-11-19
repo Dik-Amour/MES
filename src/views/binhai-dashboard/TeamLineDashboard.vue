@@ -1,5 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+
+import dayjs from 'dayjs'
 
 import LineDashboardShell from './LineDashboardShell.vue'
 import type { EChartsOption } from 'echarts'
@@ -25,8 +27,8 @@ const indicators = [
   { label: '造型数', value: '116', unit: '箱', tone: 'inbound' as const },
   { label: '浇筑数', value: '108', unit: '箱', tone: 'output' as const },
   { label: '转运数', value: '104', unit: '箱', tone: 'output' as const },
-  { label: '过程检验合格率', value: '96.8', unit: '%', tone: 'inbound' as const },
-  { label: '生产人员利用率', value: '91.2', unit: '%', tone: 'inbound' as const }
+  { label: '出产吨位', value: '98.6', unit: '吨', tone: 'inbound' as const },
+  { label: '下芯数', value: '86', unit: '件', tone: 'inbound' as const }
 ]
 
 /** 任务列表 mock（各班组共用同一套数据） */
@@ -80,17 +82,47 @@ const taskList = ref<TaskCardItem[]>([
   { blankNo: '1002381310R', blankName: '气缸盖毛坯', planBoxes: 26, fixtureCount: 5, flaskCount: 26, line: '机体线', status: '异常结束', taskType: '普通类' }
 ])
 
+/** 造型追溯卡片（各班组共用 mock；时间未到的工序显示 —） */
+interface TraceCardItem {
+  blankNo: string
+  blankName: string
+  productSeries: string
+  startTime: string
+  drawTime: string
+  coreSetTime: string
+  closeTime: string
+  pourTime: string
+}
+
+const traceList = ref<TraceCardItem[]>([
+  { blankNo: '1002380677R', blankName: '气缸盖毛坯', productSeries: '机体系列', startTime: '2025-11-18 08:12:30', drawTime: '2025-11-18 09:05:16', coreSetTime: '2025-11-18 09:48:02', closeTime: '2025-11-18 10:36:44', pourTime: '2025-11-18 11:20:08' },
+  { blankNo: '1000000244R', blankName: '主轴承盖', productSeries: '机体系列', startTime: '2025-11-18 08:30:11', drawTime: '2025-11-18 09:22:40', coreSetTime: '2025-11-18 10:05:27', closeTime: '2025-11-18 10:58:19', pourTime: '2025-11-18 11:45:03' },
+  { blankNo: '1002381102R', blankName: '气缸体毛坯', productSeries: '大机系列', startTime: '2025-11-18 08:05:52', drawTime: '2025-11-18 09:18:07', coreSetTime: '2025-11-18 10:02:55', closeTime: '2025-11-18 10:51:33', pourTime: '' },
+  { blankNo: '1001560088R', blankName: '曲轴箱盖', productSeries: '曲轴系列', startTime: '2025-11-18 08:41:25', drawTime: '2025-11-18 09:36:48', coreSetTime: '2025-11-18 10:14:12', closeTime: '', pourTime: '' },
+  { blankNo: '1004420015R', blankName: '新产品壳体', productSeries: '新产品系列', startTime: '2025-11-18 09:02:06', drawTime: '2025-11-18 09:55:31', coreSetTime: '', closeTime: '', pourTime: '' },
+  { blankNo: '1002380901R', blankName: '气缸盖毛坯', productSeries: '机体系列', startTime: '2025-11-17 14:20:18', drawTime: '2025-11-17 15:11:09', coreSetTime: '2025-11-17 15:54:47', closeTime: '2025-11-17 16:40:22', pourTime: '2025-11-17 17:18:56' },
+  { blankNo: '1000000311R', blankName: '主轴承盖', productSeries: '机体系列', startTime: '2025-11-17 15:05:44', drawTime: '2025-11-17 15:58:20', coreSetTime: '2025-11-17 16:39:15', closeTime: '', pourTime: '' },
+  { blankNo: '1001560120R', blankName: '连杆盖', productSeries: '曲轴系列', startTime: '2025-11-17 16:10:03', drawTime: '2025-11-17 17:01:38', coreSetTime: '2025-11-17 17:42:51', closeTime: '2025-11-17 18:25:09', pourTime: '2025-11-17 19:03:44' },
+  { blankNo: '1004420040R', blankName: '支架毛坯', productSeries: '新产品系列', startTime: '2025-11-17 16:48:27', drawTime: '', coreSetTime: '', closeTime: '', pourTime: '' },
+  { blankNo: '1002381205R', blankName: '气缸体毛坯', productSeries: '大机系列', startTime: '2025-11-16 08:15:40', drawTime: '2025-11-16 09:09:12', coreSetTime: '2025-11-16 09:51:36', closeTime: '2025-11-16 10:38:55', pourTime: '2025-11-16 11:22:17' },
+  { blankNo: '1000000455R', blankName: '轴承座', productSeries: '机体系列', startTime: '2025-11-16 09:22:58', drawTime: '2025-11-16 10:14:05', coreSetTime: '2025-11-16 10:56:49', closeTime: '2025-11-16 11:41:23', pourTime: '2025-11-16 12:20:08' },
+  { blankNo: '1001560177R', blankName: '飞轮壳', productSeries: '曲轴系列', startTime: '2025-11-16 10:08:33', drawTime: '2025-11-16 10:59:47', coreSetTime: '2025-11-16 11:40:21', closeTime: '', pourTime: '' },
+  { blankNo: '1004420062R', blankName: '端盖毛坯', productSeries: '新产品系列', startTime: '2025-11-16 13:35:16', drawTime: '2025-11-16 14:26:52', coreSetTime: '2025-11-16 15:08:30', closeTime: '2025-11-16 15:49:11', pourTime: '2025-11-16 16:31:04' },
+  { blankNo: '1002381310R', blankName: '气缸盖毛坯', productSeries: '机体系列', startTime: '2025-11-15 08:02:49', drawTime: '2025-11-15 08:54:13', coreSetTime: '2025-11-15 09:37:28', closeTime: '2025-11-15 10:22:40', pourTime: '2025-11-15 11:05:19' }
+])
+
 const taskListEl = ref<HTMLElement | null>(null)
-let autoScrollTimer: ReturnType<typeof setInterval> | null = null
-let hoverPaused = false
+const traceListEl = ref<HTMLElement | null>(null)
+let taskScrollTimer: ReturnType<typeof setInterval> | null = null
+let traceScrollTimer: ReturnType<typeof setInterval> | null = null
+let taskHoverPaused = false
+let traceHoverPaused = false
 
 /** 数据过多时自动上下滚动；悬停暂停 */
-function startAutoScroll() {
-  stopAutoScroll()
-  autoScrollTimer = setInterval(() => {
-    const el = taskListEl.value
-    if (!el || hoverPaused) return
-    // 滚到底后回到顶部，形成循环
+function startScroll(elRef: typeof taskListEl, paused: () => boolean): ReturnType<typeof setInterval> {
+  return setInterval(() => {
+    const el = elRef.value
+    if (!el || paused()) return
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 1) {
       el.scrollTop = 0
     } else {
@@ -99,27 +131,23 @@ function startAutoScroll() {
   }, 40)
 }
 
-function stopAutoScroll() {
-  if (autoScrollTimer) {
-    clearInterval(autoScrollTimer)
-    autoScrollTimer = null
-  }
+function stopScroll(timer: ReturnType<typeof setInterval> | null) {
+  if (timer) clearInterval(timer)
 }
 
-function onListMouseEnter() {
-  hoverPaused = true
-}
-
-function onListMouseLeave() {
-  hoverPaused = false
-}
+function onTaskEnter() { taskHoverPaused = true }
+function onTaskLeave() { taskHoverPaused = false }
+function onTraceEnter() { traceHoverPaused = true }
+function onTraceLeave() { traceHoverPaused = false }
 
 onMounted(() => {
-  startAutoScroll()
+  taskScrollTimer = startScroll(taskListEl, () => taskHoverPaused)
+  traceScrollTimer = startScroll(traceListEl, () => traceHoverPaused)
 })
 
 onBeforeUnmount(() => {
-  stopAutoScroll()
+  stopScroll(taskScrollTimer)
+  stopScroll(traceScrollTimer)
 })
 
 /** 占位面板 option：显示建设中提示 */
@@ -139,28 +167,369 @@ const placeholderOption: EChartsOption = {
   series: []
 }
 
-/** 六宫格：首格为任务列表，其余占位 */
+/* =========================
+   通用图表样式（与生产运营大屏一致）
+   ========================= */
+const tooltipBase = {
+  backgroundColor: 'rgba(5, 24, 34, 0.96)',
+  borderColor: 'rgba(0, 198, 239, 0.55)',
+  textStyle: { color: '#dff8ff' }
+}
+
+const axisLine = { lineStyle: { color: 'rgba(76, 196, 226, 0.55)' } }
+const splitLine = { lineStyle: { type: 'dashed' as const, color: 'rgba(72, 164, 194, 0.24)' } }
+const axisLabel = { color: '#a9c9d4', fontSize: 10 }
+const axisNameStyle = { color: '#a9c9d4', fontSize: 10 }
+
+/** 近 7 日横轴（MM-DD） */
+const todayStart = dayjs().startOf('day')
+const pourDates = Array.from({ length: 7 }, (_, index) =>
+  todayStart.subtract(6 - index, 'day').format('MM-DD')
+)
+
+/** 按日期确定性生成近一周浇筑吨位，刷新不跳变 */
+function mockPourTons(): number[] {
+  return pourDates.map((_, index) => {
+    const date = todayStart.subtract(6 - index, 'day')
+    const seed = date.year() + date.month() * 31 + date.date() + 23
+    return 86 + ((seed * 13) % 41)
+  })
+}
+
+/** 浇筑吨位统计：横轴日期，纵轴吨位，柱状图 */
+const pourTonsOption: EChartsOption = {
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: { type: 'shadow' },
+    ...tooltipBase,
+    formatter: (params: any) => {
+      const list = Array.isArray(params) ? params : [params]
+      if (!list.length) return ''
+      const body = list
+        .map((item: any) => `${item.marker} ${item.seriesName}: ${item.value} 吨`)
+        .join('<br/>')
+      return `${list[0]?.axisValue ?? ''}<br/>${body}`
+    }
+  },
+  grid: { left: '4%', right: '5%', bottom: '4%', top: '14%', containLabel: true },
+  xAxis: {
+    type: 'category',
+    data: pourDates,
+    axisLabel: { ...axisLabel, interval: 0 },
+    axisLine,
+    axisTick: { show: false }
+  },
+  yAxis: {
+    type: 'value',
+    name: '吨',
+    nameTextStyle: axisNameStyle,
+    axisLabel,
+    splitLine,
+    axisLine: { show: false },
+    axisTick: { show: false }
+  },
+  series: [
+    {
+      name: '浇筑吨位',
+      type: 'bar',
+      data: mockPourTons(),
+      barWidth: '36%',
+      itemStyle: {
+        color: '#20cfff',
+        borderRadius: [3, 3, 0, 0]
+      },
+      label: { show: true, position: 'top', color: '#dff8ff', fontSize: 10 }
+    }
+  ]
+}
+
+/** 六宫格：首格为任务列表，浇筑吨位为柱状图，其余占位 */
 const productionTrendOption: EChartsOption = {
-  tooltip: { trigger: 'axis' },
+  tooltip: { trigger: 'axis', ...tooltipBase },
   legend: { data: ['计划数', '造型数', '合箱数', '浇筑数', '转运数'], textStyle: { color: '#a9c9d4' }, top: 4 },
   grid: { left: '3%', right: '4%', bottom: '3%', top: '18%', containLabel: true },
-  xAxis: { type: 'category', data: ['11-13', '11-14', '11-15', '11-16', '11-17', '11-18', '11-19'], axisLabel: { color: '#a9c9d4' } },
-  yAxis: { type: 'value', name: '箱数', nameTextStyle: { color: '#a9c9d4' }, axisLabel: { color: '#a9c9d4' }, splitLine: { lineStyle: { color: 'rgba(72,164,194,.24)', type: 'dashed' } } },
-  series: ['计划数', '造型数', '合箱数', '浇筑数', '转运数'].map((name, index) => ({ name, type: 'line', smooth: true, data: [[128,132,126,140,136,142,128], [116,121,118,129,124,133,116], [112,118,114,124,120,128,113], [108,114,110,120,116,124,108], [104,110,106,116,112,120,104]][index], lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 5 }))
+  xAxis: {
+    type: 'category',
+    data: pourDates,
+    axisLabel: { ...axisLabel, interval: 0 },
+    axisLine,
+    axisTick: { show: false }
+  },
+  yAxis: {
+    type: 'value',
+    name: '箱数',
+    nameTextStyle: axisNameStyle,
+    axisLabel,
+    splitLine,
+    axisLine: { show: false },
+    axisTick: { show: false }
+  },
+  series: ['计划数', '造型数', '合箱数', '浇筑数', '转运数'].map((name, index) => ({
+    name,
+    type: 'line',
+    smooth: true,
+    data: [
+      [128, 132, 126, 140, 136, 142, 128],
+      [116, 121, 118, 129, 124, 133, 116],
+      [112, 118, 114, 124, 120, 128, 113],
+      [108, 114, 110, 120, 116, 124, 108],
+      [104, 110, 106, 116, 112, 120, 104]
+    ][index],
+    lineStyle: { width: 2 },
+    symbol: 'circle',
+    symbolSize: 5
+  }))
 }
+
+/* =========================
+   不合格品分析：返工 / 返修 / 报废 / 回用，横向条形图
+   ========================= */
+type NgTabKey = 'rework' | 'repair' | 'scrap' | 'reuse'
+
+const ngTabs = [
+  { key: 'rework', label: '返工' },
+  { key: 'repair', label: '返修' },
+  { key: 'scrap', label: '报废' },
+  { key: 'reuse', label: '回用' }
+] as const
+
+const activeNgKey = ref<NgTabKey>('rework')
+
+/** 各类型下按毛坯件号的数量 mock（降序排列，便于横向条形阅读） */
+const ngMetrics: Record<
+  NgTabKey,
+  { color: string; items: { blankNo: string; count: number }[] }
+> = {
+  rework: {
+    color: '#20cfff',
+    items: [
+      { blankNo: '1002380677R', count: 42 },
+      { blankNo: '1000000244R', count: 36 },
+      { blankNo: '1002381102R', count: 31 },
+      { blankNo: '1001560088R', count: 27 },
+      { blankNo: '1004420015R', count: 22 },
+      { blankNo: '1002380901R', count: 18 },
+      { blankNo: '1000000311R', count: 14 },
+      { blankNo: '1001560120R', count: 9 }
+    ]
+  },
+  repair: {
+    color: '#ffd52a',
+    items: [
+      { blankNo: '1002381102R', count: 33 },
+      { blankNo: '1002380677R', count: 28 },
+      { blankNo: '1004420040R', count: 24 },
+      { blankNo: '1001560088R', count: 19 },
+      { blankNo: '1000000244R', count: 16 },
+      { blankNo: '1002381310R', count: 12 },
+      { blankNo: '1001560177R', count: 8 },
+      { blankNo: '1000000455R', count: 5 }
+    ]
+  },
+  scrap: {
+    color: '#ff4f8b',
+    items: [
+      { blankNo: '1004420015R', count: 18 },
+      { blankNo: '1002381102R', count: 14 },
+      { blankNo: '1001560120R', count: 11 },
+      { blankNo: '1002380677R', count: 9 },
+      { blankNo: '1004420062R', count: 7 },
+      { blankNo: '1000000311R', count: 5 },
+      { blankNo: '1002380901R', count: 4 },
+      { blankNo: '1001560088R', count: 2 }
+    ]
+  },
+  reuse: {
+    color: '#4ee6a6',
+    items: [
+      { blankNo: '1000000244R', count: 39 },
+      { blankNo: '1002381310R', count: 34 },
+      { blankNo: '1001560088R', count: 29 },
+      { blankNo: '1002380901R', count: 25 },
+      { blankNo: '1004420040R', count: 21 },
+      { blankNo: '1000000455R', count: 17 },
+      { blankNo: '1002381102R', count: 13 },
+      { blankNo: '1001560177R', count: 10 }
+    ]
+  }
+}
+
+/** 不合格品分析：纵轴毛坯件号、横轴数量的横向条形图 */
+function createNgOption(key: NgTabKey): EChartsOption {
+  const metric = ngMetrics[key]
+  const label = ngTabs.find((tab) => tab.key === key)?.label ?? ''
+  // ECharts 横向条形：yAxis 为类目（自上而下对应 items 顺序）
+  const blankNos = metric.items.map((item) => item.blankNo)
+  const counts = metric.items.map((item) => item.count)
+  const maxCount = Math.max(...counts, 1)
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      ...tooltipBase,
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        const item = list[0]
+        if (!item) return ''
+        return `毛坯件号: ${item.name}<br/>${label}: ${item.value}`
+      }
+    },
+    grid: { left: '4%', right: '10%', bottom: '4%', top: '8%', containLabel: true },
+    xAxis: {
+      type: 'value',
+      name: '数量',
+      nameTextStyle: axisNameStyle,
+      axisLabel,
+      splitLine,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      max: Math.ceil(maxCount * 1.15)
+    },
+    yAxis: {
+      type: 'category',
+      data: blankNos,
+      axisLabel: { ...axisLabel, interval: 0 },
+      axisLine,
+      axisTick: { show: false },
+      splitLine: { show: false }
+    },
+    series: [
+      {
+        name: label,
+        type: 'bar',
+        data: counts,
+        barWidth: '55%',
+        itemStyle: {
+          color: metric.color,
+          borderRadius: [0, 3, 3, 0]
+        },
+        label: {
+          show: true,
+          position: 'right',
+          color: '#dff8ff',
+          fontSize: 10
+        }
+      }
+    ]
+  }
+}
+
+const ngOption = computed(() => createNgOption(activeNgKey.value))
+
+/** 过程检验分析：最近 6 个月，横轴月份、纵轴合格率 */
+const processMonths = Array.from({ length: 6 }, (_, index) =>
+  todayStart.subtract(5 - index, 'month').format('YYYY-MM')
+)
+
+function mockProcessPassRates(): number[] {
+  return processMonths.map((_, index) => {
+    const base = todayStart.subtract(5 - index, 'month')
+    const seed = base.year() * 100 + base.month() + 17
+    // 94.0 ~ 98.9，保留 1 位小数
+    return Math.round((94 + ((seed * 11) % 50) / 10) * 10) / 10
+  })
+}
+
+const processInspectOption: EChartsOption = {
+  tooltip: {
+    trigger: 'axis',
+    ...tooltipBase,
+    formatter: (params: any) => {
+      const list = Array.isArray(params) ? params : [params]
+      if (!list.length) return ''
+      const body = list
+        .map((item: any) => `${item.marker} ${item.seriesName}: ${item.value}%`)
+        .join('<br/>')
+      return `${list[0]?.axisValue ?? ''}<br/>${body}`
+    }
+  },
+  grid: { left: '4%', right: '6%', bottom: '4%', top: '14%', containLabel: true },
+  xAxis: {
+    type: 'category',
+    data: processMonths,
+    axisLabel: { ...axisLabel, interval: 0 },
+    axisLine,
+    axisTick: { show: false }
+  },
+  yAxis: {
+    type: 'value',
+    name: '合格率',
+    nameTextStyle: axisNameStyle,
+    min: 90,
+    max: 100,
+    axisLabel: {
+      ...axisLabel,
+      formatter: '{value}%'
+    },
+    splitLine,
+    axisLine: { show: false },
+    axisTick: { show: false }
+  },
+  series: [
+    {
+      name: '过程检验合格率',
+      type: 'line',
+      smooth: true,
+      data: mockProcessPassRates(),
+      symbol: 'circle',
+      symbolSize: 7,
+      lineStyle: { width: 2.5, color: '#4ee6a6' },
+      itemStyle: { color: '#4ee6a6' },
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
+          colorStops: [
+            { offset: 0, color: 'rgba(78, 230, 166, 0.35)' },
+            { offset: 1, color: 'rgba(78, 230, 166, 0.02)' }
+          ]
+        }
+      },
+      label: {
+        show: true,
+        position: 'top',
+        color: '#dff8ff',
+        fontSize: 10,
+        formatter: (params: any) => `${params.value}%`
+      }
+    }
+  ]
+}
+
+/** 面板 tab 切换：不合格品分析按类型（返工/返修/报废/回用） */
+function handleTabChange(payload: { title: string; key: string }) {
+  if (payload.title === '不合格品分析') {
+    activeNgKey.value = payload.key as NgTabKey
+  }
+}
+
 const panels = computed(() => [
   { title: '任务列表', contentKey: 'taskList' },
-  { title: '浇筑进度分析', option: placeholderOption },
+  { title: '造型追溯', contentKey: 'traceList' },
   { title: '生产趋势', option: productionTrendOption },
-  { title: '设备可动分析', option: placeholderOption },
-  { title: '人员利用分析', option: placeholderOption },
-  { title: '班组对比分析', option: placeholderOption }
+  {
+    title: '不合格品分析',
+    option: ngOption.value,
+    tabs: ngTabs.map((tab) => ({ key: tab.key as string, label: tab.label })),
+    activeKey: activeNgKey.value
+  },
+  { title: '浇筑吨位统计', option: pourTonsOption },
+  { title: '过程检验分析', option: processInspectOption }
 ])
 </script>
 
 <template>
   <!-- 造型班组可视化：可切换班组 + 6 指标 + 任务列表卡片 -->
-  <LineDashboardShell title="造型班组可视化" :indicators="indicators" :panels="panels">
+  <LineDashboardShell
+    title="造型班组可视化"
+    :indicators="indicators"
+    :panels="panels"
+    @tab-change="handleTabChange"
+  >
     <template #headerTeamsLeft>
       <button
         v-for="name in teamGroups.left"
@@ -190,8 +559,8 @@ const panels = computed(() => [
       <div
         ref="taskListEl"
         class="task-list-scroll"
-        @mouseenter="onListMouseEnter"
-        @mouseleave="onListMouseLeave"
+        @mouseenter="onTaskEnter"
+        @mouseleave="onTaskLeave"
       >
         <div
           v-for="task in taskList"
@@ -239,6 +608,60 @@ const panels = computed(() => [
               <div class="task-field">
                 <span class="task-label">产线:</span>
                 <span class="task-value">{{ task.line }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template #traceList>
+      <div
+        ref="traceListEl"
+        class="task-list-scroll"
+        @mouseenter="onTraceEnter"
+        @mouseleave="onTraceLeave"
+      >
+        <div
+          v-for="trace in traceList"
+          :key="trace.blankNo"
+          class="task-card trace-card"
+        >
+          <div class="task-card-grid trace-grid">
+            <div class="task-card-col">
+              <div class="task-field">
+                <span class="task-label">毛坯件号:</span>
+                <span class="task-value">{{ trace.blankNo }}</span>
+              </div>
+              <div class="task-field">
+                <span class="task-label">毛坯名称:</span>
+                <span class="task-value">{{ trace.blankName }}</span>
+              </div>
+              <div class="task-field">
+                <span class="task-label">产品系列:</span>
+                <span class="task-value">{{ trace.productSeries }}</span>
+              </div>
+              <div class="task-field">
+                <span class="task-label">任务开始时间:</span>
+                <span class="task-value">{{ trace.startTime || '—' }}</span>
+              </div>
+              <div class="task-field">
+                <span class="task-label">起模时间:</span>
+                <span class="task-value">{{ trace.drawTime || '—' }}</span>
+              </div>
+            </div>
+            <div class="task-card-col">
+              <div class="task-field">
+                <span class="task-label">下芯时间:</span>
+                <span class="task-value">{{ trace.coreSetTime || '—' }}</span>
+              </div>
+              <div class="task-field">
+                <span class="task-label">合箱时间:</span>
+                <span class="task-value">{{ trace.closeTime || '—' }}</span>
+              </div>
+              <div class="task-field">
+                <span class="task-label">浇筑时间:</span>
+                <span class="task-value trace-pour">{{ trace.pourTime || '—' }}</span>
               </div>
             </div>
           </div>
@@ -458,6 +881,23 @@ const panels = computed(() => [
   color: #ff8fb5;
   background: rgba(255, 79, 139, 0.12);
   border-color: rgba(255, 79, 139, 0.45);
+}
+
+/* 造型追溯卡片：双列时间字段略紧凑 */
+.trace-card .task-field {
+  font-size: 13px;
+}
+
+.trace-card .task-label {
+  min-width: 7.5em;
+}
+
+.trace-grid {
+  grid-template-columns: 1.2fr 1fr;
+}
+
+.trace-pour {
+  color: #20cfff;
 }
 </style>
 
