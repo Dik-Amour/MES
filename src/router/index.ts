@@ -277,13 +277,13 @@ const routes: RouteRecordRaw[] = [
     path: '/binhai-dashboard/personnel',
     name: 'BinhaiPersonnelDashboard',
     component: () => import('@/views/binhai-dashboard/PersonnelDashboard.vue'),
-    meta: { requiresAuth: true, title: '人员管理大屏' }
+    meta: { requiresAuth: true, title: '人员可视化大屏' }
   },
   {
     path: '/binhai-dashboard/cost',
     name: 'BinhaiCostDashboard',
     component: () => import('@/views/binhai-dashboard/CostDashboard.vue'),
-    meta: { requiresAuth: true, title: '成本管理大屏' }
+    meta: { requiresAuth: true, title: '成本可视化大屏' }
   },
   {
     path: '/binhai-dashboard/molding-line',

@@ -9,7 +9,7 @@ import type { EChartsOption } from 'echarts'
 /* =========================
    页面静态数据
    ========================= */
-/** 人员管理大屏静态数据 */
+/** 人员可视化大屏静态数据 */
 
 interface HrDatum {
   category: string
@@ -34,9 +34,9 @@ interface AppointmentDatum {
 }
 
 const appointmentData: AppointmentDatum[] = [
-  { name: '助理技师', value: 45, colors: ['#4472c4', '#4472c4'] },
-  { name: '技师', value: 68, colors: ['#70ad47', '#3ba8a0'] },
-  { name: '高级技师', value: 32, colors: ['#ffc000', '#D69D06'] }
+  { name: '助理技师', value: 45, colors: ['#20cfff', '#20cfff'] },
+  { name: '技师', value: 68, colors: ['#4ee6a6', '#3ba8a0'] },
+  { name: '高级技师', value: 32, colors: ['#ffd52a', '#D69D06'] }
 ]
 
 interface DynamicsRow {
@@ -72,7 +72,7 @@ const scheduleRows: ScheduleRow[] = [
     time: '2025-12-03 17:51:00',
     position: '上机位1',
     status: '在岗',
-    statusColor: '#70ad47',
+    statusColor: '#4ee6a6',
     duration: '314.38'
   },
   {
@@ -81,7 +81,7 @@ const scheduleRows: ScheduleRow[] = [
     time: '2025-12-03 10:22:26',
     position: '上机位1',
     status: '休息',
-    statusColor: '#666',
+    statusColor: '#a9c9d4',
     duration: '696.72'
   },
   {
@@ -159,9 +159,9 @@ interface StackedSeries {
 }
 
 const departmentSeries: StackedSeries[] = [
-  { name: '一线人员', data: [45, 52, 38, 42], colors: ['#4472c4', '#4472c4'] },
-  { name: '技术支持', data: [12, 15, 10, 11], colors: ['#70ad47', '#3ba8a0'] },
-  { name: '管理技术', data: [8, 10, 7, 9], colors: ['#ffc000', '#D69D06'] }
+  { name: '一线人员', data: [45, 52, 38, 42], colors: ['#20cfff', '#20cfff'] },
+  { name: '技术支持', data: [12, 15, 10, 11], colors: ['#4ee6a6', '#3ba8a0'] },
+  { name: '管理技术', data: [8, 10, 7, 9], colors: ['#ffd52a', '#D69D06'] }
 ]
 
 const outputTrendMonths = ['1月', '2月', '3月', '4月', '5月', '6月']
@@ -199,29 +199,29 @@ const dynamicsSeriesConfig: DynamicsSeriesConfig[] = [
     name: '大机',
     baseCount: 85,
     variance: 15,
-    color: '#70ad47',
-    areaColors: ['rgba(112, 173, 71, 0.3)', 'rgba(112, 173, 71, 0.05)']
+    color: '#4ee6a6',
+    areaColors: ['rgba(78, 230, 166, 0.3)', 'rgba(78, 230, 166, 0.05)']
   },
   {
     name: '曲轴',
     baseCount: 75,
     variance: 12,
-    color: '#4472c4',
-    areaColors: ['rgba(91, 143, 249, 0.3)', 'rgba(91, 143, 249, 0.05)']
+    color: '#20cfff',
+    areaColors: ['rgba(32, 207, 255, 0.3)', 'rgba(32, 207, 255, 0.05)']
   },
   {
     name: '机体',
     baseCount: 65,
     variance: 10,
-    color: '#ffc000',
-    areaColors: ['rgba(246, 189, 22, 0.3)', 'rgba(246, 189, 22, 0.05)']
+    color: '#ffd52a',
+    areaColors: ['rgba(255, 213, 42, 0.3)', 'rgba(255, 213, 42, 0.05)']
   },
   {
     name: '新产品',
     baseCount: 55,
     variance: 8,
-    color: '#3ba8a0',
-    areaColors: ['rgba(146, 112, 202, 0.3)', 'rgba(146, 112, 202, 0.05)']
+    color: '#9b8cff',
+    areaColors: ['rgba(155, 140, 255, 0.3)', 'rgba(155, 140, 255, 0.05)']
   }
 ]
 
@@ -267,18 +267,18 @@ function createPersonnelValues(
 }
 
 /* =========================
-   ECharts 配置
+   ECharts 配置（深色底，对齐生产可视化大屏）
    ========================= */
 const tooltipBase = {
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderColor: 'rgba(68, 114, 196, 0.3)',
-  textStyle: { color: '#333' }
+  backgroundColor: 'rgba(6, 24, 33, 0.94)',
+  borderColor: 'rgba(0, 191, 235, 0.48)',
+  textStyle: { color: '#dff8ff' }
 }
 
 const dashedSplitLine = {
   lineStyle: {
     type: 'dashed' as const,
-    color: 'rgba(148, 163, 184, 0.3)'
+    color: 'rgba(0, 154, 197, 0.28)'
   }
 }
 
@@ -287,19 +287,19 @@ const valueAxisBase = {
   axisLine: { show: false },
   axisTick: { show: false },
   splitLine: dashedSplitLine,
-  axisLabel: { color: '#666', fontSize: 10 }
+  axisLabel: { color: '#a9c9d4', fontSize: 10 }
 }
 
 const categoryAxisBase = {
   type: 'category' as const,
-  axisLine: { lineStyle: { color: '#cbd5e1' } },
-  axisLabel: { color: '#666', fontSize: 11 },
+  axisLine: { lineStyle: { color: 'rgba(0, 191, 235, 0.35)' } },
+  axisLabel: { color: '#a9c9d4', fontSize: 11 },
   axisTick: { show: false }
 }
 
 /** 人力资源动态明细：横向条形图，逐条渐变着色 */
 function createHrDynamicsOption(): EChartsOption {
-  const barColors = ['#4472c4', '#70ad47', '#ffc000', '#3ba8a0', '#ffc000', '#3ba8a0', '#3ba8a0']
+  const barColors = ['#20cfff', '#4ee6a6', '#ffd52a', '#9b8cff', '#ffd52a', '#4ee6a6', '#20cfff']
   return {
     tooltip: {
       ...tooltipBase,
@@ -346,7 +346,7 @@ function createHrDynamicsOption(): EChartsOption {
         label: {
           show: true,
           position: 'right',
-          color: '#333',
+          color: '#dff8ff',
           fontSize: 11,
           formatter: '{c} 人'
         }
@@ -366,7 +366,7 @@ function createAppointmentOption(): EChartsOption {
       orient: 'vertical',
       right: '10%',
       top: 'center',
-      textStyle: { color: '#666', fontSize: 12 },
+      textStyle: { color: '#a9c9d4', fontSize: 12 },
       itemWidth: 14,
       itemHeight: 14
     },
@@ -382,7 +382,7 @@ function createAppointmentOption(): EChartsOption {
           position: 'center',
           formatter: '{d}%\n{b}',
           fontSize: 14,
-          color: '#333'
+          color: '#f4fdff'
         },
         emphasis: {
           label: {
@@ -424,7 +424,7 @@ function createDynamicsOption(): EChartsOption {
     },
     legend: {
       data: dynamicsSeriesConfig.map((item) => item.name),
-      textStyle: { color: '#666', fontSize: 11 },
+      textStyle: { color: '#a9c9d4', fontSize: 11 },
       top: 0,
       itemWidth: 12,
       itemHeight: 12
@@ -439,13 +439,13 @@ function createDynamicsOption(): EChartsOption {
     xAxis: {
       ...categoryAxisBase,
       data: labels,
-      axisLabel: { color: '#666', fontSize: 10, interval: 'auto' },
+      axisLabel: { color: '#a9c9d4', fontSize: 10, interval: 'auto' },
       boundaryGap: false
     },
     yAxis: {
       ...valueAxisBase,
       name: '人数',
-      nameTextStyle: { color: '#666', fontSize: 10 }
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 }
     },
     series: dynamicsSeriesConfig.map((item) => ({
       name: item.name,
@@ -483,7 +483,7 @@ function createDepartmentOption(): EChartsOption {
     },
     legend: {
       data: departmentSeries.map((item) => item.name),
-      textStyle: { color: '#666', fontSize: 11 },
+      textStyle: { color: '#a9c9d4', fontSize: 11 },
       top: 0,
       itemWidth: 12,
       itemHeight: 12
@@ -502,7 +502,7 @@ function createDepartmentOption(): EChartsOption {
     yAxis: {
       ...valueAxisBase,
       name: '人数',
-      nameTextStyle: { color: '#666', fontSize: 11 }
+      nameTextStyle: { color: '#a9c9d4', fontSize: 11 }
     },
     series: departmentSeries.map((item) => ({
       name: item.name,
@@ -548,7 +548,7 @@ function createOutputTrendOption(): EChartsOption {
     yAxis: {
       ...valueAxisBase,
       name: '吨/人',
-      nameTextStyle: { color: '#666', fontSize: 11 }
+      nameTextStyle: { color: '#a9c9d4', fontSize: 11 }
     },
     series: [
       {
@@ -565,8 +565,8 @@ function createOutputTrendOption(): EChartsOption {
             x2: 1,
             y2: 0,
             colorStops: [
-              { offset: 0, color: '#4472c4' },
-              { offset: 1, color: '#70ad47' }
+              { offset: 0, color: '#20cfff' },
+              { offset: 1, color: '#4ee6a6' }
             ]
           }
         },
@@ -578,14 +578,14 @@ function createOutputTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(59, 167, 255, 0.3)' },
-              { offset: 1, color: 'rgba(59, 167, 255, 0.05)' }
+              { offset: 0, color: 'rgba(32, 207, 255, 0.3)' },
+              { offset: 1, color: 'rgba(32, 207, 255, 0.05)' }
             ]
           }
         },
         itemStyle: {
-          color: '#4472c4',
-          borderColor: '#fff',
+          color: '#20cfff',
+          borderColor: '#061821',
           borderWidth: 2
         }
       }
@@ -597,7 +597,8 @@ function createOutputTrendOption(): EChartsOption {
 function createIndicatorOption(): EChartsOption {
   return {
     tooltip: {
-      formatter: '{b}: {c}'
+      formatter: '{b}: {c}',
+      ...tooltipBase
     },
     series: [
       {
@@ -619,8 +620,8 @@ function createIndicatorOption(): EChartsOption {
               x2: 1,
               y2: 0,
               colorStops: [
-                { offset: 0, color: '#4472c4' },
-                { offset: 1, color: '#4472c4' }
+                { offset: 0, color: '#20cfff' },
+                { offset: 1, color: '#20cfff' }
               ]
             }
           }
@@ -628,7 +629,7 @@ function createIndicatorOption(): EChartsOption {
         axisLine: {
           lineStyle: {
             width: 12,
-            color: [[1, 'rgba(148, 163, 184, 0.3)']]
+            color: [[1, 'rgba(0, 154, 197, 0.28)']]
           }
         },
         axisTick: { show: false },
@@ -636,12 +637,12 @@ function createIndicatorOption(): EChartsOption {
           length: 8,
           lineStyle: {
             width: 2,
-            color: '#cbd5e1'
+            color: 'rgba(0, 191, 235, 0.45)'
           }
         },
         axisLabel: {
           distance: 15,
-          color: '#666',
+          color: '#a9c9d4',
           fontSize: 10
         },
         anchor: {
@@ -650,20 +651,20 @@ function createIndicatorOption(): EChartsOption {
           size: 8,
           itemStyle: {
             borderWidth: 2,
-            borderColor: '#4472c4'
+            borderColor: '#20cfff'
           }
         },
         title: {
           show: true,
           offsetCenter: [0, '80%'],
-          color: '#666',
+          color: '#a9c9d4',
           fontSize: 12
         },
         detail: {
           valueAnimation: true,
           fontSize: 20,
           fontWeight: 'bold',
-          color: '#333',
+          color: '#ffd91a',
           offsetCenter: [0, '50%'],
           formatter: '{value} 级'
         },
@@ -688,8 +689,8 @@ function createIndicatorOption(): EChartsOption {
               x2: 1,
               y2: 0,
               colorStops: [
-                { offset: 0, color: '#70ad47' },
-                { offset: 1, color: '#3ba8a0' }
+                { offset: 0, color: '#4ee6a6' },
+                { offset: 1, color: '#20cfff' }
               ]
             }
           }
@@ -697,7 +698,7 @@ function createIndicatorOption(): EChartsOption {
         axisLine: {
           lineStyle: {
             width: 12,
-            color: [[1, 'rgba(148, 163, 184, 0.3)']]
+            color: [[1, 'rgba(0, 154, 197, 0.28)']]
           }
         },
         axisTick: { show: false },
@@ -705,12 +706,12 @@ function createIndicatorOption(): EChartsOption {
           length: 8,
           lineStyle: {
             width: 2,
-            color: '#cbd5e1'
+            color: 'rgba(0, 191, 235, 0.45)'
           }
         },
         axisLabel: {
           distance: 15,
-          color: '#666',
+          color: '#a9c9d4',
           fontSize: 10
         },
         anchor: {
@@ -719,20 +720,20 @@ function createIndicatorOption(): EChartsOption {
           size: 8,
           itemStyle: {
             borderWidth: 2,
-            borderColor: '#70ad47'
+            borderColor: '#4ee6a6'
           }
         },
         title: {
           show: true,
           offsetCenter: [0, '80%'],
-          color: '#666',
+          color: '#a9c9d4',
           fontSize: 12
         },
         detail: {
           valueAnimation: true,
           fontSize: 20,
           fontWeight: 'bold',
-          color: '#333',
+          color: '#ffd91a',
           offsetCenter: [0, '50%'],
           formatter: '{value} 小时'
         },
@@ -749,7 +750,6 @@ function createIndicatorOption(): EChartsOption {
 type MetricTab = 'skill' | 'training'
 
 const activeTab = ref<MetricTab>('skill')
-const alertVisible = ref(true)
 
 const hrDynamicsOption = createHrDynamicsOption()
 const appointmentOption = createAppointmentOption()
@@ -763,8 +763,9 @@ const indicatorOption = createIndicatorOption()
   <div class="dashboard-container">
     <!-- 顶部标题栏 -->
     <DashboardHeader
-      title="人员管理大屏"
+      title="人员可视化大屏"
       weather="潍坊 18℃ 晴"
+      variant="fui"
     />
 
     <div class="dashboard-row">
@@ -800,9 +801,9 @@ const indicatorOption = createIndicatorOption()
               <div class="data-item-content">
                 <div class="data-item-label">总在岗人数/缺勤人数</div>
                 <div class="data-item-value">
-                  <span style="color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5)">256</span>
-                  <span style="color: #9cc9ff; margin: 0 4px">/</span>
-                  <span style="color: #ff5252; text-shadow: 0 0 10px rgba(255, 82, 82, 0.5)">8</span>
+                  <span style="color: #4ee6a6; text-shadow: 0 0 10px rgba(78, 230, 166, 0.5)">256</span>
+                  <span style="color: #a9c9d4; margin: 0 4px">/</span>
+                  <span style="color: #ff5f87; text-shadow: 0 0 10px rgba(255, 95, 135, 0.5)">8</span>
                 </div>
                 <div class="data-item-progress">
                   <div class="progress-bar" style="width: 97%"></div>
@@ -919,13 +920,6 @@ const indicatorOption = createIndicatorOption()
               <div class="dynamics-dot">·</div>
               <div class="dynamics-action">{{ row.action }}</div>
             </div>
-          </div>
-
-          <!-- 异常提醒弹窗 -->
-          <div v-show="alertVisible" class="alert-box">
-            <button class="alert-close" @click="alertVisible = false">×</button>
-            <div class="alert-title">异常提醒</div>
-            <div class="alert-content">超时班组人员、技能不匹配隐患</div>
           </div>
 
           <!-- 统计图表 -->
@@ -1091,47 +1085,82 @@ const indicatorOption = createIndicatorOption()
 <style scoped>
 .dashboard-container {
   width: 100%;
-  height: 100%;
-  padding: 16px;
+  min-height: calc(100vh - 132px);
+  padding: 10px;
+  box-sizing: border-box;
   position: relative;
   overflow-y: auto;
+  color: #dff8ff;
+  background-color: #041019;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px);
+  background-size: auto, auto, 32px 32px, 32px 32px;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46);
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
 }
 
-/* 顶部标题栏样式 */
-/* 左侧时间 */
-/* 中间标题 */
-.title-decoration-left,
-/* 右侧区域 */
-/* 右侧天气 */
-/* Logo 样式 */
-/* 网格布局 */
 .dashboard-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
   gap: 16px;
   height: auto;
+  min-height: calc(100vh - 200px);
 }
 
 .column-wrapper {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
-/* 数据面板 */
+/* 数据面板：沿用生产可视化大屏 */
 .data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1px solid rgba(68, 114, 196, 0.4);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  color: #dff8ff;
+  background-color: #061821;
+  background-image:
+    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
+    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%);
+  border: 1px solid rgba(0, 191, 235, 0.48);
+  border-radius: 2px;
+  padding: 12px 14px;
+  box-shadow:
+    inset 0 0 24px rgba(0, 157, 205, 0.055),
+    0 0 12px rgba(0, 0, 0, 0.24);
   display: flex;
   flex-direction: column;
   position: relative;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
   height: 360px;
 }
 
-/* 中间列特殊高度 */
+.data-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  width: 74px;
+  height: 2px;
+  background: #18d2ff;
+  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9);
+}
+
+.data-panel::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  bottom: 14px;
+  width: 3px;
+  height: 42px;
+  background: linear-gradient(180deg, transparent, #18d2ff, transparent);
+  opacity: 0.75;
+}
+
 .realtime-dynamics-panel {
   height: 650px;
 }
@@ -1143,74 +1172,102 @@ const indicatorOption = createIndicatorOption()
 .panel-header {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
+  width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
+  min-height: 34px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(0, 185, 226, 0.34);
 }
 
 .panel-icon {
-  width: 32px;
-  height: 32px;
   display: flex;
+  width: 28px;
+  height: 28px;
+  margin-right: 9px;
   align-items: center;
   justify-content: center;
-  background: rgba(68, 114, 196, 0.2);
-  border-radius: 6px;
-  margin-right: 12px;
-  color: #4472c4;
+  flex-shrink: 0;
+  color: #40e3ff;
+  background: rgba(0, 176, 220, 0.14);
+  border: 1px solid rgba(35, 211, 255, 0.48);
+  border-radius: 2px;
+  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
+}
+
+.panel-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .panel-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
+  display: inline-block;
   margin: 0;
-  flex: 1;
+  padding: 0;
+  color: #f4fdff;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* data-panel 角装饰 */
-.corner-tl {
+.panel-title::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin-left: 10px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, #17cfff, transparent);
+}
+
+.panel-header:has(.tab-buttons) .panel-title::after {
+  display: none;
+}
+
+/* 角装饰 */
+.corner-tl,
+.corner-tr,
+.corner-bl,
+.corner-br {
   position: absolute;
+  width: 14px;
+  height: 14px;
+  z-index: 10;
+  border-color: #1bd5ff;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
+}
+
+.corner-tl {
   top: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-  z-index: 10;
+  border-top: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .corner-tr {
-  position: absolute;
   top: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-  z-index: 10;
+  border-top: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 .corner-bl {
-  position: absolute;
   bottom: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-  z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .corner-br {
-  position: absolute;
   bottom: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-  z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 /* 数据列表 */
@@ -1220,22 +1277,23 @@ const indicatorOption = createIndicatorOption()
   gap: 12px;
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .data-item {
   display: flex;
   align-items: center;
   padding: 12px;
-  background: rgba(68, 114, 196, 0.05);
-  border: 1px solid rgba(68, 114, 196, 0.2);
-  border-radius: 6px;
+  background: rgba(0, 143, 184, 0.12);
+  border: 1px solid rgba(0, 191, 235, 0.28);
+  border-radius: 3px;
   transition: all 0.3s ease;
 }
 
 .data-item:hover {
-  background: rgba(68, 114, 196, 0.1);
-  border-color: rgba(68, 114, 196, 0.4);
-  box-shadow: 0 0 15px rgba(68, 114, 196, 0.3);
+  background: rgba(0, 169, 215, 0.16);
+  border-color: rgba(0, 191, 235, 0.5);
+  box-shadow: inset 0 0 14px rgba(0, 154, 201, 0.12);
 }
 
 .data-item-icon {
@@ -1244,54 +1302,60 @@ const indicatorOption = createIndicatorOption()
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 3px;
   margin-right: 12px;
   flex-shrink: 0;
 }
 
 .data-item-icon.green {
-  background: rgba(112, 173, 71, 0.2);
-  color: #70ad47;
-  box-shadow: 0 0 15px rgba(112, 173, 71, 0.3);
+  background: rgba(43, 214, 157, 0.14);
+  color: #4ee6a6;
+  border: 1px solid rgba(83, 255, 197, 0.4);
+  box-shadow: inset 0 0 12px rgba(78, 230, 166, 0.12);
 }
 
 .data-item-icon.gray {
-  background: rgba(153, 153, 153, 0.2);
-  color: #666;
+  background: rgba(0, 174, 220, 0.12);
+  color: #62e8ff;
+  border: 1px solid rgba(55, 220, 255, 0.4);
 }
 
 .data-item-content {
   flex: 1;
+  min-width: 0;
 }
 
 .data-item-label {
   font-size: 13px;
-  color: #666;
+  color: #a9c9d4;
   margin-bottom: 6px;
 }
 
 .data-item-value {
   font-size: 18px;
-  font-weight: bold;
-  color: #70ad47;
-  text-shadow: 0 0 10px rgba(112, 173, 71, 0.5);
+  font-weight: 800;
+  color: #f4fdff;
+  text-shadow: 0 0 10px rgba(31, 204, 255, 0.25);
   font-family: 'DIN Alternate', 'Source Han Sans CN', 'Microsoft YaHei', sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
 .data-item-progress {
   width: 100%;
-  height: 8px;
-  background: rgba(68, 114, 196, 0.1);
-  border-radius: 4px;
+  height: 7px;
+  background: rgba(0, 126, 165, 0.2);
+  border: 1px solid rgba(0, 181, 224, 0.26);
+  border-radius: 1px;
   overflow: hidden;
   margin-top: 6px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.45);
 }
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #70ad47 0%, #4472c4 100%);
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(112, 173, 71, 0.5);
+  background: linear-gradient(90deg, #0aaad9, #35e4ff 72%, #ffd91a);
+  border-radius: 1px;
+  box-shadow: 0 0 9px rgba(53, 228, 255, 0.72);
   transition: width 0.3s ease;
 }
 
@@ -1300,6 +1364,7 @@ const indicatorOption = createIndicatorOption()
   margin-bottom: 16px;
   max-height: 150px;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .dynamics-row {
@@ -1307,94 +1372,50 @@ const indicatorOption = createIndicatorOption()
   align-items: center;
   padding: 8px 12px;
   margin-bottom: 8px;
-  background: rgba(68, 114, 196, 0.05);
-  border: 1px solid rgba(68, 114, 196, 0.2);
-  border-radius: 4px;
+  background: rgba(5, 27, 37, 0.78);
+  border: 1px solid rgba(0, 154, 197, 0.22);
+  border-radius: 3px;
   font-size: 12px;
   transition: all 0.3s ease;
 }
 
 .dynamics-row:hover {
-  background: rgba(68, 114, 196, 0.1);
-  border-color: rgba(68, 114, 196, 0.4);
+  background: rgba(0, 169, 215, 0.13);
+  border-color: rgba(0, 191, 235, 0.44);
   transform: translateX(4px);
 }
 
 .dynamics-arrow {
-  color: #70ad47;
+  color: #4ee6a6;
   font-size: 12px;
   margin-right: 10px;
   flex-shrink: 0;
 }
 
 .dynamics-time {
-  color: #4472c4;
+  color: #35e4ff;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  font-weight: bold;
+  font-weight: 700;
   margin-right: 12px;
   flex-shrink: 0;
 }
 
 .dynamics-name {
-  color: #333;
-  font-weight: 500;
+  color: #f4fdff;
+  font-weight: 600;
   margin-right: 6px;
   flex-shrink: 0;
 }
 
 .dynamics-dot {
-  color: #666;
+  color: #a9c9d4;
   margin-right: 6px;
   flex-shrink: 0;
 }
 
 .dynamics-action {
-  color: #666;
+  color: #a9c9d4;
   flex: 1;
-}
-
-/* 异常提醒框 */
-.alert-box {
-  position: relative;
-  background: linear-gradient(135deg, #ff4d4f 0%, #ff4d4f 100%);
-  border: 2px solid #ffffff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 0 30px rgba(255, 77, 79, 0.8);
-}
-
-.alert-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 24px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  border-radius: 50%;
-  color: #ffffff;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.alert-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.alert-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #ffffff;
-  margin-bottom: 8px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.alert-content {
-  font-size: 14px;
-  color: #ffffff;
-  margin-bottom: 12px;
 }
 
 /* 排班表格样式 */
@@ -1402,6 +1423,8 @@ const indicatorOption = createIndicatorOption()
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 202, 242, 0.5) transparent;
 }
 
 .schedule-table table {
@@ -1410,34 +1433,38 @@ const indicatorOption = createIndicatorOption()
 }
 
 .schedule-table thead tr {
-  background: rgba(255, 255, 255, 0.6);
-  border-bottom: 2px solid #ff4d4f;
+  background: rgba(0, 143, 184, 0.17);
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44);
 }
 
 .schedule-table thead th {
-  color: #333;
-  font-weight: bold;
+  color: #75dff7;
+  font-weight: 600;
   font-size: 12px;
   text-align: center;
   padding: 8px 4px;
 }
 
 .schedule-table tbody tr {
-  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16);
   transition: background-color 0.2s ease;
 }
 
+.schedule-table tbody tr:nth-child(odd) {
+  background: rgba(7, 36, 48, 0.78);
+}
+
 .schedule-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 4px rgba(68, 114, 196, 0.2);
+  background: rgba(0, 169, 215, 0.13);
 }
 
 .schedule-table tbody td {
-  color: #333;
+  color: #cde7ee;
   font-size: 12px;
   text-align: center;
   padding: 8px 4px;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
 /* 切换按钮样式 */
@@ -1445,28 +1472,33 @@ const indicatorOption = createIndicatorOption()
   display: flex;
   gap: 8px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .tab-button {
-  background: rgba(242, 242, 242, 0.5);
-  border: 1px solid rgba(68, 114, 196, 0.3);
-  color: #666;
+  background: rgba(4, 24, 33, 0.88);
+  border: 1px solid rgba(0, 184, 225, 0.4);
+  color: #9cc8d5;
   padding: 6px 12px;
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .tab-button:hover {
-  color: #70ad47;
+  color: #effcff;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34));
+  border-color: #26d5ff;
+  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18);
 }
 
 .tab-button.active {
-  background: rgba(112, 173, 71, 0.2);
-  border-color: #70ad47;
-  color: #70ad47;
-  box-shadow: none;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34));
+  border-color: #26d5ff;
+  color: #effcff;
+  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18);
 }
 
 /* 图表容器 */
@@ -1491,19 +1523,21 @@ const indicatorOption = createIndicatorOption()
   justify-content: center;
   margin-bottom: 12px;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .big-number {
   font-size: 48px;
-  font-weight: 900;
-  color: #70ad47;
+  font-weight: 800;
+  color: #ffd91a;
   font-family: 'DIN Alternate', 'Source Han Sans CN', 'Microsoft YaHei', sans-serif;
-  text-shadow: 0 0 30px rgba(112, 173, 71, 0.8), 0 0 60px rgba(112, 173, 71, 0.4);
+  text-shadow: 0 0 18px rgba(255, 217, 26, 0.36);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .big-unit {
-  color: #666;
+  color: #a7cad5;
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -1516,51 +1550,467 @@ const indicatorOption = createIndicatorOption()
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 12px;
+  flex: 1;
+  align-content: center;
 }
 
 .training-item {
   text-align: center;
   padding: 12px;
-  background: rgba(242, 242, 242, 0.5);
-  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  background-color: #082532;
+  background-image:
+    linear-gradient(180deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
+    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%);
+  border: 1px solid rgba(0, 190, 235, 0.56);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 22px rgba(0, 154, 201, 0.09),
+    0 0 10px rgba(0, 0, 0, 0.24);
+}
+
+.training-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58%;
+  height: 2px;
+  background: linear-gradient(90deg, #26d9ff, transparent);
+  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
 }
 
 .training-label {
-  color: #666;
+  color: #a9c9d4;
   font-size: 12px;
   margin-bottom: 8px;
 }
 
 .training-value {
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 800;
   margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
 }
 
 .training-change {
-  color: #666;
+  color: #a7cad5;
   font-size: 12px;
 }
 
 .training-value.green {
-  color: #70ad47;
+  color: #4ee6a6;
+  text-shadow: 0 0 10px rgba(78, 230, 166, 0.25);
 }
 
 .training-value.yellow {
-  color: #ffc000;
+  color: #ffd91a;
+  text-shadow: 0 0 10px rgba(255, 217, 26, 0.28);
 }
 
 .training-value.blue {
-  color: #4472c4;
+  color: #31d7ff;
+  text-shadow: 0 0 10px rgba(49, 215, 255, 0.28);
 }
 
 .training-value.purple {
-  color: #3ba8a0;
+  color: #9b8cff;
+  text-shadow: 0 0 10px rgba(155, 140, 255, 0.28);
+}
+
+.dynamics-list-new::-webkit-scrollbar,
+.schedule-table::-webkit-scrollbar,
+.data-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dynamics-list-new::-webkit-scrollbar-track,
+.schedule-table::-webkit-scrollbar-track,
+.data-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dynamics-list-new::-webkit-scrollbar-thumb,
+.schedule-table::-webkit-scrollbar-thumb,
+.data-list::-webkit-scrollbar-thumb {
+  background: rgba(26, 202, 242, 0.5);
+  border-radius: 2px;
 }
 
 @media (max-width: 1400px) {
   .dashboard-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* =========================================================
+   强制覆盖全局 style.css 浅色 !important（对齐生产可视化深色）
+   ========================================================= */
+.dashboard-container {
+  width: 100% !important;
+  height: auto !important;
+  min-height: calc(100vh - 132px) !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  color: #dff8ff !important;
+  background: #041019 !important;
+  background-color: #041019 !important;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px) !important;
+  background-size: auto, auto, 32px 32px, 32px 32px !important;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46) !important;
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif !important;
+}
+
+.dashboard-container .data-panel {
+  color: #dff8ff !important;
+  background: #061821 !important;
+  background-color: #061821 !important;
+  background-image:
+    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
+    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%) !important;
+  border: 1px solid rgba(0, 191, 235, 0.48) !important;
+  border-radius: 2px !important;
+  padding: 12px 14px !important;
+  box-shadow:
+    inset 0 0 24px rgba(0, 157, 205, 0.055),
+    0 0 12px rgba(0, 0, 0, 0.24) !important;
+}
+
+.dashboard-container .data-panel::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 14px !important;
+  width: 74px !important;
+  height: 2px !important;
+  background: #18d2ff !important;
+  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9) !important;
+  z-index: 2 !important;
+}
+
+.dashboard-container .data-panel::after {
+  content: '' !important;
+  position: absolute !important;
+  right: -1px !important;
+  bottom: 14px !important;
+  width: 3px !important;
+  height: 42px !important;
+  background: linear-gradient(180deg, transparent, #18d2ff, transparent) !important;
+  opacity: 0.75 !important;
+  z-index: 2 !important;
+}
+
+.dashboard-container .data-panel > .panel-header {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  min-height: 34px !important;
+  margin-bottom: 10px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px dashed rgba(0, 185, 226, 0.34) !important;
+}
+
+.dashboard-container .data-panel .panel-icon,
+.dashboard-container .kpi-card .kpi-icon {
+  display: flex !important;
+  width: 28px !important;
+  height: 28px !important;
+  margin-right: 9px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: #40e3ff !important;
+  background: rgba(0, 176, 220, 0.14) !important;
+  border: 1px solid rgba(35, 211, 255, 0.48) !important;
+  border-radius: 2px !important;
+  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12) !important;
+}
+
+.dashboard-container .data-panel .panel-title {
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #f4fdff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25) !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-container .data-panel .panel-title::after {
+  content: '' !important;
+  display: inline-block !important;
+  width: 28px !important;
+  height: 1px !important;
+  margin-left: 10px !important;
+  vertical-align: middle !important;
+  background: linear-gradient(90deg, #17cfff, transparent) !important;
+}
+
+.dashboard-container .data-panel .panel-header:has(.tab-buttons) .panel-title::after {
+  display: none !important;
+}
+
+.dashboard-container .data-panel .corner-tl,
+.dashboard-container .data-panel .corner-tr,
+.dashboard-container .data-panel .corner-bl,
+.dashboard-container .data-panel .corner-br,
+.dashboard-container .kpi-card .corner-bl,
+.dashboard-container .kpi-card .corner-br {
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  z-index: 10 !important;
+  border-color: #1bd5ff !important;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75)) !important;
+}
+
+.dashboard-container .data-panel .corner-tl,
+.dashboard-container .kpi-card .corner-tl {
+  top: 0 !important;
+  left: 0 !important;
+  border-top: 2px solid #1bd5ff !important;
+  border-left: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .data-panel .corner-tr,
+.dashboard-container .kpi-card .corner-tr {
+  top: 0 !important;
+  right: 0 !important;
+  border-top: 2px solid #1bd5ff !important;
+  border-right: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .data-panel .corner-bl,
+.dashboard-container .kpi-card .corner-bl {
+  bottom: 0 !important;
+  left: 0 !important;
+  border-bottom: 2px solid #1bd5ff !important;
+  border-left: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .data-panel .corner-br,
+.dashboard-container .kpi-card .corner-br {
+  bottom: 0 !important;
+  right: 0 !important;
+  border-bottom: 2px solid #1bd5ff !important;
+  border-right: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .tab-buttons {
+  display: flex !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.dashboard-container .tab-button {
+  background: rgba(4, 24, 33, 0.88) !important;
+  border: 1px solid rgba(0, 184, 225, 0.4) !important;
+  color: #9cc8d5 !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-container .tab-button:first-child {
+  border-radius: 4px 0 0 4px !important;
+}
+
+.dashboard-container .tab-button:last-child {
+  border-radius: 0 4px 4px 0 !important;
+}
+
+.dashboard-container .tab-button.active,
+.dashboard-container .tab-button:hover {
+  color: #effcff !important;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34)) !important;
+  border-color: #26d5ff !important;
+  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18) !important;
+}
+
+.dashboard-container .kpi-value,
+.dashboard-container .panel-title {
+  color: #ffd91a !important;
+}
+
+.dashboard-container .data-panel .panel-title {
+  color: #f4fdff !important;
+}
+
+.dashboard-container .kpi-title,
+.dashboard-container .panel-note,
+.dashboard-container .unit-label {
+  color: #a9c9d4 !important;
+}
+
+.dashboard-container .data-panel table th,
+.dashboard-container .data-panel table td {
+  border-color: rgba(0, 154, 197, 0.16) !important;
+}
+
+.dashboard-container .data-panel table thead th {
+  background: rgba(0, 143, 184, 0.17) !important;
+  color: #75dff7 !important;
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:nth-child(odd) {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:hover {
+  background: rgba(0, 169, 215, 0.13) !important;
+}
+
+.dashboard-container .data-panel table tbody td {
+  color: #cde7ee !important;
+  background: rgba(5, 27, 37, 0.72) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:nth-child(odd) td {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .success-text,
+.dashboard-container .rate-value.success,
+.dashboard-container .text-green {
+  color: #4ee6a6 !important;
+}
+
+.dashboard-container .error-text,
+.dashboard-container .rate-value.error,
+.dashboard-container .text-red {
+  color: #ff5f87 !important;
+}
+
+.dashboard-container .dashboard-row,
+.dashboard-container .main-content,
+.dashboard-container .kpi-grid-container,
+.dashboard-container .column,
+.dashboard-container .column-wrapper {
+  gap: 16px !important;
+}
+
+
+.dashboard-container .kpi-card,
+.dashboard-container .data-item {
+  color: #dff8ff !important;
+  background: rgba(0, 143, 184, 0.12) !important;
+  background-color: rgba(0, 143, 184, 0.12) !important;
+  background-image: none !important;
+  border: 1px solid rgba(0, 191, 235, 0.28) !important;
+  border-left: 1px solid rgba(0, 191, 235, 0.28) !important;
+  border-radius: 3px !important;
+  box-shadow: none !important;
+}
+
+.dashboard-container .data-item:hover {
+  background: rgba(0, 169, 215, 0.16) !important;
+  border-color: rgba(0, 191, 235, 0.5) !important;
+  box-shadow: inset 0 0 14px rgba(0, 154, 201, 0.12) !important;
+}
+
+.dashboard-container .data-item-label {
+  color: #a9c9d4 !important;
+}
+
+.dashboard-container .data-item-value {
+  color: #f4fdff !important;
+  text-shadow: 0 0 10px rgba(31, 204, 255, 0.25) !important;
+}
+
+.dashboard-container .data-item-progress {
+  background: rgba(0, 126, 165, 0.2) !important;
+  border: 1px solid rgba(0, 181, 224, 0.26) !important;
+}
+
+.dashboard-container .progress-bar {
+  background: linear-gradient(90deg, #0aaad9, #35e4ff 72%, #ffd91a) !important;
+}
+
+.dashboard-container .dynamics-row {
+  background: rgba(5, 27, 37, 0.78) !important;
+  border: 1px solid rgba(0, 154, 197, 0.22) !important;
+  color: #a9c9d4 !important;
+}
+
+.dashboard-container .dynamics-name {
+  color: #f4fdff !important;
+}
+
+.dashboard-container .dynamics-time {
+  color: #35e4ff !important;
+}
+
+.dashboard-container .dynamics-arrow {
+  color: #4ee6a6 !important;
+}
+
+.dashboard-container .big-number {
+  color: #ffd91a !important;
+  text-shadow: 0 0 18px rgba(255, 217, 26, 0.36) !important;
+}
+
+.dashboard-container .big-unit {
+  color: #a7cad5 !important;
+}
+
+.dashboard-container .training-item {
+  background: #082532 !important;
+  background-color: #082532 !important;
+  background-image:
+    linear-gradient(180deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
+    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%) !important;
+  border: 1px solid rgba(0, 190, 235, 0.56) !important;
+  border-radius: 3px !important;
+}
+
+.dashboard-container .training-label,
+.dashboard-container .training-change {
+  color: #a9c9d4 !important;
+}
+
+.dashboard-container .schedule-table thead tr {
+  background: rgba(0, 143, 184, 0.17) !important;
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+}
+
+.dashboard-container .schedule-table thead th {
+  color: #75dff7 !important;
+}
+
+.dashboard-container .schedule-table tbody td {
+  color: #cde7ee !important;
+}
+
+.dashboard-container .schedule-table tbody tr {
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
+}
+
+.dashboard-container .schedule-table tbody tr:nth-child(odd) {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .schedule-table tbody tr:hover {
+  background: rgba(0, 169, 215, 0.13) !important;
+}
+
+.dashboard-container .dashboard-row {
+  gap: 16px !important;
+}
+
 </style>

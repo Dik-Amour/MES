@@ -9,7 +9,7 @@ import type { EChartsOption } from 'echarts'
 /* =========================
    页面静态数据
    ========================= */
-/** 成本管理大屏静态数据 */
+/** 成本可视化大屏静态数据 */
 
 interface KpiIconPath {
   d: string
@@ -88,11 +88,11 @@ const kpiCards: KpiCard[] = [
 const monthlyCompletionData = {
   categories: ['原材料', '辅助材料', '燃动力费', '设备维修', '其他费用'],
   items: [
-    { value: 16.8, colors: ['#4472c4', '#4472c4'] },
-    { value: 3.2, colors: ['#70ad47', '#3ba8a0'] },
-    { value: 2.8, colors: ['#ffc000', '#D69D06'] },
-    { value: 1.7, colors: ['#3ba8a0', '#7250AA'] },
-    { value: 4.0, colors: ['#ffc000', '#DF7D2D'] }
+    { value: 16.8, colors: ['#20cfff', '#20cfff'] },
+    { value: 3.2, colors: ['#4ee6a6', '#3ba8a0'] },
+    { value: 2.8, colors: ['#ffd52a', '#D69D06'] },
+    { value: 1.7, colors: ['#9b8cff', '#7250AA'] },
+    { value: 4.0, colors: ['#ffd52a', '#DF7D2D'] }
   ]
 }
 
@@ -124,21 +124,21 @@ const yearlyTrendData = {
 
 /** 成本占比分析：科目成本 */
 const subjectCostData: PieDatum[] = [
-  { name: '原材料', value: 1680, color: '#4472c4' },
-  { name: '辅助材料', value: 320, color: '#70ad47' },
-  { name: '燃动力费', value: 280, color: '#ffc000' },
-  { name: '设备维修', value: 170, color: '#3ba8a0' },
-  { name: '废品损失', value: 45, color: '#ffc000' },
-  { name: '工具工装', value: 85, color: '#3ba8a0' },
-  { name: '低值易耗', value: 35, color: '#3ba8a0' }
+  { name: '原材料', value: 1680, color: '#20cfff' },
+  { name: '辅助材料', value: 320, color: '#4ee6a6' },
+  { name: '燃动力费', value: 280, color: '#ffd52a' },
+  { name: '设备维修', value: 170, color: '#9b8cff' },
+  { name: '废品损失', value: 45, color: '#ff4f8b' },
+  { name: '工具工装', value: 85, color: '#35e4ff' },
+  { name: '低值易耗', value: 35, color: '#4ee6a6' }
 ]
 
 /** 成本占比分析：工序成本 */
 const processCostData: PieDatum[] = [
-  { name: '熔炼', value: 45, color: '#3ba8a0' },
-  { name: '造型', value: 35, color: '#FF6B6B' },
-  { name: '清理', value: 15, color: '#ffc000' },
-  { name: '制芯', value: 5, color: '#70ad47' }
+  { name: '熔炼', value: 45, color: '#20cfff' },
+  { name: '造型', value: 35, color: '#4ee6a6' },
+  { name: '清理', value: 15, color: '#ffd52a' },
+  { name: '制芯', value: 5, color: '#9b8cff' }
 ]
 
 /** 能耗成本与生产负荷分析散点 */
@@ -166,33 +166,33 @@ const energyLoadData: [number, number][] = [
 ]
 
 /* =========================
-   ECharts 配置
+   ECharts 配置（深色底，对齐生产可视化大屏）
    ========================= */
 const tooltipBase = {
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderColor: 'rgba(68, 114, 196, 0.3)',
-  textStyle: { color: '#333' }
+  backgroundColor: 'rgba(6, 24, 33, 0.94)',
+  borderColor: 'rgba(0, 191, 235, 0.48)',
+  textStyle: { color: '#dff8ff' }
 }
 
 const categoryAxis = {
   type: 'category' as const,
-  axisLine: { lineStyle: { color: '#cbd5e1' } },
-  axisLabel: { color: '#666', fontSize: 10 },
+  axisLine: { lineStyle: { color: 'rgba(0, 191, 235, 0.35)' } },
+  axisLabel: { color: '#a9c9d4', fontSize: 10 },
   axisTick: { show: false }
 }
 
 const valueAxis = {
   type: 'value' as const,
-  nameTextStyle: { color: '#666', fontSize: 10 },
+  nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
   axisLine: { show: false },
   axisTick: { show: false },
   splitLine: {
     lineStyle: {
       type: 'dashed' as const,
-      color: 'rgba(148, 163, 184, 0.3)'
+      color: 'rgba(0, 154, 197, 0.28)'
     }
   },
-  axisLabel: { color: '#666', fontSize: 10 }
+  axisLabel: { color: '#a9c9d4', fontSize: 10 }
 }
 
 /** 本月成本概况 */
@@ -213,7 +213,7 @@ function createMonthlyCompletionOption(): EChartsOption {
     xAxis: {
       ...categoryAxis,
       data: monthlyCompletionData.categories,
-      axisLabel: { color: '#666', fontSize: 10, rotate: 15 }
+      axisLabel: { color: '#a9c9d4', fontSize: 10, rotate: 15 }
     },
     yAxis: {
       ...valueAxis,
@@ -244,7 +244,7 @@ function createMonthlyCompletionOption(): EChartsOption {
         label: {
           show: true,
           position: 'top',
-          color: '#333',
+          color: '#dff8ff',
           fontSize: 10
         }
       }
@@ -263,7 +263,7 @@ function createMonthlyTrendOption(): EChartsOption {
     },
     legend: {
       data: [`${currentYear}年`, `${lastYear}年`],
-      textStyle: { color: '#666', fontSize: 12 },
+      textStyle: { color: '#a9c9d4', fontSize: 12 },
       top: 5,
       itemWidth: 14,
       itemHeight: 14
@@ -294,7 +294,7 @@ function createMonthlyTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#4472c4' },
+              { offset: 0, color: '#20cfff' },
               { offset: 1, color: '#0284c7' }
             ]
           },
@@ -303,7 +303,7 @@ function createMonthlyTrendOption(): EChartsOption {
         markLine: {
           silent: true,
           lineStyle: {
-            color: '#ffc000',
+            color: '#ffd52a',
             width: 2,
             type: 'solid'
           },
@@ -311,9 +311,9 @@ function createMonthlyTrendOption(): EChartsOption {
             show: true,
             position: 'end',
             formatter: `${currentYear}${monthlyTrendData.averageLabel}`,
-            color: '#ffc000',
+            color: '#ffd52a',
             fontSize: 11,
-            backgroundColor: 'rgba(246, 189, 22, 0.2)',
+            backgroundColor: 'rgba(255, 213, 42, 0.16)',
             padding: [4, 8],
             borderRadius: 4
           },
@@ -333,7 +333,7 @@ function createMonthlyTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#70ad47' },
+              { offset: 0, color: '#4ee6a6' },
               { offset: 1, color: '#3ba8a0' }
             ]
           },
@@ -349,7 +349,7 @@ function createYearlyTrendOption(): EChartsOption {
   const dualAxis = {
     ...valueAxis,
     name: '元/吨',
-    nameTextStyle: { color: '#666', fontSize: 11 }
+    nameTextStyle: { color: '#a9c9d4', fontSize: 11 }
   }
   return {
     tooltip: {
@@ -358,7 +358,7 @@ function createYearlyTrendOption(): EChartsOption {
     },
     legend: {
       data: ['单吨制造成本', '单吨可控成本'],
-      textStyle: { color: '#666', fontSize: 11 },
+      textStyle: { color: '#a9c9d4', fontSize: 11 },
       top: 0
     },
     grid: {
@@ -371,7 +371,7 @@ function createYearlyTrendOption(): EChartsOption {
     xAxis: {
       ...categoryAxis,
       data: yearlyTrendData.years,
-      axisLabel: { color: '#666', fontSize: 11 }
+      axisLabel: { color: '#a9c9d4', fontSize: 11 }
     },
     yAxis: [
       {
@@ -399,8 +399,8 @@ function createYearlyTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#4472c4' },
-              { offset: 1, color: '#4472c4' }
+              { offset: 0, color: '#20cfff' },
+              { offset: 1, color: '#20cfff' }
             ]
           },
           borderRadius: [4, 4, 0, 0]
@@ -413,12 +413,12 @@ function createYearlyTrendOption(): EChartsOption {
         data: yearlyTrendData.controllable,
         lineStyle: {
           width: 3,
-          color: '#70ad47'
+          color: '#4ee6a6'
         },
         itemStyle: {
-          color: '#70ad47',
+          color: '#4ee6a6',
           borderWidth: 2,
-          borderColor: '#fff'
+          borderColor: '#061821'
         },
         smooth: true
       }
@@ -439,7 +439,7 @@ function createCostPieOption(data: PieDatum[], mode: 'subject' | 'process'): ECh
       orient: 'vertical',
       right: '5%',
       top: 'center',
-      textStyle: { color: '#666', fontSize: 11 },
+      textStyle: { color: '#a9c9d4', fontSize: 11 },
       itemWidth: 12,
       itemHeight: 12,
       itemGap: 8,
@@ -498,10 +498,10 @@ function createEnergyLoadOption(): EChartsOption {
       name: '生产负荷（%）',
       nameLocation: 'middle',
       nameGap: 25,
-      nameTextStyle: { color: '#666', fontSize: 12 },
-      axisLine: { lineStyle: { color: '#cbd5e1' } },
+      nameTextStyle: { color: '#a9c9d4', fontSize: 12 },
+      axisLine: { lineStyle: { color: 'rgba(0, 191, 235, 0.35)' } },
       axisLabel: {
-        color: '#666',
+        color: '#a9c9d4',
         fontSize: 10,
         formatter: '{value}%'
       },
@@ -509,7 +509,7 @@ function createEnergyLoadOption(): EChartsOption {
       splitLine: {
         lineStyle: {
           type: 'dashed',
-          color: 'rgba(148, 163, 184, 0.3)'
+          color: 'rgba(0, 154, 197, 0.28)'
         }
       },
       min: 0,
@@ -520,14 +520,14 @@ function createEnergyLoadOption(): EChartsOption {
       name: '能耗成本（元）',
       nameLocation: 'middle',
       nameGap: 40,
-      nameTextStyle: { color: '#666', fontSize: 12 },
+      nameTextStyle: { color: '#a9c9d4', fontSize: 12 },
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { color: '#666', fontSize: 10 },
+      axisLabel: { color: '#a9c9d4', fontSize: 10 },
       splitLine: {
         lineStyle: {
           type: 'dashed',
-          color: 'rgba(148, 163, 184, 0.3)'
+          color: 'rgba(0, 154, 197, 0.28)'
         }
       }
     },
@@ -540,14 +540,14 @@ function createEnergyLoadOption(): EChartsOption {
         itemStyle: {
           color: (params: any) => {
             const load = params.value[0] as number
-            if (load >= 100) return '#FF6B6B'
-            if (load >= 85) return '#ffc000'
-            if (load >= 70) return '#70ad47'
-            return '#4472c4'
+            if (load >= 100) return '#ff5f87'
+            if (load >= 85) return '#ffd52a'
+            if (load >= 70) return '#4ee6a6'
+            return '#20cfff'
           },
-          borderColor: 'rgba(255, 255, 255, 0.3)',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
           borderWidth: 0.5,
-          opacity: 0.8
+          opacity: 0.85
         },
         emphasis: {
           itemStyle: {
@@ -581,8 +581,9 @@ const processOption = createCostPieOption(processCostData, 'process')
 <template>
   <div class="dashboard-container">
     <DashboardHeader
-      title="成本管理大屏"
+      title="成本可视化大屏"
       weather="潍坊 18℃ 晴"
+      variant="fui"
     />
 
     <!-- 主要指标展示 -->
@@ -638,9 +639,7 @@ const processOption = createCostPieOption(processCostData, 'process')
             <h3 class="panel-title">本月成本概况</h3>
           </div>
           <div class="panel-content">
-            <div style="margin-bottom: 8px">
-              <span style="color: #666; font-size: 12px">单位：万元</span>
-            </div>
+            <div class="unit-hint">单位：万元</div>
             <div class="chart-container">
               <EChart :option="monthlyCompletionOption" />
             </div>
@@ -711,9 +710,7 @@ const processOption = createCostPieOption(processCostData, 'process')
             <h3 class="panel-title">月成本趋势</h3>
           </div>
           <div class="panel-content">
-            <div style="margin-bottom: 8px">
-              <span style="color: #666; font-size: 12px">单位：元</span>
-            </div>
+            <div class="unit-hint">单位：元</div>
             <div class="chart-container">
               <EChart :option="monthlyTrendOption" />
             </div>
@@ -820,38 +817,55 @@ const processOption = createCostPieOption(processCostData, 'process')
 <style scoped>
 .dashboard-container {
   width: 100%;
-  height: 100%;
-  padding: 16px;
+  min-height: calc(100vh - 132px);
+  padding: 10px;
+  box-sizing: border-box;
   position: relative;
   overflow-y: auto;
+  color: #dff8ff;
+  background-color: #041019;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px);
+  background-size: auto, auto, 32px 32px, 32px 32px;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46);
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
 }
 
-/* 顶部标题栏样式 */
-.title-decoration-left,
 /* KPI 指标区域样式 */
 .kpi-section {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .kpi-grid-container {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
+/* KPI 卡片：沿用生产可视化大屏指标卡 */
 .kpi-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.85) 100%);
-  border: 1px solid rgba(68, 114, 196, 0.4);
-  border-radius: 8px;
-  padding: 16px;
-  height: 100px;
+  position: relative;
+  min-height: 100px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  position: relative;
+  gap: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  color: #dff8ff;
+  background-color: #082532;
+  background-image:
+    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
+    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%);
+  border: 1px solid rgba(0, 190, 235, 0.56);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 22px rgba(0, 154, 201, 0.09),
+    0 0 10px rgba(0, 0, 0, 0.24);
+  box-sizing: border-box;
 }
 
 .kpi-card::before {
@@ -859,185 +873,256 @@ const processOption = createCostPieOption(processCostData, 'process')
   position: absolute;
   top: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-  z-index: 10;
+  width: 58%;
+  height: 2px;
+  background: linear-gradient(90deg, #26d9ff, transparent);
+  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
 }
 
 .kpi-card::after {
   content: '';
   position: absolute;
-  top: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-  z-index: 10;
+  bottom: 0;
+  width: 34%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
 }
 
 .corner-bl {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
+  width: 14px;
+  height: 14px;
   z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
 }
 
 .corner-br {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
+  width: 14px;
+  height: 14px;
   z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
 }
 
 .kpi-icon {
-  width: 48px;
-  height: 48px;
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(68, 114, 196, 0.2) 0%, rgba(68, 114, 196, 0.2) 100%);
-  border: 2px solid rgba(68, 114, 196, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4472c4;
-  flex-shrink: 0;
+  color: #40e3ff;
+  background: rgba(0, 176, 220, 0.14);
+  border: 1px solid rgba(35, 211, 255, 0.48);
+  box-shadow: inset 0 0 16px rgba(35, 211, 255, 0.16);
 }
 
 .kpi-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .kpi-content {
+  position: relative;
+  z-index: 1;
   flex: 1;
+  min-width: 0;
 }
 
 .kpi-title {
-  color: #666;
+  color: #a9c9d4;
   font-size: 12px;
   margin-bottom: 6px;
   line-height: 1.2;
+  letter-spacing: 1px;
 }
 
 .kpi-value {
-  color: #4472c4;
-  font-size: 24px;
-  font-weight: bold;
+  color: #ffd91a;
+  font-size: 22px;
+  font-weight: 800;
   font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  text-shadow: 0 0 10px rgba(68, 114, 196, 0.5);
+  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36);
   line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .kpi-unit {
-  font-size: 14px;
+  color: #a7cad5;
+  font-size: 13px;
   margin-left: 2px;
 }
 
 /* 主内容区域 */
 .main-content {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  min-height: calc(100vh - 320px);
 }
 
 .column {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
-/* 数据面板样式 */
+/* 数据面板样式：沿用生产可视化大屏 */
 .data-panel {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 100%);
-  border: 1px solid rgba(68, 114, 196, 0.4);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  color: #dff8ff;
+  background-color: #061821;
+  background-image:
+    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
+    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%);
+  border: 1px solid rgba(0, 191, 235, 0.48);
+  border-radius: 2px;
+  padding: 12px 14px;
+  box-shadow:
+    inset 0 0 24px rgba(0, 157, 205, 0.055),
+    0 0 12px rgba(0, 0, 0, 0.24);
   display: flex;
   flex-direction: column;
   position: relative;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
   height: 360px;
 }
 
-.data-panel .corner-tl {
+.data-panel::before {
+  content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
+  left: 14px;
+  width: 74px;
+  height: 2px;
+  background: #18d2ff;
+  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9);
+}
+
+.data-panel::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  bottom: 14px;
+  width: 3px;
+  height: 42px;
+  background: linear-gradient(180deg, transparent, #18d2ff, transparent);
+  opacity: 0.75;
+}
+
+.data-panel .corner-tl,
+.data-panel .corner-tr,
+.data-panel .corner-bl,
+.data-panel .corner-br {
+  position: absolute;
+  width: 14px;
+  height: 14px;
   z-index: 10;
+  border-color: #1bd5ff;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
+}
+
+.data-panel .corner-tl {
+  top: 0;
+  left: 0;
+  border-top: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .data-panel .corner-tr {
-  position: absolute;
   top: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-  z-index: 10;
+  border-top: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 .data-panel .corner-bl {
-  position: absolute;
   bottom: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-left: 2px solid #4472c4;
-  z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-left: 2px solid #1bd5ff;
 }
 
 .data-panel .corner-br {
-  position: absolute;
   bottom: 0;
   right: 0;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid #4472c4;
-  border-right: 2px solid #4472c4;
-  z-index: 10;
+  border-bottom: 2px solid #1bd5ff;
+  border-right: 2px solid #1bd5ff;
 }
 
 .panel-header {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.2);
+  width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
+  min-height: 34px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(0, 185, 226, 0.34);
 }
 
 .panel-icon {
-  width: 32px;
-  height: 32px;
   display: flex;
+  width: 28px;
+  height: 28px;
+  margin-right: 9px;
   align-items: center;
   justify-content: center;
-  background: rgba(68, 114, 196, 0.2);
-  border-radius: 6px;
-  margin-right: 12px;
-  color: #4472c4;
+  flex-shrink: 0;
+  color: #40e3ff;
+  background: rgba(0, 176, 220, 0.14);
+  border: 1px solid rgba(35, 211, 255, 0.48);
+  border-radius: 2px;
+  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
+}
+
+.panel-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .panel-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
+  display: inline-block;
   margin: 0;
+  padding: 0;
+  color: #f4fdff;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.panel-title::after {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin-left: 10px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, #17cfff, transparent);
+}
+
+.panel-header:has(.tab-buttons) .panel-title::after {
+  display: none;
 }
 
 .panel-content {
@@ -1047,9 +1132,16 @@ const processOption = createCostPieOption(processCostData, 'process')
   min-height: 0;
 }
 
+.panel-content .unit-hint {
+  margin-bottom: 8px;
+  color: #a9c9d4;
+  font-size: 12px;
+}
+
 .chart-container {
   flex: 1;
   min-height: 0;
+  position: relative;
 }
 
 /* 表格样式 */
@@ -1057,7 +1149,7 @@ const processOption = createCostPieOption(processCostData, 'process')
   flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(68, 114, 196, 0.3) transparent;
+  scrollbar-color: rgba(26, 202, 242, 0.5) transparent;
   min-height: 0;
 }
 
@@ -1067,12 +1159,12 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .equipment-table table thead tr {
-  background: transparent;
-  border-bottom: 1px dashed rgba(153, 153, 153, 0.3);
+  background: rgba(0, 143, 184, 0.17);
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44);
 }
 
 .equipment-table table thead th {
-  color: #666;
+  color: #75dff7;
   font-weight: 600;
   font-size: 13px;
   padding: 12px 8px;
@@ -1080,42 +1172,51 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .equipment-table table tbody tr {
-  border-bottom: 1px dashed rgba(153, 153, 153, 0.2);
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16);
 }
 
-.equipment-table table tbody tr:hover {
-  background: rgba(68, 114, 196, 0.05) !important;
+.equipment-table table tbody tr:nth-child(odd) td {
+  background: rgba(7, 36, 48, 0.78);
+}
+
+.equipment-table table tbody tr:hover td {
+  background: rgba(0, 169, 215, 0.13);
 }
 
 .equipment-table table tbody td {
-  color: #333;
+  color: #cde7ee;
   font-size: 12px;
   padding: 12px 8px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .text-green {
-  color: #70ad47;
+  color: #4ee6a6;
+  font-weight: 600;
 }
 
 .text-red {
-  color: #ff4d4f;
+  color: #ff5f87;
+  font-weight: 600;
 }
 
 /* 切换按钮样式 */
 .tab-buttons {
   display: flex;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .tab-button {
-  background: rgba(242, 242, 242, 0.5);
-  border: 1px solid rgba(68, 114, 196, 0.3);
-  color: #666;
+  background: rgba(4, 24, 33, 0.88);
+  border: 1px solid rgba(0, 184, 225, 0.4);
+  color: #9cc8d5;
   font-size: 12px;
   padding: 6px 12px;
   cursor: pointer;
   transition: all 0.3s;
+  white-space: nowrap;
 }
 
 .tab-button:first-child {
@@ -1127,24 +1228,417 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .tab-button.active {
-  background: rgba(112, 173, 71, 0.2);
-  border-color: #70ad47;
-  color: #70ad47;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34));
+  border-color: #26d5ff;
+  color: #effcff;
+  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18);
 }
 
 .tab-button:hover {
-  color: #70ad47;
+  color: #effcff;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34));
+  border-color: #26d5ff;
+}
+
+.equipment-table::-webkit-scrollbar {
+  width: 4px;
+}
+
+.equipment-table::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.equipment-table::-webkit-scrollbar-thumb {
+  background: rgba(26, 202, 242, 0.5);
+  border-radius: 2px;
 }
 
 @media (max-width: 1400px) {
   .kpi-grid-container {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
   }
 
   .main-content {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
 }
+
+
+/* =========================================================
+   强制覆盖全局 style.css 浅色 !important（对齐生产可视化深色）
+   ========================================================= */
+.dashboard-container {
+  width: 100% !important;
+  height: auto !important;
+  min-height: calc(100vh - 132px) !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  color: #dff8ff !important;
+  background: #041019 !important;
+  background-color: #041019 !important;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px) !important;
+  background-size: auto, auto, 32px 32px, 32px 32px !important;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46) !important;
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif !important;
+}
+
+.dashboard-container .data-panel {
+  color: #dff8ff !important;
+  background: #061821 !important;
+  background-color: #061821 !important;
+  background-image:
+    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
+    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%) !important;
+  border: 1px solid rgba(0, 191, 235, 0.48) !important;
+  border-radius: 2px !important;
+  padding: 12px 14px !important;
+  box-shadow:
+    inset 0 0 24px rgba(0, 157, 205, 0.055),
+    0 0 12px rgba(0, 0, 0, 0.24) !important;
+}
+
+.dashboard-container .data-panel::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 14px !important;
+  width: 74px !important;
+  height: 2px !important;
+  background: #18d2ff !important;
+  box-shadow: 0 0 8px rgba(24, 210, 255, 0.9) !important;
+  z-index: 2 !important;
+}
+
+.dashboard-container .data-panel::after {
+  content: '' !important;
+  position: absolute !important;
+  right: -1px !important;
+  bottom: 14px !important;
+  width: 3px !important;
+  height: 42px !important;
+  background: linear-gradient(180deg, transparent, #18d2ff, transparent) !important;
+  opacity: 0.75 !important;
+  z-index: 2 !important;
+}
+
+.dashboard-container .data-panel > .panel-header {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  min-height: 34px !important;
+  margin-bottom: 10px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px dashed rgba(0, 185, 226, 0.34) !important;
+}
+
+.dashboard-container .data-panel .panel-icon,
+.dashboard-container .kpi-card .kpi-icon {
+  display: flex !important;
+  width: 28px !important;
+  height: 28px !important;
+  margin-right: 9px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: #40e3ff !important;
+  background: rgba(0, 176, 220, 0.14) !important;
+  border: 1px solid rgba(35, 211, 255, 0.48) !important;
+  border-radius: 2px !important;
+  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12) !important;
+}
+
+.dashboard-container .data-panel .panel-title {
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #f4fdff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25) !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-container .data-panel .panel-title::after {
+  content: '' !important;
+  display: inline-block !important;
+  width: 28px !important;
+  height: 1px !important;
+  margin-left: 10px !important;
+  vertical-align: middle !important;
+  background: linear-gradient(90deg, #17cfff, transparent) !important;
+}
+
+.dashboard-container .data-panel .panel-header:has(.tab-buttons) .panel-title::after {
+  display: none !important;
+}
+
+.dashboard-container .data-panel .corner-tl,
+.dashboard-container .data-panel .corner-tr,
+.dashboard-container .data-panel .corner-bl,
+.dashboard-container .data-panel .corner-br,
+.dashboard-container .kpi-card .corner-bl,
+.dashboard-container .kpi-card .corner-br {
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  z-index: 10 !important;
+  border-color: #1bd5ff !important;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75)) !important;
+}
+
+.dashboard-container .data-panel .corner-tl,
+.dashboard-container .kpi-card .corner-tl {
+  top: 0 !important;
+  left: 0 !important;
+  border-top: 2px solid #1bd5ff !important;
+  border-left: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .data-panel .corner-tr,
+.dashboard-container .kpi-card .corner-tr {
+  top: 0 !important;
+  right: 0 !important;
+  border-top: 2px solid #1bd5ff !important;
+  border-right: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .data-panel .corner-bl,
+.dashboard-container .kpi-card .corner-bl {
+  bottom: 0 !important;
+  left: 0 !important;
+  border-bottom: 2px solid #1bd5ff !important;
+  border-left: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .data-panel .corner-br,
+.dashboard-container .kpi-card .corner-br {
+  bottom: 0 !important;
+  right: 0 !important;
+  border-bottom: 2px solid #1bd5ff !important;
+  border-right: 2px solid #1bd5ff !important;
+}
+
+.dashboard-container .tab-buttons {
+  display: flex !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.dashboard-container .tab-button {
+  background: rgba(4, 24, 33, 0.88) !important;
+  border: 1px solid rgba(0, 184, 225, 0.4) !important;
+  color: #9cc8d5 !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+.dashboard-container .tab-button:first-child {
+  border-radius: 4px 0 0 4px !important;
+}
+
+.dashboard-container .tab-button:last-child {
+  border-radius: 0 4px 4px 0 !important;
+}
+
+.dashboard-container .tab-button.active,
+.dashboard-container .tab-button:hover {
+  color: #effcff !important;
+  background: linear-gradient(180deg, rgba(0, 177, 220, 0.46), rgba(0, 101, 135, 0.34)) !important;
+  border-color: #26d5ff !important;
+  box-shadow: inset 0 0 10px rgba(38, 213, 255, 0.18) !important;
+}
+
+.dashboard-container .kpi-value,
+.dashboard-container .panel-title {
+  color: #ffd91a !important;
+}
+
+.dashboard-container .data-panel .panel-title {
+  color: #f4fdff !important;
+}
+
+.dashboard-container .kpi-title,
+.dashboard-container .panel-note,
+.dashboard-container .unit-label {
+  color: #a9c9d4 !important;
+}
+
+.dashboard-container .data-panel table th,
+.dashboard-container .data-panel table td {
+  border-color: rgba(0, 154, 197, 0.16) !important;
+}
+
+.dashboard-container .data-panel table thead th {
+  background: rgba(0, 143, 184, 0.17) !important;
+  color: #75dff7 !important;
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:nth-child(odd) {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:hover {
+  background: rgba(0, 169, 215, 0.13) !important;
+}
+
+.dashboard-container .data-panel table tbody td {
+  color: #cde7ee !important;
+  background: rgba(5, 27, 37, 0.72) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:nth-child(odd) td {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .success-text,
+.dashboard-container .rate-value.success,
+.dashboard-container .text-green {
+  color: #4ee6a6 !important;
+}
+
+.dashboard-container .error-text,
+.dashboard-container .rate-value.error,
+.dashboard-container .text-red {
+  color: #ff5f87 !important;
+}
+
+.dashboard-container .dashboard-row,
+.dashboard-container .main-content,
+.dashboard-container .kpi-grid-container,
+.dashboard-container .column,
+.dashboard-container .column-wrapper {
+  gap: 16px !important;
+}
+
+
+.dashboard-container .kpi-card {
+  position: relative !important;
+  min-height: 100px !important;
+  padding: 12px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+  color: #dff8ff !important;
+  background: #082532 !important;
+  background-color: #082532 !important;
+  background-image:
+    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
+    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%) !important;
+  border: 1px solid rgba(0, 190, 235, 0.56) !important;
+  border-left: 1px solid rgba(0, 190, 235, 0.56) !important;
+  border-radius: 3px !important;
+  box-shadow:
+    inset 0 0 22px rgba(0, 154, 201, 0.09),
+    0 0 10px rgba(0, 0, 0, 0.24) !important;
+}
+
+.dashboard-container .kpi-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 58% !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, #26d9ff, transparent) !important;
+  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82) !important;
+  z-index: 2 !important;
+}
+
+.dashboard-container .kpi-card::after {
+  content: '' !important;
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 34% !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86)) !important;
+  z-index: 2 !important;
+}
+
+.dashboard-container .kpi-icon {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px !important;
+  border-radius: 50% !important;
+  color: #40e3ff !important;
+  background: rgba(0, 176, 220, 0.14) !important;
+  border: 1px solid rgba(35, 211, 255, 0.48) !important;
+  box-shadow: inset 0 0 16px rgba(35, 211, 255, 0.16) !important;
+}
+
+.dashboard-container .kpi-content {
+  position: relative !important;
+  z-index: 1 !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.dashboard-container .kpi-title {
+  color: #a9c9d4 !important;
+  font-size: 12px !important;
+  margin-bottom: 6px !important;
+  letter-spacing: 1px !important;
+}
+
+.dashboard-container .kpi-value {
+  color: #ffd91a !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36) !important;
+}
+
+.dashboard-container .kpi-unit {
+  color: #a7cad5 !important;
+}
+
+.dashboard-container .unit-hint {
+  color: #a9c9d4 !important;
+}
+
+.dashboard-container .equipment-table table thead tr {
+  background: rgba(0, 143, 184, 0.17) !important;
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+}
+
+.dashboard-container .equipment-table table thead th {
+  background: rgba(0, 143, 184, 0.17) !important;
+  color: #75dff7 !important;
+}
+
+.dashboard-container .equipment-table table tbody td {
+  background: rgba(5, 27, 37, 0.72) !important;
+  color: #cde7ee !important;
+}
+
+.dashboard-container .equipment-table table tbody tr:nth-child(odd) td {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .equipment-table table tbody tr:hover td {
+  background: rgba(0, 169, 215, 0.13) !important;
+}
+
+.dashboard-container .main-content {
+  gap: 16px !important;
+}
+
 </style>
