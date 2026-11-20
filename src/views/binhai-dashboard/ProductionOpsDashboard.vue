@@ -236,8 +236,22 @@ function createOutputBarOption(data: PieDatum[]): EChartsOption {
 
 interface InboundDailyPoint {
   label: string
+  /** 完整日期 YYYY-MM-DD，用于弹窗标题与明细 */
+  fullDate: string
   value: number
   isToday: boolean
+}
+
+/** 入库详情行 */
+interface InboundDetailRow {
+  date: string
+  orderNo: string
+  blankCode: string
+  blankName: string
+  series: string
+  warehouse: string
+  qty: number
+  customer: string
 }
 
 /**
@@ -291,7 +305,8 @@ function createInboundDailyOption(points: InboundDailyPoint[]): EChartsOption {
           color: '#a9c9d4',
           fontSize: 10,
           formatter: '{c}'
-        }
+        },
+        cursor: 'pointer'
       }
     ]
   } as EChartsOption
@@ -639,6 +654,7 @@ const inboundDailyPoints = computed<InboundDailyPoint[]>(() => {
     const date = inboundRangeEnd.value.subtract(offset, 'day')
     points.push({
       label: date.format('MM-DD'),
+      fullDate: date.format('YYYY-MM-DD'),
       value: mockDailyInbound(date),
       isToday: date.isSame(todayStart, 'day')
     })
@@ -659,6 +675,71 @@ const canShiftInboundRangeNext = computed(() => inboundRangeEnd.value.isBefore(t
 const shiftInboundRange = (delta: number) => {
   const next = inboundRangeEnd.value.add(delta * INBOUND_RANGE_DAYS, 'day')
   inboundRangeEnd.value = next.isAfter(todayStart, 'day') ? todayStart : next
+}
+
+/* =========================
+   入库详情弹窗（点击柱状图）
+   ========================= */
+const blankNames = [
+  '缸体毛坯',
+  '缸盖毛坯',
+  '曲轴毛坯',
+  '飞轮毛坯',
+  '油底壳毛坯',
+  '进气歧管毛坯'
+]
+const seriesNames = ['中速机', '博杜安', '重潍柴', '大机', 'M55']
+const warehouses = ['毛坯一库', '毛坯二库', '成品库', '中转库']
+const customers = ['潍柴动力', '玉柴机器', '玉柴机器', '全柴动力', '常柴股份']
+
+/** 按日期确定性生成当日入库明细 mock */
+function mockInboundDetails(dateStr: string): InboundDetailRow[] {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const seed = year * 10000 + month * 100 + day
+  const count = 8 + ((seed * 17) % 7)
+  const rows: InboundDetailRow[] = []
+  for (let i = 0; i < count; i++) {
+    const n = seed + i * 13
+    rows.push({
+      date: dateStr,
+      orderNo: `RK${dateStr.replace(/-/g, '')}${String(i + 1).padStart(3, '0')}`,
+      blankCode: `MP-${String(20240 + (n % 900)).padStart(5, '0')}`,
+      blankName: blankNames[n % blankNames.length],
+      series: seriesNames[n % seriesNames.length],
+      warehouse: warehouses[n % warehouses.length],
+      qty: 12 + ((n * 7) % 48),
+      customer: customers[n % customers.length]
+    })
+  }
+  return rows
+}
+
+const inboundDetailOpen = ref(false)
+const inboundDetailDate = ref('')
+const inboundDetailLabel = ref('')
+const inboundDetailRows = computed<InboundDetailRow[]>(() =>
+  inboundDetailDate.value ? mockInboundDetails(inboundDetailDate.value) : []
+)
+const inboundDetailTitle = computed(() =>
+  inboundDetailLabel.value ? `${inboundDetailLabel.value} 入库详情` : '入库详情'
+)
+
+function openInboundDetail(point: InboundDailyPoint) {
+  inboundDetailDate.value = point.fullDate
+  inboundDetailLabel.value = point.label
+  inboundDetailOpen.value = true
+}
+
+function closeInboundDetail() {
+  inboundDetailOpen.value = false
+}
+
+/** 入库概况柱状图点击 → 打开当日入库详情 */
+function handleInboundChartClick(payload: unknown) {
+  const params = payload as { dataIndex?: number } | null
+  if (!params || typeof params.dataIndex !== 'number') return
+  const point = inboundDailyPoints.value[params.dataIndex]
+  if (point) openInboundDetail(point)
 }
 
 /* 计划分析：近 7 天实际 / 计划浇筑箱数，按日期确定性生成，避免刷新跳变 */
@@ -842,7 +923,11 @@ const activeProductChart = computed(
               </div>
 
               <div class="inbound-range-chart">
-                <EChart :option="inboundDailyOption" height="100%" />
+                <EChart
+                  :option="inboundDailyOption"
+                  height="100%"
+                  @click="handleInboundChartClick"
+                />
               </div>
             </div>
           </div>
@@ -981,7 +1066,309 @@ const activeProductChart = computed(
         </div>
       </div>
     </div>
+
+    <!-- 入库详情大弹窗：点击入库概况柱状图打开 -->
+    <Teleport to="body">
+      <div
+        v-if="inboundDetailOpen"
+        class="inbound-modal-mask"
+        @click.self="closeInboundDetail"
+      >
+        <div class="inbound-modal" role="dialog" aria-modal="true" :aria-label="inboundDetailTitle">
+          <div class="inbound-modal-corner tl"></div>
+          <div class="inbound-modal-corner tr"></div>
+          <div class="inbound-modal-corner bl"></div>
+          <div class="inbound-modal-corner br"></div>
+
+          <button type="button" class="inbound-modal-close" aria-label="关闭" @click="closeInboundDetail">
+            ×
+          </button>
+
+          <div class="inbound-modal-header">
+            <h3 class="inbound-modal-title">{{ inboundDetailTitle }}</h3>
+          </div>
+
+          <div class="inbound-modal-body">
+            <div class="inbound-modal-meta">
+              <span>日期：{{ inboundDetailDate }}</span>
+              <span>共 {{ inboundDetailRows.length }} 条入库记录</span>
+            </div>
+
+            <div class="inbound-modal-table-wrap">
+              <table class="inbound-modal-table">
+                <thead>
+                  <tr>
+                    <th>序号</th>
+                    <th>日期</th>
+                    <th>单号</th>
+                    <th>毛坯件号</th>
+                    <th>毛坯名称</th>
+                    <th>产品系列</th>
+                    <th>仓库</th>
+                    <th>数量</th>
+                    <th>客户名称</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, index) in inboundDetailRows" :key="`${row.orderNo}-${index}`">
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ row.date }}</td>
+                    <td>{{ row.orderNo }}</td>
+                    <td>{{ row.blankCode }}</td>
+                    <td>{{ row.blankName }}</td>
+                    <td>{{ row.series }}</td>
+                    <td>{{ row.warehouse }}</td>
+                    <td class="num">{{ row.qty }}</td>
+                    <td>{{ row.customer }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <style scoped src="./dashboard-theme.css"></style>
+
+<style>
+/* 入库详情 FUI 大弹窗（Teleport 到 body，需全局样式） */
+.inbound-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  background: rgba(2, 12, 18, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.inbound-modal {
+  position: relative;
+  width: min(1200px, 96vw);
+  max-height: min(86vh, 820px);
+  display: flex;
+  flex-direction: column;
+  color: #dff8ff;
+  background:
+    linear-gradient(180deg, rgba(8, 48, 72, 0.96), rgba(4, 24, 36, 0.98)),
+    radial-gradient(ellipse at 50% 0%, rgba(0, 180, 230, 0.18), transparent 55%);
+  border: 1px solid rgba(0, 210, 255, 0.75);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px rgba(0, 120, 180, 0.25),
+    0 0 28px rgba(0, 190, 255, 0.28),
+    inset 0 0 40px rgba(0, 100, 150, 0.12);
+}
+
+.inbound-modal::before,
+.inbound-modal::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  pointer-events: none;
+}
+
+.inbound-modal::before {
+  top: 0;
+  background: linear-gradient(90deg, transparent, #18d2ff, transparent);
+  box-shadow: 0 0 10px rgba(24, 210, 255, 0.85);
+}
+
+.inbound-modal::after {
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(24, 210, 255, 0.55), transparent);
+}
+
+.inbound-modal-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.inbound-modal-corner.tl {
+  top: -1px;
+  left: -1px;
+  border-top: 3px solid #1bd5ff;
+  border-left: 3px solid #1bd5ff;
+  box-shadow: -2px -2px 8px rgba(27, 213, 255, 0.55);
+}
+
+.inbound-modal-corner.tr {
+  top: -1px;
+  right: -1px;
+  border-top: 3px solid #1bd5ff;
+  border-right: 3px solid #1bd5ff;
+  box-shadow: 2px -2px 8px rgba(27, 213, 255, 0.55);
+}
+
+.inbound-modal-corner.bl {
+  bottom: -1px;
+  left: -1px;
+  border-bottom: 3px solid #1bd5ff;
+  border-left: 3px solid #1bd5ff;
+  box-shadow: -2px 2px 8px rgba(27, 213, 255, 0.55);
+}
+
+.inbound-modal-corner.br {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 3px solid #1bd5ff;
+  border-right: 3px solid #1bd5ff;
+  box-shadow: 2px 2px 8px rgba(27, 213, 255, 0.55);
+}
+
+.inbound-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #9fd9ea;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
+.inbound-modal-close:hover {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(24, 210, 255, 0.9);
+}
+
+.inbound-modal-header {
+  flex-shrink: 0;
+  padding: 22px 48px 12px;
+  text-align: center;
+}
+
+.inbound-modal-title {
+  margin: 0;
+  display: inline-block;
+  padding-bottom: 10px;
+  color: #f4fdff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-shadow: 0 0 14px rgba(31, 204, 255, 0.35);
+}
+
+.inbound-modal-title::after {
+  content: '';
+  display: block;
+  width: 72px;
+  height: 3px;
+  margin: 10px auto 0;
+  background: #ffd91a;
+  box-shadow: 0 0 10px rgba(255, 217, 26, 0.75);
+}
+
+.inbound-modal-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 28px 28px;
+}
+
+.inbound-modal-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #a9c9d4;
+  font-size: 13px;
+}
+
+.inbound-modal-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid rgba(0, 190, 235, 0.28);
+  border-radius: 2px;
+}
+
+.inbound-modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.inbound-modal-table th,
+.inbound-modal-table td {
+  padding: 12px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.inbound-modal-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 160, 210, 0.45), rgba(0, 100, 150, 0.35));
+  color: #f4fdff;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0, 200, 240, 0.45);
+}
+
+.inbound-modal-table tbody td {
+  background: rgba(6, 40, 58, 0.72);
+  color: #dff8ff;
+  border-bottom: 1px solid rgba(0, 150, 190, 0.18);
+}
+
+.inbound-modal-table tbody tr:nth-child(odd) td {
+  background: rgba(10, 52, 74, 0.78);
+}
+
+.inbound-modal-table tbody tr:hover td {
+  background: rgba(0, 169, 215, 0.18);
+}
+
+.inbound-modal-table .num {
+  color: #ffd91a;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.inbound-modal-table-wrap::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.inbound-modal-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(26, 202, 242, 0.55);
+  border-radius: 3px;
+}
+
+.inbound-modal-table-wrap::-webkit-scrollbar-track {
+  background: rgba(0, 40, 60, 0.4);
+}
+
+@media (max-width: 900px) {
+  .inbound-modal-title {
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  .inbound-modal-table {
+    font-size: 12px;
+  }
+
+  .inbound-modal-table th,
+  .inbound-modal-table td {
+    padding: 8px 6px;
+  }
+}
+</style>
