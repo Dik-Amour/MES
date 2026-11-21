@@ -1,7 +1,7 @@
 <template>
   <div class="plant-virtual">
     <!-- 顶部导航 + 标题 -->
-    <DashboardHeader title="厂区虚拟产线大屏" />
+    <DashboardHeader title="厂区虚拟产线大屏" :show-weather="false" variant="fui" />
     <div class="top-nav">
       <button
         v-for="n in lineNavs"

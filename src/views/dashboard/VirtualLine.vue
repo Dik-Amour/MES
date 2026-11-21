@@ -1,6 +1,6 @@
 <template>
   <div class="virtual-line">
-    <DashboardHeader title="虚拟产线" />
+    <DashboardHeader title="虚拟产线" :show-weather="false" variant="fui" />
 
     <div class="vl-body">
       <div class="btn-grid">

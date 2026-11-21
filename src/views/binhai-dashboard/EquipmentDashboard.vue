@@ -595,23 +595,24 @@ const downtimeAnalysisOption = computed(() =>
       variant="fui"
     />
 
-    <!-- 设备总览 KPI 区 -->
-    <div class="kpi-section">
-      <div class="kpi-grid-container">
-        <div v-for="item in kpiCards" :key="item.title" class="kpi-card">
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="kpi-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path :d="item.iconPath" />
-            </svg>
+    <!-- 设备总览指标：与人员大屏 top-indicators 统一 -->
+    <div class="top-indicators">
+      <div
+        v-for="(item, index) in kpiCards"
+        :key="item.title"
+        class="top-indicator-card"
+        :class="index % 2 === 1 ? 'tone-inbound' : 'tone-output'"
+      >
+        <div class="top-indicator-content">
+          <div class="top-indicator-label">{{ item.title }}</div>
+          <div class="top-indicator-value">
+            {{ item.value }}<span v-if="item.unit" class="top-indicator-unit">{{ item.unit }}</span>
           </div>
-          <div class="kpi-content">
-            <div class="kpi-title">{{ item.title }}</div>
-            <div class="kpi-value">
-              {{ item.value }}<span v-if="item.unit" class="kpi-unit">{{ item.unit }}</span>
-            </div>
-          </div>
+        </div>
+        <div class="top-indicator-icon" aria-hidden="true">
+          <svg width="28" height="28" fill="currentColor" viewBox="0 0 20 20">
+            <path :d="item.iconPath" />
+          </svg>
         </div>
       </div>
     </div>
@@ -860,16 +861,31 @@ const downtimeAnalysisOption = computed(() =>
   </div>
 </template>
 
+<style src="./dashboard-common.css"></style>
 <style scoped>
+.equipment-table {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.equipment-table-scroll {
+  max-height: 280px;
+  overscroll-behavior: contain;
+}
+
+
+
+
 .dashboard-container {
   width: 100%;
   height: 100%;
-  padding: 16px;
+  /* 与人员/质量大屏一致 */
+  padding: 10px !important;
   box-sizing: border-box;
   position: relative;
   overflow-y: auto;
-  /* 背景沿用生产可视化大屏 */
   color: #dff8ff !important;
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
   background-color: #041019 !important;
   background-image:
     radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
@@ -882,112 +898,6 @@ const downtimeAnalysisOption = computed(() =>
 
 /* 顶部标题栏样式 */
 .title-decoration-left,
-/* KPI 指标区域样式 */
-.kpi-section {
-  margin-bottom: 20px;
-}
-
-.kpi-grid-container {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.dashboard-container .kpi-card {
-  position: relative;
-  height: 100px;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow: hidden;
-  color: #dff8ff;
-  background-color: #082532 !important;
-  background-image:
-    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%) !important;
-  border: 1px solid rgba(0, 190, 235, 0.56) !important;
-  border-radius: 3px !important;
-  box-shadow:
-    inset 0 0 22px rgba(0, 154, 201, 0.09),
-    0 0 10px rgba(0, 0, 0, 0.24) !important;
-}
-
-.dashboard-container .kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 58%;
-  height: 2px;
-  background: linear-gradient(90deg, #26d9ff, transparent);
-  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
-}
-
-.dashboard-container .kpi-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 34%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
-}
-
-.dashboard-container .kpi-icon {
-  display: flex !important;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #40e3ff;
-  background: rgba(0, 176, 220, 0.14);
-  border: 1px solid rgba(35, 211, 255, 0.48);
-  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12);
-}
-
-.dashboard-container .kpi-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.dashboard-container .kpi-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.dashboard-container .kpi-title {
-  color: #9fc3cf !important;
-  font-size: 12px;
-  margin-bottom: 6px;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dashboard-container .kpi-value {
-  color: #ffd91a !important;
-  font-size: 22px;
-  font-weight: 800;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36);
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dashboard-container .kpi-unit {
-  color: #a7cad5 !important;
-  font-size: 14px;
-  margin-left: 2px;
-}
-
 /* 主要内容区域 */
 .main-content {
   display: grid;
@@ -998,13 +908,25 @@ const downtimeAnalysisOption = computed(() =>
 }
 
 .column {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 360px 360px;
   gap: 16px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.column > .data-panel {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
 
 /* 数据面板样式：沿用生产可视化大屏 */
 .dashboard-container .data-panel {
+  height: 360px !important;
+  min-height: 360px !important;
+  max-height: 360px !important;
+  box-sizing: border-box !important;
   color: #dff8ff !important;
   background-color: #061821 !important;
   background-image:
@@ -1117,14 +1039,6 @@ const downtimeAnalysisOption = computed(() =>
 .dashboard-container .data-panel .corner-bl,
 .dashboard-container .data-panel .corner-br,
 .dashboard-container .kpi-card .corner-bl,
-.dashboard-container .kpi-card .corner-br {
-  display: block !important;
-  width: 14px;
-  height: 14px;
-  border-color: #1bd5ff !important;
-  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
-}
-
 .corner-tl {
   top: 0;
   left: 0;
@@ -1207,49 +1121,15 @@ const downtimeAnalysisOption = computed(() =>
 }
 
 /* 表格样式 */
-.equipment-table {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(26, 202, 242, 0.5) transparent;
-  min-height: 0;
-}
 
 .equipment-table-scroll {
   max-height: 280px;
   overscroll-behavior: contain;
 }
 
-.equipment-table table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
 
-.dashboard-container .equipment-table table thead th {
-  background: rgba(0, 143, 184, 0.17) !important;
-  color: #75dff7 !important;
-  padding: 8px 4px;
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
-  font-weight: 500;
-  text-align: center;
-}
 
-.dashboard-container .equipment-table table tbody td {
-  background: rgba(5, 27, 37, 0.72) !important;
-  color: #cde7ee !important;
-  padding: 8px 4px;
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
-  text-align: center;
-}
 
-.dashboard-container .equipment-table table tbody tr:nth-child(odd) td {
-  background: rgba(7, 36, 48, 0.78) !important;
-}
-
-.dashboard-container .equipment-table table tbody tr:hover td {
-  background: rgba(0, 169, 215, 0.13) !important;
-}
 
 .abnormal-rate {
   color: #ff5f87;
@@ -1278,37 +1158,15 @@ const downtimeAnalysisOption = computed(() =>
   font-weight: 500;
 }
 
-.equipment-table::-webkit-scrollbar {
-  width: 4px;
-}
 
-.equipment-table::-webkit-scrollbar-track {
-  background: transparent;
-}
 
-.equipment-table::-webkit-scrollbar-thumb {
-  background: rgba(26, 202, 242, 0.5);
-  border-radius: 2px;
-}
 
-.equipment-table::-webkit-scrollbar-thumb:hover {
-  background: rgba(38, 213, 255, 0.72);
-}
 
 /* 响应式设计 */
 @media (max-width: 1500px) {
-  .kpi-grid-container {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-  }
 }
 
 @media (max-width: 1200px) {
-  .kpi-grid-container {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
-
   .main-content {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
@@ -1316,14 +1174,9 @@ const downtimeAnalysisOption = computed(() =>
 }
 
 @media (max-width: 768px) {
-  .kpi-grid-container {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 480px) {
-  .kpi-grid-container {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
+
 </style>

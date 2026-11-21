@@ -1,7 +1,7 @@
 <template>
   <div class="plant-dashboard">
     <!-- 顶部导航 + 标题 -->
-    <DashboardHeader title="材料成型中心运营管控系统" />
+    <DashboardHeader title="材料成型中心运营管控系统" :show-weather="false" variant="fui" />
     <div class="top-nav">
       <button
         v-for="n in topNavs"
@@ -223,11 +223,11 @@ const charts: Record<string, echarts.ECharts> = {}
 // ========== 状态 ==========
 // 顶部大屏导航（点击跳转对应大屏）
 const topNavs = [
-  { key: 'production', label: '生产大屏', path: '/dashboard/production' },
-  { key: 'quality', label: '质量大屏', path: '/dashboard/quality' },
-  { key: 'personnel', label: '人力大屏', path: '/dashboard/personnel' },
-  { key: 'equipment', label: '设备大屏', path: '/dashboard/equipment' },
-  { key: 'safety', label: '安环大屏', path: '/dashboard/safety' }
+  { key: 'production', label: '生产可视化大屏', path: '/dashboard/production' },
+  { key: 'quality', label: '质量可视化大屏', path: '/dashboard/quality' },
+  { key: 'personnel', label: '人力可视化大屏', path: '/dashboard/personnel' },
+  { key: 'equipment', label: '设备可视化大屏', path: '/dashboard/equipment' },
+  { key: 'safety', label: '安环可视化大屏', path: '/dashboard/safety' }
 ]
 const router = useRouter()
 const goDashboard = (path: string) => {

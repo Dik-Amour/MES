@@ -1181,6 +1181,7 @@ function handleSubChange(payload: { title: string; key: string }) {
   </a-modal>
 </template>
 
+<style src="./dashboard-common.css"></style>
 <style scoped>
 /* 出入库明细弹窗 */
 .io-detail-body {

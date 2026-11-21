@@ -1,7 +1,7 @@
 <template>
   <div class="quality-dashboard">
     <!-- 大屏标题 -->
-    <DashboardHeader title="材料成型中心工业园区质量监管大屏" />
+    <DashboardHeader title="材料成型中心工业园区质量监管大屏" :show-weather="false" variant="fui" />
 
     <!-- 数据指标（单独一行） -->
     <div class="kpi-row">

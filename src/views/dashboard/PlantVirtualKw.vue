@@ -1,6 +1,6 @@
 <template>
   <div class="kw-dashboard">
-    <DashboardHeader title="厂区虚拟产线大屏—造型三线KW" />
+    <DashboardHeader title="厂区虚拟产线大屏—造型三线KW" :show-weather="false" variant="fui" />
 
     <!-- 产线图例 -->
     <div class="flow-legend">

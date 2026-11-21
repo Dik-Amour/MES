@@ -1,3 +1,6 @@
+/* 通用可视化样式（表格等），后续可持续补充 */
+@import './dashboard-common.css';
+
 /* 生产可视化大屏样式（迁移自 production-ops-dashboard.html） */
 
 .dashboard-container {
@@ -13,117 +16,25 @@
 .main-content {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  gap: 16px;
   height: auto;
   min-height: calc(100vh - 310px);
 }
 
-.top-indicators {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 24px;
-  margin-bottom: 12px;
-}
-
-.top-indicator-card {
-  position: relative;
-  width: 100%;
-  height: 125px;
-  min-height: 125px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  color: #dff8ff;
-  background-color: #082532;
-  background-image:
-    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%);
-  border: 1px solid rgba(0, 190, 235, 0.56);
-  border-radius: 3px;
-  box-shadow:
-    inset 0 0 22px rgba(0, 154, 201, 0.09),
-    0 0 10px rgba(0, 0, 0, 0.24);
-}
-
-.top-indicator-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 58%;
-  height: 2px;
-  background: linear-gradient(90deg, #26d9ff, transparent);
-  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
-}
-
-.top-indicator-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 34%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
-}
-
-.top-indicator-content {
-  position: relative;
-  z-index: 1;
-}
-
-.top-indicator-label {
-  margin-bottom: 8px;
-  color: #a9c9d4;
-  font-size: 14px;
-  letter-spacing: 1px;
-}
-
-.top-indicator-value {
-  color: #ffd91a;
-  font-size: 36px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 2px;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 14px rgba(255, 217, 26, 0.36);
-}
-
-.top-indicator-unit {
-  margin-left: 7px;
-  color: #b8d6df;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-
-.top-indicator-icon {
-  position: relative;
-  z-index: 1;
-  width: 56px;
-  height: 56px;
-  flex: 0 0 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #62e8ff;
-  background: rgba(0, 174, 220, 0.15);
-  border: 1px solid rgba(55, 220, 255, 0.68);
-  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-  box-shadow: inset 0 0 16px rgba(55, 220, 255, 0.16);
-}
-
-.top-indicator-card.tone-inbound .top-indicator-icon {
-  color: #8fffd0;
-  background: rgba(43, 214, 157, 0.12);
-  border-color: rgba(83, 255, 197, 0.58);
-}
-
+/* 顶部指标栏：与人员可视化大屏 top-indicators 统一 */
 .column {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  /* 与人员大屏一致：上下两行各 360px */
+  grid-template-rows: 360px 360px;
   gap: 16px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.column > .data-panel {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
 
 /* 数据面板样式 */
@@ -578,28 +489,36 @@
 .assessment-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .assessment-table th {
-  background: rgba(242, 242, 242, 0.8);
-  color: #475569;
-  padding: 8px 4px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.3);
-  font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 160, 210, 0.45), rgba(0, 100, 150, 0.35)) !important;
+  color: #f4fdff !important;
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(0, 200, 240, 0.45) !important;
+  font-weight: 600 !important;
   text-align: center;
 }
 
 .assessment-table td {
-  background: rgba(255, 255, 255, 0.6);
-  color: #333;
-  padding: 8px 4px;
-  border-bottom: 1px solid rgba(68, 114, 196, 0.1);
+  background: rgba(6, 40, 58, 0.72) !important;
+  color: #dff8ff !important;
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(0, 150, 190, 0.18) !important;
   text-align: center;
 }
 
+.assessment-table tbody tr:nth-child(odd) td,
+.assessment-table tr:nth-child(odd) td {
+  background: rgba(10, 52, 74, 0.78) !important;
+}
+
 .assessment-table tr:hover td {
-  background: rgba(242, 242, 242, 0.7);
+  background: rgba(0, 169, 215, 0.18) !important;
 }
 
 .completion-success {
@@ -676,14 +595,18 @@
 }
 
 .dashboard-container .main-content[data-v] {
-  gap: 12px !important;
+  gap: 16px !important;
 }
 
 .dashboard-container .column[data-v] {
-  gap: 12px !important;
+  gap: 16px !important;
 }
 
 .dashboard-container .data-panel[data-v] {
+  height: 360px !important;
+  min-height: 360px !important;
+  max-height: 360px !important;
+  box-sizing: border-box !important;
   color: #dff8ff !important;
   background-color: #061821 !important;
   background-image:
@@ -936,27 +859,37 @@
 }
 
 .dashboard-container .assessment-table[data-v] {
-  color: #cde7ee;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
 }
 
 .dashboard-container .assessment-table th[data-v] {
-  color: #75dff7 !important;
-  background: rgba(0, 143, 184, 0.17) !important;
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 160, 210, 0.45), rgba(0, 100, 150, 0.35)) !important;
+  color: #f4fdff !important;
+  padding: 12px 10px !important;
+  border-bottom: 1px solid rgba(0, 200, 240, 0.45) !important;
+  font-weight: 600 !important;
+  text-align: center !important;
 }
 
 .dashboard-container .assessment-table td[data-v] {
-  color: #cde7ee !important;
-  background: rgba(5, 27, 37, 0.72) !important;
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
+  background: rgba(6, 40, 58, 0.72) !important;
+  color: #dff8ff !important;
+  padding: 12px 10px !important;
+  border-bottom: 1px solid rgba(0, 150, 190, 0.18) !important;
+  text-align: center !important;
 }
 
 .dashboard-container .assessment-table tbody tr:nth-child(odd) td[data-v] {
-  background: rgba(7, 36, 48, 0.78) !important;
+  background: rgba(10, 52, 74, 0.78) !important;
 }
 
 .dashboard-container .assessment-table tbody tr:hover td[data-v] {
-  background: rgba(0, 169, 215, 0.13) !important;
+  background: rgba(0, 169, 215, 0.18) !important;
 }
 
 .dashboard-container .completion-success[data-v] {
@@ -1003,7 +936,7 @@
 
 .dashboard-container .main-content,
 .dashboard-container .column {
-  gap: 24px !important;
+  gap: 16px !important;
 }
 
 .dashboard-container .data-panel {
@@ -1253,27 +1186,37 @@
 }
 
 .dashboard-container .assessment-table {
-  color: #cde7ee;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
 }
 
 .dashboard-container .assessment-table th {
-  color: #75dff7 !important;
-  background: rgba(0, 143, 184, 0.17) !important;
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 160, 210, 0.45), rgba(0, 100, 150, 0.35)) !important;
+  color: #f4fdff !important;
+  padding: 12px 10px !important;
+  border-bottom: 1px solid rgba(0, 200, 240, 0.45) !important;
+  font-weight: 600 !important;
+  text-align: center !important;
 }
 
 .dashboard-container .assessment-table td {
-  color: #cde7ee !important;
-  background: rgba(5, 27, 37, 0.72) !important;
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
+  background: rgba(6, 40, 58, 0.72) !important;
+  color: #dff8ff !important;
+  padding: 12px 10px !important;
+  border-bottom: 1px solid rgba(0, 150, 190, 0.18) !important;
+  text-align: center !important;
 }
 
 .dashboard-container .assessment-table tbody tr:nth-child(odd) td {
-  background: rgba(7, 36, 48, 0.78) !important;
+  background: rgba(10, 52, 74, 0.78) !important;
 }
 
 .dashboard-container .assessment-table tbody tr:hover td {
-  background: rgba(0, 169, 215, 0.13) !important;
+  background: rgba(0, 169, 215, 0.18) !important;
 }
 
 .dashboard-container .completion-success {
@@ -1295,32 +1238,12 @@
   background: rgba(0, 108, 145, 0.1) !important;
 }
 
-/* 中等宽度：6 张指标卡等分后变窄，压缩内边距 / 图标 / 数字，避免内容被裁切 */
-@media (min-width: 1201px) and (max-width: 1600px) {
-  .top-indicator-card {
-    padding: 12px 14px;
-  }
-
-  .top-indicator-icon {
-    width: 44px;
-    height: 44px;
-    flex: 0 0 44px;
-  }
-
-  .top-indicator-value {
-    font-size: 28px;
-  }
-}
-
+/* 中等宽度：与人员大屏一致压缩指标卡 */
 /* 响应式设计 */
 @media (max-width: 1200px) {
-  .top-indicators {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   /* minmax(0, ...)：避免画布固有宽度把单列撑出视口（ECharts 尺寸反馈环） */
   .main-content {
     grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+    gap: 16px;
   }
 }

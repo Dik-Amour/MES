@@ -1,7 +1,7 @@
 <template>
   <div class="safety-dashboard">
     <!-- 顶部标题栏 -->
-    <DashboardHeader title="材料成型中心工业园区安全环保大屏" />
+    <DashboardHeader title="材料成型中心工业园区安全环保大屏" :show-weather="false" variant="fui" />
 
     <div class="safety-grid">
       <!-- 左列 -->

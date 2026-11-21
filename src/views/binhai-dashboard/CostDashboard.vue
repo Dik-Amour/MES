@@ -586,29 +586,30 @@ const processOption = createCostPieOption(processCostData, 'process')
       variant="fui"
     />
 
-    <!-- 主要指标展示 -->
-    <div class="kpi-section">
-      <div class="kpi-grid-container">
-        <div v-for="item in kpiCards" :key="item.title" class="kpi-card">
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="kpi-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                v-for="(iconPath, index) in item.paths"
-                :key="index"
-                :d="iconPath.d"
-                :fill-rule="iconPath.fillRule"
-                :clip-rule="iconPath.fillRule"
-              />
-            </svg>
+    <!-- 主要指标展示：与人员大屏 top-indicators 统一 -->
+    <div class="top-indicators">
+      <div
+        v-for="(item, index) in kpiCards"
+        :key="item.title"
+        class="top-indicator-card"
+        :class="index % 2 === 1 ? 'tone-inbound' : 'tone-output'"
+      >
+        <div class="top-indicator-content">
+          <div class="top-indicator-label">{{ item.title }}</div>
+          <div class="top-indicator-value">
+            {{ item.value }}<span v-if="item.unit" class="top-indicator-unit">{{ item.unit }}</span>
           </div>
-          <div class="kpi-content">
-            <div class="kpi-title">{{ item.title }}</div>
-            <div class="kpi-value">
-              {{ item.value }}<span v-if="item.unit" class="kpi-unit">{{ item.unit }}</span>
-            </div>
-          </div>
+        </div>
+        <div class="top-indicator-icon" aria-hidden="true">
+          <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              v-for="(iconPath, pIndex) in item.paths"
+              :key="pIndex"
+              :d="iconPath.d"
+              :fill-rule="iconPath.fillRule"
+              :clip-rule="iconPath.fillRule"
+            />
+          </svg>
         </div>
       </div>
     </div>
@@ -814,7 +815,18 @@ const processOption = createCostPieOption(processCostData, 'process')
   </div>
 </template>
 
+<style src="./dashboard-common.css"></style>
 <style scoped>
+/* 表格视觉：dashboard-common.css；此处仅布局 */
+.equipment-table {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+
+
+
 .dashboard-container {
   width: 100%;
   min-height: calc(100vh - 132px);
@@ -975,10 +987,18 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .column {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  /* 与人员大屏一致：上下两行各 360px */
+  grid-template-rows: 360px 360px;
   gap: 16px;
   min-width: 0;
+  min-height: 0;
+}
+
+.column > .data-panel {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
 
 /* 数据面板样式：沿用生产可视化大屏 */
@@ -1145,51 +1165,13 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 /* 表格样式 */
-.equipment-table {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(26, 202, 242, 0.5) transparent;
-  min-height: 0;
-}
 
-.equipment-table table {
-  width: 100%;
-  border-collapse: collapse;
-}
 
-.equipment-table table thead tr {
-  background: rgba(0, 143, 184, 0.17);
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44);
-}
 
-.equipment-table table thead th {
-  color: #75dff7;
-  font-weight: 600;
-  font-size: 13px;
-  padding: 12px 8px;
-  text-align: center;
-}
 
-.equipment-table table tbody tr {
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16);
-}
 
-.equipment-table table tbody tr:nth-child(odd) td {
-  background: rgba(7, 36, 48, 0.78);
-}
 
-.equipment-table table tbody tr:hover td {
-  background: rgba(0, 169, 215, 0.13);
-}
 
-.equipment-table table tbody td {
-  color: #cde7ee;
-  font-size: 12px;
-  padding: 12px 8px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
 
 .text-green {
   color: #4ee6a6;
@@ -1240,18 +1222,8 @@ const processOption = createCostPieOption(processCostData, 'process')
   border-color: #26d5ff;
 }
 
-.equipment-table::-webkit-scrollbar {
-  width: 4px;
-}
 
-.equipment-table::-webkit-scrollbar-track {
-  background: transparent;
-}
 
-.equipment-table::-webkit-scrollbar-thumb {
-  background: rgba(26, 202, 242, 0.5);
-  border-radius: 2px;
-}
 
 @media (max-width: 1400px) {
   .kpi-grid-container {
@@ -1264,7 +1236,6 @@ const processOption = createCostPieOption(processCostData, 'process')
     gap: 16px;
   }
 }
-
 
 /* =========================================================
    强制覆盖全局 style.css 浅色 !important（对齐生产可视化深色）
@@ -1291,6 +1262,10 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .dashboard-container .data-panel {
+  height: 360px !important;
+  min-height: 360px !important;
+  max-height: 360px !important;
+  box-sizing: border-box !important;
   color: #dff8ff !important;
   background: #061821 !important;
   background-color: #061821 !important;
@@ -1526,7 +1501,6 @@ const processOption = createCostPieOption(processCostData, 'process')
   gap: 16px !important;
 }
 
-
 .dashboard-container .kpi-card {
   position: relative !important;
   min-height: 100px !important;
@@ -1614,28 +1588,10 @@ const processOption = createCostPieOption(processCostData, 'process')
   color: #a9c9d4 !important;
 }
 
-.dashboard-container .equipment-table table thead tr {
-  background: rgba(0, 143, 184, 0.17) !important;
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
-}
 
-.dashboard-container .equipment-table table thead th {
-  background: rgba(0, 143, 184, 0.17) !important;
-  color: #75dff7 !important;
-}
 
-.dashboard-container .equipment-table table tbody td {
-  background: rgba(5, 27, 37, 0.72) !important;
-  color: #cde7ee !important;
-}
 
-.dashboard-container .equipment-table table tbody tr:nth-child(odd) td {
-  background: rgba(7, 36, 48, 0.78) !important;
-}
 
-.dashboard-container .equipment-table table tbody tr:hover td {
-  background: rgba(0, 169, 215, 0.13) !important;
-}
 
 .dashboard-container .main-content {
   gap: 16px !important;

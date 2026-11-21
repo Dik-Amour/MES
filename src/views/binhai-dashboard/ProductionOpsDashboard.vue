@@ -824,7 +824,7 @@ const activeProductChart = computed(
       <!-- 左侧列 -->
       <div class="column">
         <!-- 出产分析 -->
-        <div class="data-panel" style="height: 386px">
+        <div class="data-panel" style="height: 360px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -856,7 +856,7 @@ const activeProductChart = computed(
         </div>
 
         <!-- 入库概况 -->
-        <div class="data-panel" style="height: 386px">
+        <div class="data-panel" style="height: 360px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -937,7 +937,7 @@ const activeProductChart = computed(
       <!-- 中间列 -->
       <div class="column">
         <!-- 月度分析 -->
-        <div class="data-panel" style="height: 386px">
+        <div class="data-panel" style="height: 360px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -967,7 +967,7 @@ const activeProductChart = computed(
         </div>
 
         <!-- 年度分析 -->
-        <div class="data-panel" style="height: 386px">
+        <div class="data-panel" style="height: 360px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -1002,7 +1002,7 @@ const activeProductChart = computed(
       <!-- 右侧列 -->
       <div class="column">
         <!-- 生产详情 -->
-        <div class="data-panel" style="height: 386px; overflow: hidden">
+        <div class="data-panel" style="height: 360px; overflow: hidden">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -1046,7 +1046,7 @@ const activeProductChart = computed(
         </div>
 
         <!-- 计划分析 -->
-        <div class="data-panel" style="height: 386px">
+        <div class="data-panel" style="height: 360px">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
           <div class="corner-bl"></div>
@@ -1131,6 +1131,7 @@ const activeProductChart = computed(
   </div>
 </template>
 
+<style src="./dashboard-common.css"></style>
 <style scoped src="./dashboard-theme.css"></style>
 
 <style>
@@ -1371,4 +1372,5 @@ const activeProductChart = computed(
     padding: 8px 6px;
   }
 }
+
 </style>

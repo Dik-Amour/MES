@@ -1,7 +1,7 @@
 <template>
   <div class="equipment-dashboard">
     <!-- 大屏标题 -->
-    <DashboardHeader title="材料成型中心工业园区设备监控大屏" />
+    <DashboardHeader title="材料成型中心工业园区设备监控大屏" :show-weather="false" variant="fui" />
 
     <!-- 第一行：设备指标总览（等宽 KPI 带） -->
     <div class="kpi-panel">

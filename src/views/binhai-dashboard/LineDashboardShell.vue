@@ -212,6 +212,7 @@ const columns = computed(() => {
   </div>
 </template>
 
+<style src="./dashboard-common.css"></style>
 <style scoped src="./dashboard-theme.css"></style>
 
 <style scoped>

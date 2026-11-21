@@ -1,7 +1,7 @@
 <template>
   <div class="personnel-dashboard">
     <!-- 大屏标题 -->
-    <DashboardHeader title="材料成型中心工业园区人员管理大屏" />
+    <DashboardHeader title="材料成型中心工业园区人员管理大屏" :show-weather="false" variant="fui" />
 
     <div class="personnel-grid">
       <!-- 第一行 -->

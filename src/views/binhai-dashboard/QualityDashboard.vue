@@ -1245,6 +1245,7 @@ function handleDefectChartClick(payload: unknown) {
   </div>
 </template>
 
+<style src="./dashboard-common.css"></style>
 <style scoped>
 .dashboard-container {
   width: 100%;
@@ -1266,145 +1267,13 @@ function handleDefectChartClick(payload: unknown) {
   font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
 }
 
-/* 顶部指标栏：对齐生产可视化大屏 top-indicators */
-.top-indicators {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 14px;
-}
 
-.top-indicator-card {
-  position: relative;
-  width: 100%;
-  height: 110px;
-  min-height: 110px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  color: #dff8ff;
-  background-color: #082532;
-  background-image:
-    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%);
-  border: 1px solid rgba(0, 190, 235, 0.56);
-  border-radius: 3px;
-  box-shadow:
-    inset 0 0 22px rgba(0, 154, 201, 0.09),
-    0 0 10px rgba(0, 0, 0, 0.24);
-}
-
-.top-indicator-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 58%;
-  height: 2px;
-  background: linear-gradient(90deg, #26d9ff, transparent);
-  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
-}
-
-.top-indicator-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 34%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
-}
-
-.top-indicator-content {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-}
-
-.top-indicator-label {
-  margin-bottom: 8px;
-  color: #a9c9d4;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.top-indicator-value {
-  color: #ffd91a;
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 1px;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 14px rgba(255, 217, 26, 0.36);
-  white-space: nowrap;
-}
-
-.top-indicator-unit {
-  margin-left: 6px;
-  color: #b8d6df;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-
-.top-indicator-icon {
-  position: relative;
-  z-index: 1;
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #62e8ff;
-  background: rgba(0, 174, 220, 0.15);
-  border: 1px solid rgba(55, 220, 255, 0.68);
-  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-  box-shadow: inset 0 0 16px rgba(55, 220, 255, 0.16);
-}
-
-.top-indicator-card.tone-inbound .top-indicator-icon {
-  color: #8fffd0;
-  background: rgba(43, 214, 157, 0.12);
-  border-color: rgba(83, 255, 197, 0.58);
-}
-
-@media (min-width: 1201px) and (max-width: 1600px) {
-  .top-indicator-card {
-    padding: 12px 12px;
-  }
-
-  .top-indicator-icon {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-  }
-
-  .top-indicator-value {
-    font-size: 24px;
-  }
-
-  .top-indicator-label {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 1200px) {
-  .top-indicators {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
 
 /* 网格布局：默认三列；质量大屏为两行三列 */
 .dashboard-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px !important;
+  gap: 16px !important;
   margin-bottom: 14px;
 }
 
@@ -1415,6 +1284,7 @@ function handleDefectChartClick(payload: unknown) {
 
 .dashboard-row.two-columns {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .dashboard-row.wide-columns {
@@ -1710,6 +1580,10 @@ function handleDefectChartClick(payload: unknown) {
 
 /* 数据面板：沿用生产 / 设备可视化大屏 */
 .dashboard-container .data-panel {
+  height: 360px !important;
+  min-height: 360px !important;
+  max-height: 360px !important;
+  box-sizing: border-box !important;
   color: #dff8ff !important;
   background-color: #061821 !important;
   background-image:

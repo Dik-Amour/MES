@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import EChart from '@/components/EChart.vue'
 import DashboardHeader from '@/views/dashboard/DashboardHeader.vue'
@@ -11,19 +11,79 @@ import type { EChartsOption } from 'echarts'
    ========================= */
 /** 人员可视化大屏静态数据 */
 
+/** 顶部指标栏（6 项，样式对齐其他滨海大屏 top-indicators） */
+const personnelIndicators: { label: string; value: string; unit: string; tone: string }[] = [
+  { label: '厂区总人数', value: '486', unit: '人', tone: 'output' },
+  { label: '熔炼线人数', value: '72', unit: '人', tone: 'output' },
+  { label: '造型线人数', value: '128', unit: '人', tone: 'inbound' },
+  { label: '清理线人数', value: '56', unit: '人', tone: 'output' },
+  { label: '上机人数', value: '312', unit: '人', tone: 'inbound' },
+  { label: '人员利用率', value: '92.5', unit: '%', tone: 'inbound' }
+]
+
+/** 产线人员排班统计：近 7 天 × 造型 / 熔炼 / 清理 */
+type ScheduleLineKey = 'molding' | 'smelting' | 'cleaning'
+
+const scheduleLineTabs: { key: ScheduleLineKey; label: string }[] = [
+  { key: 'molding', label: '造型' },
+  { key: 'smelting', label: '熔炼' },
+  { key: 'cleaning', label: '清理' }
+]
+
+const scheduleDates = Array.from({ length: 7 }, (_, i) => {
+  const d = new Date()
+  d.setDate(d.getDate() - (6 - i))
+  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+})
+
+function mockScheduleCounts(line: ScheduleLineKey): number[] {
+  const bases: Record<ScheduleLineKey, number> = { molding: 128, smelting: 72, cleaning: 56 }
+  const seedMap: Record<ScheduleLineKey, number> = { molding: 11, smelting: 23, cleaning: 37 }
+  const seed = seedMap[line]
+  return scheduleDates.map((_, i) => {
+    const weekend = (i + new Date().getDate()) % 7 === 0 || (i + new Date().getDate()) % 7 === 6
+    const base = bases[line]
+    const wave = Math.round(Math.sin(seed * 0.3 + i * 0.7) * (base * 0.08))
+    return weekend ? Math.max(8, base - Math.round(base * 0.35) + wave) : base + wave
+  })
+}
+
+const scheduleColorMap: Record<ScheduleLineKey, string> = {
+  molding: '#31d7ff',
+  smelting: '#ffd52a',
+  cleaning: '#4ee6a6'
+}
+
+/* 人员利用率 */
+type UtilScopeKey = 'plant' | 'line'
+
+const utilizationScopeTabs: { key: UtilScopeKey; label: string }[] = [
+  { key: 'plant', label: '分厂' },
+  { key: 'line', label: '产线' }
+]
+
+const plantUtilizationData = [91.2, 92.5, 90.8, 93.1, 92.0, 88.6, 89.4]
+
+const lineUtilizationSeries = [
+  { name: '造型', color: '#31d7ff', data: [93.5, 94.2, 92.8, 94.8, 93.6, 90.2, 91.0] },
+  { name: '熔炼', color: '#ffd52a', data: [90.8, 91.5, 89.6, 92.0, 91.2, 87.8, 88.5] },
+  { name: '清理', color: '#4ee6a6', data: [89.2, 90.4, 88.6, 91.1, 90.0, 86.5, 87.2] }
+]
+
+/* 人员岗位统计 */
 interface HrDatum {
   category: string
   value: number
 }
 
-const hrDistributionData: HrDatum[] = [
-  { category: '管理', value: 25 },
-  { category: '工艺质量', value: 48 },
-  { category: '装备技术', value: 36 },
-  { category: '技术支持', value: 52 },
-  { category: '实习大学生', value: 18 },
-  { category: '借点入人员', value: 12 },
-  { category: '工序外包人员', value: 65 }
+const positionAnalysisData: HrDatum[] = [
+  { category: '一线工人', value: 186 },
+  { category: '生产辅助', value: 72 },
+  { category: '工程技术', value: 56 },
+  { category: '技术支持', value: 48 },
+  { category: '管理人员', value: 42 },
+  { category: '见习大学生', value: 28 },
+  { category: '领导干部', value: 18 }
 ]
 
 interface AppointmentDatum {
@@ -37,21 +97,6 @@ const appointmentData: AppointmentDatum[] = [
   { name: '助理技师', value: 45, colors: ['#20cfff', '#20cfff'] },
   { name: '技师', value: 68, colors: ['#4ee6a6', '#3ba8a0'] },
   { name: '高级技师', value: 32, colors: ['#ffd52a', '#D69D06'] }
-]
-
-interface DynamicsRow {
-  time: string
-  name: string
-  action: string
-}
-
-const dynamicsRows: DynamicsRow[] = [
-  { time: '10:23', name: '张三', action: '员工上机' },
-  { time: '10:25', name: '李四', action: '上岗打卡' },
-  { time: '10:28', name: '王五', action: '生产报工' },
-  { time: '10:32', name: '赵六', action: '离岗登记' },
-  { time: '10:35', name: '孙七', action: '设备巡检' },
-  { time: '10:38', name: '周八', action: '质量检验' }
 ]
 
 interface ScheduleRow {
@@ -150,121 +195,136 @@ const scheduleRows: ScheduleRow[] = [
   }
 ]
 
-const departmentCategories = ['造型', '熔炼', '制芯', '清理']
+const outputTrendMonths = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
-interface StackedSeries {
-  name: string
-  data: number[]
-  colors: [string, string]
-}
-
-const departmentSeries: StackedSeries[] = [
-  { name: '一线人员', data: [45, 52, 38, 42], colors: ['#20cfff', '#20cfff'] },
-  { name: '技术支持', data: [12, 15, 10, 11], colors: ['#4ee6a6', '#3ba8a0'] },
-  { name: '管理技术', data: [8, 10, 7, 9], colors: ['#ffd52a', '#D69D06'] }
+/** 人均出产吨位：2025 / 2026 两条折线（吨/人） */
+const outputTrendSeries = [
+  { name: '2025', color: '#20cfff', data: [52, 54, 56, 55, 58, 60, 59, 61, 60, 62, 63, 64] },
+  { name: '2026', color: '#4ee6a6', data: [56, 58, 60, 59, 62, 64, 63, 65, 64, 66, 67, 68] }
 ]
 
-const outputTrendMonths = ['1月', '2月', '3月', '4月', '5月', '6月']
+const outputPerCapita = '68.0'
 
-const outputTrendData = [58, 61, 63, 62, 65, 64.5]
+/* 人员技能分析 */
+type SkillPanelTab = 'skill' | 'person'
 
-const outputPerCapita = '64.5'
-
-type TrainingTone = 'green' | 'yellow' | 'blue' | 'purple'
-
-interface TrainingStat {
-  label: string
-  value: string
-  change: string
-  tone: TrainingTone
-}
-
-const trainingStats: TrainingStat[] = [
-  { label: '培训完成率', value: '95%', change: '↑ 5%', tone: 'green' },
-  { label: '持证上岗率', value: '98%', change: '↑ 2%', tone: 'yellow' },
-  { label: '技能等级达标率', value: '92%', change: '↑ 3%', tone: 'blue' },
-  { label: '年度考核优秀率', value: '88%', change: '↑ 4%', tone: 'purple' }
+const skillPanelTabs: { key: SkillPanelTab; label: string }[] = [
+  { key: 'person', label: '人员分析' },
+  { key: 'skill', label: '技能分析' }
 ]
 
-interface DynamicsSeriesConfig {
+const skillPanelTab = ref<SkillPanelTab>('person')
+
+const skillCloudPalette = [
+  '#52c41a', '#1890ff', '#722ed1', '#fa8c16', '#fadb14',
+  '#eb2f96', '#13c2c2', '#2f54eb', '#a0d911', '#f5222d',
+  '#faad14', '#2db7a0', '#8c61ff', '#ff7a45', '#00b8d4'
+]
+
+interface SkillCloudItem {
   name: string
-  baseCount: number
-  variance: number
+  value: number
   color: string
-  areaColors: [string, string]
+  x: number
+  y: number
+  rotate: number
 }
 
-const dynamicsSeriesConfig: DynamicsSeriesConfig[] = [
-  {
-    name: '大机',
-    baseCount: 85,
-    variance: 15,
-    color: '#4ee6a6',
-    areaColors: ['rgba(78, 230, 166, 0.3)', 'rgba(78, 230, 166, 0.05)']
-  },
-  {
-    name: '曲轴',
-    baseCount: 75,
-    variance: 12,
-    color: '#20cfff',
-    areaColors: ['rgba(32, 207, 255, 0.3)', 'rgba(32, 207, 255, 0.05)']
-  },
-  {
-    name: '机体',
-    baseCount: 65,
-    variance: 10,
-    color: '#ffd52a',
-    areaColors: ['rgba(255, 213, 42, 0.3)', 'rgba(255, 213, 42, 0.05)']
-  },
-  {
-    name: '新产品',
-    baseCount: 55,
-    variance: 8,
-    color: '#9b8cff',
-    areaColors: ['rgba(155, 140, 255, 0.3)', 'rgba(155, 140, 255, 0.05)']
-  }
+const skillCloudRaw: { name: string; value: number; x: number; y: number; rotate: number }[] = [
+  { name: '造型操作', value: 88, x: 38, y: 42, rotate: 0 },
+  { name: '熔炼工艺', value: 76, x: 62, y: 55, rotate: 0 },
+  { name: '设备点检', value: 70, x: 48, y: 28, rotate: 0 },
+  { name: '质量检验', value: 66, x: 52, y: 70, rotate: 0 },
+  { name: '清理工序', value: 58, x: 22, y: 58, rotate: 0 },
+  { name: '制芯技能', value: 54, x: 74, y: 35, rotate: -90 },
+  { name: '行车操作', value: 48, x: 18, y: 32, rotate: -90 },
+  { name: '电焊维修', value: 46, x: 78, y: 62, rotate: 0 },
+  { name: '叉车驾驶', value: 42, x: 30, y: 72, rotate: -90 },
+  { name: '热处理', value: 40, x: 65, y: 20, rotate: 0 },
+  { name: '模具维护', value: 36, x: 12, y: 48, rotate: -90 },
+  { name: '安全员', value: 34, x: 85, y: 48, rotate: -90 },
+  { name: '计量管理', value: 30, x: 42, y: 15, rotate: 0 },
+  { name: '仓储物流', value: 28, x: 25, y: 18, rotate: -90 },
+  { name: '能源管理', value: 26, x: 70, y: 78, rotate: 0 },
+  { name: '工艺员', value: 24, x: 15, y: 75, rotate: 0 },
+  { name: '班组长', value: 22, x: 88, y: 22, rotate: -90 },
+  { name: '叉车维修', value: 18, x: 55, y: 12, rotate: 0 },
+  { name: '环保监测', value: 16, x: 35, y: 85, rotate: -90 },
+  { name: '信息化', value: 14, x: 8, y: 22, rotate: 0 },
+  { name: '多技能', value: 50, x: 32, y: 55, rotate: 0 },
+  { name: '标准化', value: 32, x: 58, y: 42, rotate: -90 },
+  { name: 'TPM', value: 20, x: 48, y: 88, rotate: 0 },
+  { name: '6S', value: 12, x: 90, y: 72, rotate: 0 }
 ]
 
-/** 00:00 至当前整点的时间标签 */
-function createHourlyLabels(): string[] {
-  const currentHour = new Date().getHours()
-  return Array.from({ length: currentHour + 1 }, (_, hour) => `${String(hour).padStart(2, '0')}:00`)
+const skillCloudData: SkillCloudItem[] = skillCloudRaw.map((item, index) => ({
+  ...item,
+  color: skillCloudPalette[index % skillCloudPalette.length]
+}))
+
+interface SkillPersonRow {
+  line: string
+  name: string
+  skills: number
 }
 
-/**
- * 按班次作息规律生成在岗人数曲线。
- * 原页面叠加 Math.random() 抖动，这里改用固定抖动序列，
- * 保证每次渲染数值稳定、便于核对。
- */
-const jitterPattern = [0.2, -0.4, 0.6, -0.2, 0.5, -0.6, 0.1, 0.3, -0.3, 0.4]
+const skillPersonRank: SkillPersonRow[] = [
+  { line: '造型', name: '刘强', skills: 18 },
+  { line: '熔炼', name: '王磊', skills: 16 },
+  { line: '清理', name: '赵敏', skills: 15 },
+  { line: '造型', name: '陈杰', skills: 14 },
+  { line: '熔炼', name: '李娜', skills: 13 },
+  { line: '制芯', name: '周浩', skills: 13 },
+  { line: '清理', name: '吴涛', skills: 12 },
+  { line: '造型', name: '郑凯', skills: 12 },
+  { line: '熔炼', name: '孙芳', skills: 11 },
+  { line: '制芯', name: '马超', skills: 11 },
+  { line: '清理', name: '黄伟', skills: 10 },
+  { line: '造型', name: '徐静', skills: 10 },
+  { line: '熔炼', name: '朱鹏', skills: 9 },
+  { line: '制芯', name: '胡兵', skills: 9 },
+  { line: '清理', name: '林峰', skills: 8 },
+  { line: '造型', name: '何丽', skills: 8 },
+  { line: '熔炼', name: '高翔', skills: 7 },
+  { line: '制芯', name: '罗敏', skills: 7 }
+]
 
-function createPersonnelValues(
-  baseCount: number,
-  variance: number,
-  pointCount: number
-): number[] {
-  const values: number[] = []
-  for (let hour = 0; hour < pointCount; hour += 1) {
-    let factor: number
-    if (hour >= 6 && hour < 8) {
-      factor = 0.7 + (hour - 6) * 0.15
-    } else if (hour >= 8 && hour < 12) {
-      factor = 1
-    } else if (hour >= 12 && hour < 14) {
-      factor = 0.85
-    } else if (hour >= 14 && hour < 18) {
-      factor = 0.95
-    } else if (hour >= 18) {
-      factor = 0.8
-    } else {
-      factor = 0.3
-    }
+const skillTop3 = computed(() => skillPersonRank.slice(0, 3))
+const skillRestRows = computed(() => skillPersonRank.slice(3))
+const skillRestScrollRows = computed(() => [...skillRestRows.value, ...skillRestRows.value])
 
-    const jitter = (jitterPattern[hour % jitterPattern.length] * variance) / 2
-    values.push(Math.max(0, Math.floor(baseCount * factor + jitter)))
+const medalMeta = [
+  { rank: 1, label: '冠军', color: '#ffd700', bg: 'rgba(255, 215, 0, 0.16)', border: 'rgba(255, 215, 0, 0.65)' },
+  { rank: 2, label: '亚军', color: '#c0c7d1', bg: 'rgba(192, 199, 209, 0.14)', border: 'rgba(192, 199, 209, 0.6)' },
+  { rank: 3, label: '季军', color: '#e8a06a', bg: 'rgba(232, 160, 106, 0.14)', border: 'rgba(232, 160, 106, 0.6)' }
+]
+
+function skillCloudStyle(item: SkillCloudItem, index: number) {
+  const min = 12
+  const max = 42
+  const values = skillCloudData.map((d) => d.value)
+  const minV = Math.min(...values)
+  const maxV = Math.max(...values)
+  const ratio = (item.value - minV) / Math.max(maxV - minV, 1)
+  return {
+    left: `${item.x}%`,
+    top: `${item.y}%`,
+    fontSize: `${Math.round(min + ratio * (max - min))}px`,
+    color: item.color,
+    fontWeight: ratio > 0.5 ? 700 : 600,
+    transform: `translate(-50%, -50%) rotate(${item.rotate}deg)`,
+    animationDelay: `${(index % 8) * 0.35}s`,
+    animationDuration: `${4.5 + (index % 5) * 0.6}s`
   }
-  return values
 }
+
+/* 人员培训分析 */
+const trainingCompletionMonths = [
+  '1月', '2月', '3月', '4月', '5月', '6月',
+  '7月', '8月', '9月', '10月', '11月', '12月'
+]
+const trainingCompletionTarget = 95
+const trainingCompletionData = [91.2, 92.5, 93.0, 94.1, 93.6, 95.2, 96.0, 95.5, 96.8, 97.2, 96.5, 97.8]
 
 /* =========================
    ECharts 配置（深色底，对齐生产可视化大屏）
@@ -295,64 +355,6 @@ const categoryAxisBase = {
   axisLine: { lineStyle: { color: 'rgba(0, 191, 235, 0.35)' } },
   axisLabel: { color: '#a9c9d4', fontSize: 11 },
   axisTick: { show: false }
-}
-
-/** 人力资源动态明细：横向条形图，逐条渐变着色 */
-function createHrDynamicsOption(): EChartsOption {
-  const barColors = ['#20cfff', '#4ee6a6', '#ffd52a', '#9b8cff', '#ffd52a', '#4ee6a6', '#20cfff']
-  return {
-    tooltip: {
-      ...tooltipBase,
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      top: '10%',
-      containLabel: true
-    },
-    xAxis: valueAxisBase,
-    yAxis: {
-      ...categoryAxisBase,
-      data: hrDistributionData.map((item) => item.category)
-    },
-    series: [
-      {
-        name: '人数',
-        type: 'bar',
-        barWidth: '60%',
-        data: hrDistributionData.map((item, index) => {
-          const color = barColors[index % barColors.length]
-          return {
-            value: item.value,
-            itemStyle: {
-              color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 1,
-                y2: 0,
-                colorStops: [
-                  { offset: 0, color },
-                  { offset: 1, color: `${color}CC` }
-                ]
-              },
-              borderRadius: [0, 4, 4, 0]
-            }
-          }
-        }),
-        label: {
-          show: true,
-          position: 'right',
-          color: '#dff8ff',
-          fontSize: 11,
-          formatter: '{c} 人'
-        }
-      }
-    ]
-  } as EChartsOption
 }
 
 /** 潍柴金兰领聘任情况：环形图 */
@@ -414,48 +416,57 @@ function createAppointmentOption(): EChartsOption {
   } as EChartsOption
 }
 
-/** 实时动态：各产品线在岗人数曲线 */
-function createDynamicsOption(): EChartsOption {
-  const labels = createHourlyLabels()
+/** 人均出产吨位：2025 / 2026 双折线，横轴 1–12 月 */
+function createOutputTrendOption(): EChartsOption {
   return {
     tooltip: {
       ...tooltipBase,
-      trigger: 'axis'
+      trigger: 'axis',
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        if (!list.length) return ''
+        let body = ''
+        list.forEach((item: any) => {
+          body += `${item.marker}${item.seriesName}: ${item.value} 吨/人<br/>`
+        })
+        return `${list[0].axisValue}<br/>${body}`
+      }
     },
     legend: {
-      data: dynamicsSeriesConfig.map((item) => item.name),
+      data: outputTrendSeries.map((item) => item.name),
       textStyle: { color: '#a9c9d4', fontSize: 11 },
       top: 0,
-      itemWidth: 12,
-      itemHeight: 12
+      left: 'center',
+      itemWidth: 14,
+      itemHeight: 8
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      top: '15%',
+      left: 44,
+      right: 16,
+      bottom: 28,
+      top: 36,
       containLabel: true
     },
     xAxis: {
       ...categoryAxisBase,
-      data: labels,
-      axisLabel: { color: '#a9c9d4', fontSize: 10, interval: 'auto' },
-      boundaryGap: false
+      data: outputTrendMonths,
+      boundaryGap: false,
+      axisLabel: { color: '#a9c9d4', fontSize: 10, interval: 0 }
     },
     yAxis: {
       ...valueAxisBase,
-      name: '人数',
-      nameTextStyle: { color: '#a9c9d4', fontSize: 10 }
+      name: '吨/人',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 11 }
     },
-    series: dynamicsSeriesConfig.map((item) => ({
+    series: outputTrendSeries.map((item) => ({
       name: item.name,
-      type: 'line' as const,
+      type: 'line',
       smooth: true,
-      data: createPersonnelValues(item.baseCount, item.variance, labels.length),
-      lineStyle: { width: 2, color: item.color },
-      itemStyle: { color: item.color },
       symbol: 'circle',
-      symbolSize: 4,
+      symbolSize: 5,
+      data: item.data,
+      lineStyle: { width: 2.5, color: item.color },
+      itemStyle: { color: item.color, borderColor: '#061821', borderWidth: 2 },
       areaStyle: {
         color: {
           type: 'linear',
@@ -464,8 +475,8 @@ function createDynamicsOption(): EChartsOption {
           x2: 0,
           y2: 1,
           colorStops: [
-            { offset: 0, color: item.areaColors[0] },
-            { offset: 1, color: item.areaColors[1] }
+            { offset: 0, color: `${item.color}40` },
+            { offset: 1, color: `${item.color}08` }
           ]
         }
       }
@@ -473,104 +484,42 @@ function createDynamicsOption(): EChartsOption {
   } as EChartsOption
 }
 
-/** 各单位人员明细：堆叠柱状图 */
-function createDepartmentOption(): EChartsOption {
+/** 产线人员排班统计：柱状图，横轴日期，纵轴人数 */
+function createScheduleOption(line: ScheduleLineKey): EChartsOption {
+  const color = scheduleColorMap[line]
+  const label = scheduleLineTabs.find((tab) => tab.key === line)?.label ?? ''
   return {
     tooltip: {
       ...tooltipBase,
       trigger: 'axis',
-      axisPointer: { type: 'shadow' }
-    },
-    legend: {
-      data: departmentSeries.map((item) => item.name),
-      textStyle: { color: '#a9c9d4', fontSize: 11 },
-      top: 0,
-      itemWidth: 12,
-      itemHeight: 12
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      top: '15%',
-      containLabel: true
-    },
-    xAxis: {
-      ...categoryAxisBase,
-      data: departmentCategories
-    },
-    yAxis: {
-      ...valueAxisBase,
-      name: '人数',
-      nameTextStyle: { color: '#a9c9d4', fontSize: 11 }
-    },
-    series: departmentSeries.map((item) => ({
-      name: item.name,
-      type: 'bar' as const,
-      stack: 'total',
-      data: item.data,
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 0,
-          y2: 1,
-          colorStops: [
-            { offset: 0, color: item.colors[0] },
-            { offset: 1, color: item.colors[1] }
-          ]
-        }
+      axisPointer: { type: 'shadow' },
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        const item = list[0]
+        if (!item) return ''
+        return `${item.axisValue}<br/>${item.marker}${label}排班人数: ${item.value} 人`
       }
-    }))
-  } as EChartsOption
-}
-
-/** 人均出产吨位：渐变趋势线 */
-function createOutputTrendOption(): EChartsOption {
-  return {
-    tooltip: {
-      ...tooltipBase,
-      trigger: 'axis'
     },
-    grid: {
-      left: '10%',
-      right: '4%',
-      bottom: '8%',
-      top: '10%',
-      containLabel: false
-    },
+    legend: { show: false },
+    grid: { left: 40, right: 12, bottom: 28, top: 24, containLabel: true },
     xAxis: {
       ...categoryAxisBase,
-      data: outputTrendMonths,
-      boundaryGap: false
+      data: scheduleDates,
+      axisLabel: { color: '#a9c9d4', fontSize: 10, interval: 0, rotate: 30 }
     },
     yAxis: {
       ...valueAxisBase,
-      name: '吨/人',
-      nameTextStyle: { color: '#a9c9d4', fontSize: 11 }
+      name: '人',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      min: 0
     },
     series: [
       {
-        name: '人均出产',
-        type: 'line',
-        smooth: true,
-        data: outputTrendData,
-        lineStyle: {
-          width: 3,
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 1,
-            y2: 0,
-            colorStops: [
-              { offset: 0, color: '#20cfff' },
-              { offset: 1, color: '#4ee6a6' }
-            ]
-          }
-        },
-        areaStyle: {
+        name: `${label}排班人数`,
+        type: 'bar',
+        barWidth: '55%',
+        data: mockScheduleCounts(line),
+        itemStyle: {
           color: {
             type: 'linear',
             x: 0,
@@ -578,166 +527,239 @@ function createOutputTrendOption(): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(32, 207, 255, 0.3)' },
-              { offset: 1, color: 'rgba(32, 207, 255, 0.05)' }
+              { offset: 0, color },
+              { offset: 1, color: `${color}66` }
             ]
-          }
+          },
+          borderRadius: [3, 3, 0, 0]
         },
-        itemStyle: {
-          color: '#20cfff',
-          borderColor: '#061821',
-          borderWidth: 2
+        label: { show: true, position: 'top', color: '#a9c9d4', fontSize: 9 }
+      }
+    ]
+  } as EChartsOption
+}
+
+/** 人员利用率：近 7 天折线，分厂单线 / 产线三线 */
+function createUtilizationOption(scope: UtilScopeKey): EChartsOption {
+  const seriesList = scope === 'line'
+    ? lineUtilizationSeries
+    : [{ name: '分厂', color: '#31d7ff', data: plantUtilizationData }]
+  return {
+    tooltip: {
+      ...tooltipBase,
+      trigger: 'axis',
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        if (!list.length) return ''
+        let body = ''
+        list.forEach((item: any) => {
+          body += `${item.marker}${item.seriesName}: ${item.value}%<br/>`
+        })
+        return `${list[0].axisValue}<br/>${body}`
+      }
+    },
+    legend: {
+      data: seriesList.map((item) => item.name),
+      textStyle: { color: '#a9c9d4', fontSize: 11 },
+      top: 0,
+      left: 'center',
+      itemWidth: 14,
+      itemHeight: 8
+    },
+    grid: { left: 44, right: 16, bottom: 28, top: 36, containLabel: true },
+    xAxis: {
+      ...categoryAxisBase,
+      data: scheduleDates,
+      boundaryGap: false,
+      axisLabel: { color: '#a9c9d4', fontSize: 10, interval: 0 }
+    },
+    yAxis: {
+      ...valueAxisBase,
+      name: '%',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      min: 80,
+      max: 100,
+      axisLabel: { color: '#a9c9d4', fontSize: 10, formatter: '{value}%' }
+    },
+    series: seriesList.map((item) => ({
+      name: item.name,
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 5,
+      data: item.data,
+      lineStyle: { color: item.color, width: 2.5 },
+      itemStyle: { color: item.color, borderColor: '#061821', borderWidth: 2 },
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: `${item.color}3A` },
+            { offset: 1, color: `${item.color}08` }
+          ]
+        }
+      }
+    }))
+  } as EChartsOption
+}
+
+/** 人员岗位统计：横向柱状图 */
+function createPositionAnalysisOption(): EChartsOption {
+  const colors = ['#4ee6a6', '#20cfff', '#ffd52a', '#31d7ff', '#9b8cff', '#3bd6c6', '#ff9a3c']
+  return {
+    tooltip: {
+      ...tooltipBase,
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        const item = list[0]
+        if (!item) return ''
+        return `${item.name}<br/>${item.marker}人数: ${item.value} 人`
+      }
+    },
+    grid: { left: 8, right: 40, bottom: 8, top: 12, containLabel: true },
+    xAxis: {
+      ...valueAxisBase,
+      name: '人数',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      min: 0
+    },
+    yAxis: {
+      ...categoryAxisBase,
+      data: positionAnalysisData.map((item) => item.category),
+      axisLabel: { color: '#a9c9d4', fontSize: 11 }
+    },
+    series: [
+      {
+        name: '人数',
+        type: 'bar',
+        barWidth: '58%',
+        data: positionAnalysisData.map((item, index) => {
+          const color = colors[index % colors.length]
+          return {
+            value: item.value,
+            itemStyle: {
+              color: {
+                type: 'linear',
+                x: 0, y: 0, x2: 1, y2: 0,
+                colorStops: [
+                  { offset: 0, color },
+                  { offset: 1, color: `${color}88` }
+                ]
+              },
+              borderRadius: [0, 4, 4, 0]
+            }
+          }
+        }),
+        label: {
+          show: true,
+          position: 'right',
+          color: '#dff8ff',
+          fontSize: 11,
+          formatter: '{c} 人'
         }
       }
     ]
   } as EChartsOption
 }
 
-/** 人员指标与培训：双仪表盘 */
-function createIndicatorOption(): EChartsOption {
+/** 人员培训分析：培训完成率折线 + 目标参考线 */
+function createTrainingCompletionOption(): EChartsOption {
   return {
     tooltip: {
-      formatter: '{b}: {c}',
-      ...tooltipBase
+      ...tooltipBase,
+      trigger: 'axis',
+      formatter: (params: any) => {
+        const list = Array.isArray(params) ? params : [params]
+        if (!list.length) return ''
+        let body = ''
+        list.forEach((item: any) => {
+          if (item.seriesName === '目标值') {
+            body += `${item.marker}目标值: ${trainingCompletionTarget}%<br/>`
+            return
+          }
+          body += `${item.marker}培训完成率: ${item.value}%<br/>`
+        })
+        return `${list[0].axisValue}<br/>${body}`
+      }
+    },
+    legend: {
+      data: ['培训完成率', '目标值'],
+      textStyle: { color: '#a9c9d4', fontSize: 11 },
+      top: 0,
+      left: 'center',
+      itemWidth: 14,
+      itemHeight: 8
+    },
+    grid: { left: 44, right: 20, bottom: 28, top: 40, containLabel: true },
+    xAxis: {
+      ...categoryAxisBase,
+      data: trainingCompletionMonths,
+      boundaryGap: false,
+      axisLabel: { color: '#a9c9d4', fontSize: 10, interval: 0 }
+    },
+    yAxis: {
+      ...valueAxisBase,
+      name: '%',
+      nameTextStyle: { color: '#a9c9d4', fontSize: 10 },
+      min: 0,
+      max: 100,
+      axisLabel: { color: '#a9c9d4', fontSize: 10, formatter: '{value}%' }
     },
     series: [
       {
-        name: '多技能水平',
-        type: 'gauge',
-        center: ['25%', '55%'],
-        radius: '70%',
-        min: 0,
-        max: 5,
-        splitNumber: 5,
-        progress: {
+        name: '培训完成率',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 7,
+        data: trainingCompletionData,
+        lineStyle: {
+          width: 3,
+          color: '#31d7ff',
+          shadowColor: 'rgba(49, 215, 255, 0.45)',
+          shadowBlur: 8
+        },
+        itemStyle: { color: '#31d7ff', borderColor: '#061821', borderWidth: 2 },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(49, 215, 255, 0.28)' },
+              { offset: 1, color: 'rgba(49, 215, 255, 0.04)' }
+            ]
+          }
+        },
+        label: {
           show: true,
-          width: 12,
-          itemStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 1,
-              y2: 0,
-              colorStops: [
-                { offset: 0, color: '#20cfff' },
-                { offset: 1, color: '#20cfff' }
-              ]
-            }
-          }
-        },
-        axisLine: {
-          lineStyle: {
-            width: 12,
-            color: [[1, 'rgba(0, 154, 197, 0.28)']]
-          }
-        },
-        axisTick: { show: false },
-        splitLine: {
-          length: 8,
-          lineStyle: {
-            width: 2,
-            color: 'rgba(0, 191, 235, 0.45)'
-          }
-        },
-        axisLabel: {
-          distance: 15,
-          color: '#a9c9d4',
-          fontSize: 10
-        },
-        anchor: {
-          show: true,
-          showAbove: true,
-          size: 8,
-          itemStyle: {
-            borderWidth: 2,
-            borderColor: '#20cfff'
-          }
-        },
-        title: {
-          show: true,
-          offsetCenter: [0, '80%'],
-          color: '#a9c9d4',
-          fontSize: 12
-        },
-        detail: {
-          valueAnimation: true,
-          fontSize: 20,
-          fontWeight: 'bold',
-          color: '#ffd91a',
-          offsetCenter: [0, '50%'],
-          formatter: '{value} 级'
-        },
-        data: [{ value: 3.8, name: '多技能水平' }]
+          position: 'top',
+          color: '#31d7ff',
+          fontSize: 10,
+          formatter: '{c}%'
+        }
       },
       {
-        name: '人均培训学时',
-        type: 'gauge',
-        center: ['75%', '55%'],
-        radius: '70%',
-        min: 0,
-        max: 60,
-        splitNumber: 6,
-        progress: {
+        name: '目标值',
+        type: 'line',
+        data: trainingCompletionMonths.map(() => trainingCompletionTarget),
+        symbol: 'none',
+        silent: true,
+        lineStyle: { width: 2, type: 'dashed', color: '#ff4d4f' },
+        itemStyle: { color: '#ff4d4f' },
+        label: {
           show: true,
-          width: 12,
-          itemStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 1,
-              y2: 0,
-              colorStops: [
-                { offset: 0, color: '#4ee6a6' },
-                { offset: 1, color: '#20cfff' }
-              ]
-            }
-          }
+          position: 'insideEndTop',
+          formatter: `目标 ${trainingCompletionTarget}%`,
+          color: '#ff4d4f',
+          fontSize: 11,
+          backgroundColor: 'rgba(255, 77, 79, 0.15)',
+          padding: [3, 6],
+          borderRadius: 3
         },
-        axisLine: {
-          lineStyle: {
-            width: 12,
-            color: [[1, 'rgba(0, 154, 197, 0.28)']]
-          }
-        },
-        axisTick: { show: false },
-        splitLine: {
-          length: 8,
-          lineStyle: {
-            width: 2,
-            color: 'rgba(0, 191, 235, 0.45)'
-          }
-        },
-        axisLabel: {
-          distance: 15,
-          color: '#a9c9d4',
-          fontSize: 10
-        },
-        anchor: {
-          show: true,
-          showAbove: true,
-          size: 8,
-          itemStyle: {
-            borderWidth: 2,
-            borderColor: '#4ee6a6'
-          }
-        },
-        title: {
-          show: true,
-          offsetCenter: [0, '80%'],
-          color: '#a9c9d4',
-          fontSize: 12
-        },
-        detail: {
-          valueAnimation: true,
-          fontSize: 20,
-          fontWeight: 'bold',
-          color: '#ffd91a',
-          offsetCenter: [0, '50%'],
-          formatter: '{value} 小时'
-        },
-        data: [{ value: 42, name: '人均培训学时' }]
+        tooltip: { show: false }
       }
     ]
   } as EChartsOption
@@ -747,31 +769,53 @@ function createIndicatorOption(): EChartsOption {
    页面状态与交互
    ========================= */
 
-type MetricTab = 'skill' | 'training'
+const scheduleLineKey = ref<ScheduleLineKey>('molding')
+const scheduleOption = computed(() => createScheduleOption(scheduleLineKey.value))
 
-const activeTab = ref<MetricTab>('skill')
+const utilizationScopeKey = ref<UtilScopeKey>('plant')
+const utilizationOption = computed(() => createUtilizationOption(utilizationScopeKey.value))
 
-const hrDynamicsOption = createHrDynamicsOption()
 const appointmentOption = createAppointmentOption()
-const dynamicsOption = createDynamicsOption()
-const departmentOption = createDepartmentOption()
+const positionAnalysisOption = createPositionAnalysisOption()
 const outputTrendOption = createOutputTrendOption()
-const indicatorOption = createIndicatorOption()
+const trainingCompletionOption = createTrainingCompletionOption()
+
 </script>
 
 <template>
   <div class="dashboard-container">
-    <!-- 顶部标题栏 -->
     <DashboardHeader
       title="人员可视化大屏"
       weather="潍坊 18℃ 晴"
       variant="fui"
     />
 
+    <!-- 顶部人员指标栏 -->
+    <div class="top-indicators">
+      <div
+        v-for="item in personnelIndicators"
+        :key="item.label"
+        class="top-indicator-card"
+        :class="`tone-${item.tone}`"
+      >
+        <div class="top-indicator-content">
+          <div class="top-indicator-label">{{ item.label }}</div>
+          <div class="top-indicator-value">
+            {{ item.value }}<span class="top-indicator-unit">{{ item.unit }}</span>
+          </div>
+        </div>
+        <div class="top-indicator-icon" aria-hidden="true">
+          <svg width="28" height="28" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
     <div class="dashboard-row">
       <!-- 左侧列 -->
       <div class="column-wrapper">
-        <!-- 人员概览+分布 -->
+        <!-- 人员岗位统计（第一行第一列） -->
         <div class="data-panel">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -780,95 +824,17 @@ const indicatorOption = createIndicatorOption()
           <div class="panel-header">
             <div class="panel-icon">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"
-                />
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
               </svg>
             </div>
-            <h3 class="panel-title">人员概览+分布</h3>
-          </div>
-
-          <div class="data-list">
-            <!-- 总在岗人数/缺勤人数 -->
-            <div class="data-item">
-              <div class="data-item-icon green">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"
-                  />
-                </svg>
-              </div>
-              <div class="data-item-content">
-                <div class="data-item-label">总在岗人数/缺勤人数</div>
-                <div class="data-item-value">
-                  <span style="color: #4ee6a6; text-shadow: 0 0 10px rgba(78, 230, 166, 0.5)">256</span>
-                  <span style="color: #a9c9d4; margin: 0 4px">/</span>
-                  <span style="color: #ff5f87; text-shadow: 0 0 10px rgba(255, 95, 135, 0.5)">8</span>
-                </div>
-                <div class="data-item-progress">
-                  <div class="progress-bar" style="width: 97%"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 当前班次 -->
-            <div class="data-item">
-              <div class="data-item-icon green">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div class="data-item-content">
-                <div class="data-item-label">当前班次</div>
-                <div class="data-item-value">早班 (08:00-16:00)</div>
-              </div>
-            </div>
-
-            <!-- 今日出勤达标率 -->
-            <div class="data-item">
-              <div class="data-item-icon gray">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fill-rule="evenodd"
-                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div class="data-item-content">
-                <div class="data-item-label">今日出勤达标率</div>
-                <div class="data-item-value">97%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 人力资源动态明细 -->
-        <div class="data-panel">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"
-                />
-              </svg>
-            </div>
-            <h3 class="panel-title">人力资源动态明细</h3>
+            <h3 class="panel-title">人员岗位统计</h3>
           </div>
           <div class="chart-area">
-            <EChart :option="hrDynamicsOption" />
+            <EChart :option="positionAnalysisOption" height="100%" />
           </div>
         </div>
 
-        <!-- 潍柴金兰领聘任情况 -->
+        <!-- 人均出产吨位（第二行第一列） -->
         <div class="data-panel">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -877,143 +843,7 @@ const indicatorOption = createIndicatorOption()
           <div class="panel-header">
             <div class="panel-icon">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"
-                />
-              </svg>
-            </div>
-            <h3 class="panel-title">潍柴金兰领聘任情况</h3>
-          </div>
-          <div class="chart-area">
-            <EChart :option="appointmentOption" />
-          </div>
-        </div>
-      </div>
-
-      <!-- 中间列 -->
-      <div class="column-wrapper">
-        <!-- 实时动态 -->
-        <div class="data-panel realtime-dynamics-panel">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fill-rule="evenodd"
-                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <h3 class="panel-title">实时动态</h3>
-          </div>
-
-          <!-- 动态列表 -->
-          <div class="dynamics-list-new">
-            <div v-for="row in dynamicsRows" :key="`${row.time}-${row.name}`" class="dynamics-row">
-              <div class="dynamics-arrow">▶</div>
-              <div class="dynamics-time">{{ row.time }}</div>
-              <div class="dynamics-name">{{ row.name }}</div>
-              <div class="dynamics-dot">·</div>
-              <div class="dynamics-action">{{ row.action }}</div>
-            </div>
-          </div>
-
-          <!-- 统计图表 -->
-          <div class="chart-area">
-            <EChart :option="dynamicsOption" />
-          </div>
-        </div>
-
-        <!-- 排班信息总览 -->
-        <div class="data-panel schedule-panel">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fill-rule="evenodd"
-                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <h3 class="panel-title">排班信息总览</h3>
-          </div>
-
-          <!-- 排班表格 -->
-          <div class="schedule-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>序号</th>
-                  <th>排班人</th>
-                  <th>排班时间</th>
-                  <th>排班位置</th>
-                  <th>状态</th>
-                  <th>时长</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in scheduleRows" :key="row.index">
-                  <td>{{ row.index }}</td>
-                  <td>{{ row.person }}</td>
-                  <td>{{ row.time }}</td>
-                  <td>{{ row.position }}</td>
-                  <td>
-                    <span :style="row.statusColor ? { color: row.statusColor } : undefined">
-                      {{ row.status }}
-                    </span>
-                  </td>
-                  <td>{{ row.duration }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 右侧列 -->
-      <div class="column-wrapper">
-        <!-- 各单位人员明细 -->
-        <div class="data-panel">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"
-                />
-              </svg>
-            </div>
-            <h3 class="panel-title">各单位人员明细</h3>
-          </div>
-          <div class="chart-area">
-            <EChart :option="departmentOption" />
-          </div>
-        </div>
-
-        <!-- 人均出产吨位 -->
-        <div class="data-panel">
-          <div class="corner-tl"></div>
-          <div class="corner-tr"></div>
-          <div class="corner-bl"></div>
-          <div class="corner-br"></div>
-          <div class="panel-header">
-            <div class="panel-icon">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z"
-                />
+                <path d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
               </svg>
             </div>
             <h3 class="panel-title">人均出产吨位</h3>
@@ -1026,8 +856,157 @@ const indicatorOption = createIndicatorOption()
             <EChart :option="outputTrendOption" />
           </div>
         </div>
+      </div>
 
-        <!-- 人员指标与培训 -->
+      <!-- 中间列 -->
+      <div class="column-wrapper">
+        <!-- 产线人员排班统计（第一行第二列） -->
+        <div class="data-panel">
+          <div class="corner-tl"></div>
+          <div class="corner-tr"></div>
+          <div class="corner-bl"></div>
+          <div class="corner-br"></div>
+          <div class="panel-header">
+            <div class="panel-icon">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <h3 class="panel-title">产线人员排班统计</h3>
+            <div class="tab-buttons">
+              <button
+                v-for="tab in scheduleLineTabs"
+                :key="tab.key"
+                type="button"
+                class="tab-button"
+                :class="{ active: scheduleLineKey === tab.key }"
+                @click="scheduleLineKey = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
+          </div>
+          <div class="chart-area">
+            <EChart :option="scheduleOption" height="100%" />
+          </div>
+        </div>
+
+        <!-- 人员技能分析（第二行第二列） -->
+        <div class="data-panel">
+          <div class="corner-tl"></div>
+          <div class="corner-tr"></div>
+          <div class="corner-bl"></div>
+          <div class="corner-br"></div>
+          <div class="panel-header">
+            <div class="panel-icon">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+              </svg>
+            </div>
+            <h3 class="panel-title">人员技能分析</h3>
+            <div class="tab-buttons">
+              <button
+                v-for="tab in skillPanelTabs"
+                :key="tab.key"
+                type="button"
+                class="tab-button"
+                :class="{ active: skillPanelTab === tab.key }"
+                @click="skillPanelTab = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
+          </div>
+
+          <div v-if="skillPanelTab === 'skill'" class="skill-cloud">
+            <span
+              v-for="(item, index) in skillCloudData"
+              :key="item.name"
+              class="skill-cloud-item"
+              :style="skillCloudStyle(item, index)"
+              :title="`${item.name}：${item.value} 人`"
+            >
+              {{ item.name }}
+            </span>
+          </div>
+
+          <div v-else class="skill-person-panel">
+            <div class="skill-top3">
+              <div
+                v-for="(row, index) in skillTop3"
+                :key="row.name"
+                class="skill-medal-card"
+                :style="{
+                  '--medal-color': medalMeta[index].color,
+                  '--medal-bg': medalMeta[index].bg,
+                  '--medal-border': medalMeta[index].border
+                }"
+              >
+                <div class="skill-medal-rank">{{ medalMeta[index].rank }}</div>
+                <div class="skill-medal-info">
+                  <div class="skill-medal-name">{{ row.name }}</div>
+                  <div class="skill-medal-skills">技能 <b>{{ row.skills }}</b> 项</div>
+                </div>
+                <div class="skill-medal-label">{{ medalMeta[index].label }}</div>
+              </div>
+            </div>
+
+            <div class="skill-rank-head">
+              <span>产线</span>
+              <span>姓名</span>
+              <span>技能数</span>
+            </div>
+            <div class="skill-rank-viewport">
+              <div class="skill-rank-track">
+                <div
+                  v-for="(row, index) in skillRestScrollRows"
+                  :key="`${row.name}-${index}`"
+                  class="skill-rank-row"
+                >
+                  <span>{{ row.line }}</span>
+                  <span>{{ row.name }}</span>
+                  <span class="skills">{{ row.skills }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧列 -->
+      <div class="column-wrapper">
+        <!-- 人员利用率（第一行第三列） -->
+        <div class="data-panel">
+          <div class="corner-tl"></div>
+          <div class="corner-tr"></div>
+          <div class="corner-bl"></div>
+          <div class="corner-br"></div>
+          <div class="panel-header">
+            <div class="panel-icon">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <h3 class="panel-title">人员利用率</h3>
+            <div class="tab-buttons">
+              <button
+                v-for="tab in utilizationScopeTabs"
+                :key="tab.key"
+                type="button"
+                class="tab-button"
+                :class="{ active: utilizationScopeKey === tab.key }"
+                @click="utilizationScopeKey = tab.key"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
+          </div>
+          <div class="chart-area">
+            <EChart :option="utilizationOption" height="100%" />
+          </div>
+        </div>
+
+        <!-- 人员培训分析（第二行第三列） -->
         <div class="data-panel">
           <div class="corner-tl"></div>
           <div class="corner-tr"></div>
@@ -1037,44 +1016,13 @@ const indicatorOption = createIndicatorOption()
             <div class="panel-icon">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                <path
-                  fill-rule="evenodd"
-                  d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
             </div>
-            <h3 class="panel-title">人员指标与培训</h3>
-            <div class="tab-buttons">
-              <button
-                class="tab-button"
-                :class="{ active: activeTab === 'skill' }"
-                @click="activeTab = 'skill'"
-              >
-                技能水平
-              </button>
-              <button
-                class="tab-button"
-                :class="{ active: activeTab === 'training' }"
-                @click="activeTab = 'training'"
-              >
-                培训考核
-              </button>
-            </div>
+            <h3 class="panel-title">人员培训分析</h3>
           </div>
-
-          <!-- 技能水平 -->
-          <div v-if="activeTab === 'skill'" class="chart-area">
-            <EChart :option="indicatorOption" />
-          </div>
-
-          <!-- 培训考核 -->
-          <div v-else class="training-grid">
-            <div v-for="item in trainingStats" :key="item.label" class="training-item">
-              <div class="training-label">{{ item.label }}</div>
-              <div class="training-value" :class="item.tone">{{ item.value }}</div>
-              <div class="training-change">{{ item.change }}</div>
-            </div>
+          <div class="chart-area">
+            <EChart :option="trainingCompletionOption" />
           </div>
         </div>
       </div>
@@ -1082,6 +1030,7 @@ const indicatorOption = createIndicatorOption()
   </div>
 </template>
 
+<style src="./dashboard-common.css"></style>
 <style scoped>
 .dashboard-container {
   width: 100%;
@@ -1104,17 +1053,27 @@ const indicatorOption = createIndicatorOption()
 
 .dashboard-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* 仅三列容器；行高由 column-wrapper 内两行 360 控制 */
   gap: 16px;
   height: auto;
-  min-height: calc(100vh - 200px);
+  align-items: start;
 }
 
 .column-wrapper {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  /* 与 dashboard-row 两行对齐：每列上下都是 360px */
+  grid-template-rows: 360px 360px;
   gap: 16px;
   min-width: 0;
+  min-height: 0;
+}
+
+.column-wrapper > .data-panel {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  width: 100%;
 }
 
 /* 数据面板：沿用生产可视化大屏 */
@@ -1137,6 +1096,8 @@ const indicatorOption = createIndicatorOption()
   overflow: hidden;
   box-sizing: border-box;
   height: 360px;
+  min-height: 360px;
+  max-height: 360px;
 }
 
 .data-panel::before {
@@ -1159,14 +1120,6 @@ const indicatorOption = createIndicatorOption()
   height: 42px;
   background: linear-gradient(180deg, transparent, #18d2ff, transparent);
   opacity: 0.75;
-}
-
-.realtime-dynamics-panel {
-  height: 650px;
-}
-
-.schedule-panel {
-  height: 450px;
 }
 
 .panel-header {
@@ -1418,55 +1371,6 @@ const indicatorOption = createIndicatorOption()
   flex: 1;
 }
 
-/* 排班表格样式 */
-.schedule-table {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(26, 202, 242, 0.5) transparent;
-}
-
-.schedule-table table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.schedule-table thead tr {
-  background: rgba(0, 143, 184, 0.17);
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44);
-}
-
-.schedule-table thead th {
-  color: #75dff7;
-  font-weight: 600;
-  font-size: 12px;
-  text-align: center;
-  padding: 8px 4px;
-}
-
-.schedule-table tbody tr {
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16);
-  transition: background-color 0.2s ease;
-}
-
-.schedule-table tbody tr:nth-child(odd) {
-  background: rgba(7, 36, 48, 0.78);
-}
-
-.schedule-table tbody tr:hover {
-  background: rgba(0, 169, 215, 0.13);
-}
-
-.schedule-table tbody td {
-  color: #cde7ee;
-  font-size: 12px;
-  text-align: center;
-  padding: 8px 4px;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  font-variant-numeric: tabular-nums;
-}
-
 /* 切换按钮样式 */
 .tab-buttons {
   display: flex;
@@ -1512,8 +1416,10 @@ const indicatorOption = createIndicatorOption()
 
 .chart-area {
   flex: 1;
-  min-height: 200px;
+  min-height: 0;
+  height: 0;
   width: 100%;
+  overflow: hidden;
 }
 
 /* 大数值显示 */
@@ -1620,30 +1526,13 @@ const indicatorOption = createIndicatorOption()
 }
 
 .dynamics-list-new::-webkit-scrollbar,
-.schedule-table::-webkit-scrollbar,
-.data-list::-webkit-scrollbar {
-  width: 4px;
-}
-
 .dynamics-list-new::-webkit-scrollbar-track,
-.schedule-table::-webkit-scrollbar-track,
-.data-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .dynamics-list-new::-webkit-scrollbar-thumb,
-.schedule-table::-webkit-scrollbar-thumb,
-.data-list::-webkit-scrollbar-thumb {
-  background: rgba(26, 202, 242, 0.5);
-  border-radius: 2px;
-}
-
 @media (max-width: 1400px) {
   .dashboard-row {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-
 
 /* =========================================================
    强制覆盖全局 style.css 浅色 !important（对齐生产可视化深色）
@@ -1679,6 +1568,11 @@ const indicatorOption = createIndicatorOption()
   border: 1px solid rgba(0, 191, 235, 0.48) !important;
   border-radius: 2px !important;
   padding: 12px 14px !important;
+  /* 六宫格统一高度，避免被其它规则覆盖 */
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
   box-shadow:
     inset 0 0 24px rgba(0, 157, 205, 0.055),
     0 0 12px rgba(0, 0, 0, 0.24) !important;
@@ -1905,7 +1799,6 @@ const indicatorOption = createIndicatorOption()
   gap: 16px !important;
 }
 
-
 .dashboard-container .kpi-card,
 .dashboard-container .data-item {
   color: #dff8ff !important;
@@ -1984,33 +1877,206 @@ const indicatorOption = createIndicatorOption()
   color: #a9c9d4 !important;
 }
 
-.dashboard-container .schedule-table thead tr {
-  background: rgba(0, 143, 184, 0.17) !important;
-  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
-}
-
-.dashboard-container .schedule-table thead th {
-  color: #75dff7 !important;
-}
-
-.dashboard-container .schedule-table tbody td {
-  color: #cde7ee !important;
-}
-
-.dashboard-container .schedule-table tbody tr {
-  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
-}
-
-.dashboard-container .schedule-table tbody tr:nth-child(odd) {
-  background: rgba(7, 36, 48, 0.78) !important;
-}
-
-.dashboard-container .schedule-table tbody tr:hover {
-  background: rgba(0, 169, 215, 0.13) !important;
-}
-
 .dashboard-container .dashboard-row {
   gap: 16px !important;
+}
+
+
+
+/* ===== 还原：技能分析词云 / 奖牌 / 滚动榜 ===== */
+.skill-cloud {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(0, 120, 180, 0.12), transparent 70%),
+    radial-gradient(ellipse at 20% 30%, rgba(120, 80, 220, 0.08), transparent 45%);
+  border-radius: 4px;
+}
+
+.skill-cloud-item {
+  position: absolute;
+  line-height: 1.15;
+  cursor: default;
+  white-space: nowrap;
+  user-select: none;
+  text-shadow: 0 0 12px currentColor;
+  will-change: transform;
+  animation-name: skill-cloud-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  transition: filter 0.2s ease;
+}
+
+.skill-cloud-item:hover {
+  filter: brightness(1.25) drop-shadow(0 0 8px currentColor);
+  animation-play-state: paused;
+  z-index: 2;
+}
+
+@keyframes skill-cloud-float {
+  0% { translate: 0 0; opacity: 0.88; }
+  100% { translate: 0 -8px; opacity: 1; }
+}
+
+.skill-person-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skill-top3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.skill-medal-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+  background: var(--medal-bg);
+  border: 1px solid var(--medal-border);
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.skill-medal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--medal-color), transparent);
+  box-shadow: 0 0 8px var(--medal-color);
+}
+
+.skill-medal-rank {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--medal-color);
+  color: var(--medal-color);
+  font-weight: 800;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 10px var(--medal-color);
+}
+
+.skill-medal-info { min-width: 0; flex: 1; }
+
+.skill-medal-name {
+  color: #f4fdff;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-medal-skills {
+  color: #a9c9d4;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.skill-medal-skills b {
+  color: var(--medal-color);
+  font-size: 14px;
+}
+
+.skill-medal-label {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  font-size: 10px;
+  color: var(--medal-color);
+  opacity: 0.85;
+}
+
+.skill-rank-head,
+.skill-rank-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.8fr;
+  gap: 4px;
+  text-align: center;
+}
+
+.skill-rank-head {
+  flex-shrink: 0;
+  padding: 7px 6px;
+  background: rgba(0, 143, 184, 0.28);
+  border: 1px solid rgba(0, 192, 235, 0.3);
+  border-radius: 3px 3px 0 0;
+}
+
+.skill-rank-head span {
+  color: #75dff7;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.skill-rank-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(0, 190, 235, 0.22);
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+}
+
+.skill-rank-track {
+  animation: skill-rank-scroll 22s linear infinite;
+}
+
+.skill-rank-viewport:hover .skill-rank-track {
+  animation-play-state: paused;
+}
+
+@keyframes skill-rank-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.skill-rank-row {
+  padding: 7px 6px;
+  border-bottom: 1px solid rgba(0, 154, 197, 0.14);
+  background: rgba(5, 27, 37, 0.72);
+}
+
+.skill-rank-row:nth-child(even) {
+  background: rgba(7, 36, 48, 0.78);
+}
+
+.skill-rank-row span {
+  color: #cde7ee;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-rank-row .skills {
+  color: #ffd91a;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-cloud-item, .skill-rank-track { animation: none; }
 }
 
 </style>
