@@ -16,7 +16,7 @@
 .main-content {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 15px;
   height: auto;
   min-height: calc(100vh - 310px);
 }
@@ -26,7 +26,7 @@
   display: grid;
   /* 与人员大屏一致：上下两行各 360px */
   grid-template-rows: 360px 360px;
-  gap: 16px;
+  gap: 15px;
   min-width: 0;
   min-height: 0;
 }
@@ -591,15 +591,15 @@
 }
 
 .dashboard-container .dash-header[data-v] {
-  margin-bottom: 10px !important;
+  margin-bottom: 15px !important;
 }
 
 .dashboard-container .main-content[data-v] {
-  gap: 16px !important;
+  gap: 15px !important;
 }
 
 .dashboard-container .column[data-v] {
-  gap: 16px !important;
+  gap: 15px !important;
 }
 
 .dashboard-container .data-panel[data-v] {
@@ -931,12 +931,12 @@
 }
 
 .dashboard-container .dash-header {
-  margin-bottom: 10px !important;
+  margin-bottom: 15px !important;
 }
 
 .dashboard-container .main-content,
 .dashboard-container .column {
-  gap: 16px !important;
+  gap: 15px !important;
 }
 
 .dashboard-container .data-panel {
@@ -1244,6 +1244,6 @@
   /* minmax(0, ...)：避免画布固有宽度把单列撑出视口（ECharts 尺寸反馈环） */
   .main-content {
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+    gap: 15px;
   }
 }

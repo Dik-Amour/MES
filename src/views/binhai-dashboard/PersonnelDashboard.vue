@@ -1055,7 +1055,7 @@ const trainingCompletionOption = createTrainingCompletionOption()
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   /* 仅三列容器；行高由 column-wrapper 内两行 360 控制 */
-  gap: 16px;
+  gap: 15px;
   height: auto;
   align-items: start;
 }
@@ -1064,7 +1064,7 @@ const trainingCompletionOption = createTrainingCompletionOption()
   display: grid;
   /* 与 dashboard-row 两行对齐：每列上下都是 360px */
   grid-template-rows: 360px 360px;
-  gap: 16px;
+  gap: 15px;
   min-width: 0;
   min-height: 0;
 }
@@ -1615,21 +1615,6 @@ const trainingCompletionOption = createTrainingCompletionOption()
 }
 
 .dashboard-container .data-panel .panel-icon,
-.dashboard-container .kpi-card .kpi-icon {
-  display: flex !important;
-  width: 28px !important;
-  height: 28px !important;
-  margin-right: 9px !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-shrink: 0 !important;
-  color: #40e3ff !important;
-  background: rgba(0, 176, 220, 0.14) !important;
-  border: 1px solid rgba(35, 211, 255, 0.48) !important;
-  border-radius: 2px !important;
-  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12) !important;
-}
-
 .dashboard-container .data-panel .panel-title {
   display: inline-block !important;
   margin: 0 !important;
@@ -1663,47 +1648,10 @@ const trainingCompletionOption = createTrainingCompletionOption()
 .dashboard-container .data-panel .corner-bl,
 .dashboard-container .data-panel .corner-br,
 .dashboard-container .kpi-card .corner-bl,
-.dashboard-container .kpi-card .corner-br {
-  display: block !important;
-  width: 14px !important;
-  height: 14px !important;
-  z-index: 10 !important;
-  border-color: #1bd5ff !important;
-  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75)) !important;
-}
-
 .dashboard-container .data-panel .corner-tl,
-.dashboard-container .kpi-card .corner-tl {
-  top: 0 !important;
-  left: 0 !important;
-  border-top: 2px solid #1bd5ff !important;
-  border-left: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .data-panel .corner-tr,
-.dashboard-container .kpi-card .corner-tr {
-  top: 0 !important;
-  right: 0 !important;
-  border-top: 2px solid #1bd5ff !important;
-  border-right: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .data-panel .corner-bl,
-.dashboard-container .kpi-card .corner-bl {
-  bottom: 0 !important;
-  left: 0 !important;
-  border-bottom: 2px solid #1bd5ff !important;
-  border-left: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .data-panel .corner-br,
-.dashboard-container .kpi-card .corner-br {
-  bottom: 0 !important;
-  right: 0 !important;
-  border-bottom: 2px solid #1bd5ff !important;
-  border-right: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .tab-buttons {
   display: flex !important;
   margin-left: auto !important;
@@ -1796,7 +1744,7 @@ const trainingCompletionOption = createTrainingCompletionOption()
 .dashboard-container .kpi-grid-container,
 .dashboard-container .column,
 .dashboard-container .column-wrapper {
-  gap: 16px !important;
+  gap: 15px !important;
 }
 
 .dashboard-container .kpi-card,
@@ -1878,7 +1826,7 @@ const trainingCompletionOption = createTrainingCompletionOption()
 }
 
 .dashboard-container .dashboard-row {
-  gap: 16px !important;
+  gap: 15px !important;
 }
 
 

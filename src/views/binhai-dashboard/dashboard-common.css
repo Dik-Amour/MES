@@ -3,13 +3,107 @@
  * 供各大屏 <style src="./dashboard-common.css"> 引入（非 scoped，便于跨组件复用）
  *
  * 当前收录：
+ * - 颜色与文字（底层背景、六宫格、指标卡、标题字号）
  * - 标题栏（DashboardHeader / FUI）
  * - 顶部指标卡 top-indicator-*
- * - 表格（基准：质量可视化大屏 defect-modal-table）
+ * - 表格（基准：质量可视化大屏 product-table）+ 自动滚动
+ * - 布局间距 15px
  *
- * 后续可继续补充：面板、Tab、弹窗等
+ * 后续可继续补充：Tab、弹窗等
  */
 
+
+
+/* =========================
+   颜色与文字（滨海可视化统一基准）
+   底层背景 / 六宫格 / 指标卡 / 标题字号
+   基准：人员可视化大屏
+   ========================= */
+
+/* —— 底层页面背景 —— */
+.dashboard-container {
+  color: #dff8ff !important;
+  background-color: #041019 !important;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(0, 166, 216, 0.12), transparent 27%),
+    radial-gradient(circle at 82% 78%, rgba(0, 119, 177, 0.1), transparent 31%),
+    linear-gradient(rgba(35, 146, 177, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 146, 177, 0.055) 1px, transparent 1px) !important;
+  background-size: auto, auto, 32px 32px, 32px 32px !important;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46) !important;
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
+}
+
+/* —— 六宫格面板背景 / 边框 —— */
+.dashboard-container .data-panel,
+.data-panel {
+  color: #dff8ff !important;
+  background-color: #061821 !important;
+  background-image:
+    linear-gradient(180deg, rgba(8, 35, 47, 0.96), rgba(5, 23, 32, 0.97)),
+    linear-gradient(90deg, rgba(0, 184, 226, 0.035), transparent 32%) !important;
+  border: 1px solid rgba(0, 191, 235, 0.48) !important;
+  border-radius: 2px !important;
+}
+
+/* —— 六宫格标题文字 —— */
+.dashboard-container .data-panel .panel-title,
+.data-panel .panel-title {
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #f4fdff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-shadow: 0 0 8px rgba(31, 204, 255, 0.25) !important;
+  white-space: nowrap !important;
+}
+
+/* —— 指标卡背景 —— */
+.top-indicator-card {
+  color: #dff8ff !important;
+  background-color: #082532 !important;
+  background-image:
+    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
+    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%) !important;
+  border: 1px solid rgba(0, 190, 235, 0.56) !important;
+}
+
+/* —— 指标文字字号 / 颜色 —— */
+.top-indicator-label {
+  color: #a9c9d4 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.top-indicator-value {
+  color: #ffd91a !important;
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif !important;
+  font-size: 30px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px !important;
+  text-shadow: 0 0 14px rgba(255, 217, 26, 0.36) !important;
+}
+
+.top-indicator-unit {
+  color: #b8d6df !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.top-indicator-icon {
+  color: #62e8ff !important;
+  background: rgba(0, 174, 220, 0.15) !important;
+  border-color: rgba(55, 220, 255, 0.68) !important;
+}
+
+.top-indicator-card.tone-inbound .top-indicator-icon {
+  color: #8fffd0 !important;
+  background: rgba(43, 214, 157, 0.12) !important;
+  border-color: rgba(83, 255, 197, 0.58) !important;
+}
 
 /* =========================
    标题栏（DashboardHeader）
@@ -20,7 +114,8 @@
   border: 1px solid #eee;
   border-radius: 2px;
   padding: 10px 20px;
-  margin-bottom: 8px;
+  /* 与指标行/六宫格统一间距 15px */
+  margin-bottom: 15px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -29,6 +124,7 @@
 .fui-header {
   min-height: 64px;
   padding: 8px 20px;
+  margin-bottom: 15px;
   overflow: hidden;
   color: #dff8ff;
   background:
@@ -265,8 +361,9 @@
 .top-indicators {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 14px;
+  /* 标题栏下、指标之间、指标与六宫格：统一 15px */
+  gap: 15px;
+  margin-bottom: 15px;
 }
 
 .top-indicator-card {
@@ -382,45 +479,129 @@
 
 /* =========================
    表格
-   基准：QualityDashboard · defect-modal-table
+   面板内表格基准：质量大屏 · 主要产品质量情况（product-table）；含 equipment-table / stock-table 等
+   弹窗表格基准：质量大屏 · defect-modal-table
    ========================= */
 
+/* ----- 面板表格：equipment-table / assessment-table ----- */
 .binhai-table,
 .equipment-table table,
-.inbound-modal-table,
+.stock-table,
 .schedule-table table,
 .assessment-table,
 .dashboard-container .equipment-table table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 12px;
+}
+
+.equipment-table {
+  border: 1px solid rgba(0, 190, 235, 0.22);
+  border-radius: 2px;
+  overflow: auto;
 }
 
 .binhai-table th,
 .binhai-table td,
 .equipment-table table th,
 .equipment-table table td,
-.inbound-modal-table th,
-.inbound-modal-table td,
+.stock-table th,
+.stock-table td,
 .schedule-table table th,
 .schedule-table table td,
 .assessment-table th,
 .assessment-table td,
 .dashboard-container .equipment-table table th,
 .dashboard-container .equipment-table table td {
+  padding: 9px 4px;
+  text-align: center;
+  white-space: nowrap;
+  border: none;
+}
+
+/* 表头：与质量 product-table-head 一致（实色青蓝底，非渐变） */
+.binhai-table thead th,
+.equipment-table table thead th,
+.stock-table thead th,
+.schedule-table thead th,
+.assessment-table thead th,
+.assessment-table th,
+.dashboard-container .equipment-table table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(0, 143, 184, 0.28) !important;
+  color: #75dff7 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 9px 4px !important;
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* 表体：与质量 product-table-row 一致 */
+.binhai-table tbody td,
+.equipment-table table tbody td,
+.stock-table tbody td,
+.schedule-table table tbody td,
+.assessment-table tbody td,
+.assessment-table td,
+.dashboard-container .equipment-table table tbody td {
+  background: rgba(5, 27, 37, 0.72) !important;
+  color: #cde7ee !important;
+  font-size: 12px !important;
+  padding: 9px 4px !important;
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* 斑马纹 */
+.binhai-table tbody tr:nth-child(even) td,
+.equipment-table table tbody tr:nth-child(even) td,
+.stock-table tbody tr:nth-child(even) td,
+.schedule-table table tbody tr:nth-child(even) td,
+.assessment-table tbody tr:nth-child(even) td,
+.assessment-table tr:nth-child(even) td,
+.dashboard-container .equipment-table table tbody tr:nth-child(even) td {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+/* 悬停 */
+.binhai-table tbody tr:hover td,
+.equipment-table table tbody tr:hover td,
+.stock-table tbody tr:hover td,
+.schedule-table table tbody tr:hover td,
+.assessment-table tbody tr:hover td,
+.assessment-table tr:hover td,
+.dashboard-container .equipment-table table tbody tr:hover td {
+  background: rgba(0, 169, 215, 0.13) !important;
+}
+
+/* thead 行容器不额外着色 */
+.equipment-table table thead tr,
+.schedule-table thead tr {
+  background: transparent !important;
+}
+
+/* ----- 弹窗表格：inbound-modal（质量 defect-modal 同源）----- */
+.inbound-modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.inbound-modal-table th,
+.inbound-modal-table td {
   padding: 12px 10px;
   text-align: center;
   white-space: nowrap;
 }
 
-/* 表头：青蓝渐变 + sticky */
-.binhai-table thead th,
-.equipment-table table thead th,
-.inbound-modal-table thead th,
-.schedule-table thead th,
-.assessment-table thead th,
-.assessment-table th,
-.dashboard-container .equipment-table table thead th {
+.inbound-modal-table thead th {
   position: sticky;
   top: 0;
   z-index: 1;
@@ -430,45 +611,18 @@
   border-bottom: 1px solid rgba(0, 200, 240, 0.45) !important;
 }
 
-/* 表体 */
-.binhai-table tbody td,
-.equipment-table table tbody td,
-.inbound-modal-table tbody td,
-.schedule-table table tbody td,
-.assessment-table tbody td,
-.assessment-table td,
-.dashboard-container .equipment-table table tbody td {
+.inbound-modal-table tbody td {
   background: rgba(6, 40, 58, 0.72) !important;
   color: #dff8ff !important;
   border-bottom: 1px solid rgba(0, 150, 190, 0.18) !important;
 }
 
-/* 斑马纹 */
-.binhai-table tbody tr:nth-child(odd) td,
-.equipment-table table tbody tr:nth-child(odd) td,
-.inbound-modal-table tbody tr:nth-child(odd) td,
-.schedule-table table tbody tr:nth-child(odd) td,
-.assessment-table tbody tr:nth-child(odd) td,
-.assessment-table tr:nth-child(odd) td,
-.dashboard-container .equipment-table table tbody tr:nth-child(odd) td {
+.inbound-modal-table tbody tr:nth-child(odd) td {
   background: rgba(10, 52, 74, 0.78) !important;
 }
 
-/* 悬停 */
-.binhai-table tbody tr:hover td,
-.equipment-table table tbody tr:hover td,
-.inbound-modal-table tbody tr:hover td,
-.schedule-table table tbody tr:hover td,
-.assessment-table tbody tr:hover td,
-.assessment-table tr:hover td,
-.dashboard-container .equipment-table table tbody tr:hover td {
+.inbound-modal-table tbody tr:hover td {
   background: rgba(0, 169, 215, 0.18) !important;
-}
-
-/* thead 行容器不额外着色 */
-.equipment-table table thead tr,
-.schedule-table thead tr {
-  background: transparent !important;
 }
 
 /* 数字列 */
@@ -481,6 +635,7 @@
 
 /* 滚动条（有 overflow 的表格容器） */
 .equipment-table,
+.stock-table,
 .inbound-modal-table-wrap,
 .schedule-table,
 .assessment-scroll {
@@ -489,6 +644,7 @@
 }
 
 .equipment-table::-webkit-scrollbar,
+.stock-table::-webkit-scrollbar,
 .inbound-modal-table-wrap::-webkit-scrollbar,
 .schedule-table::-webkit-scrollbar {
   width: 6px;
@@ -496,6 +652,7 @@
 }
 
 .equipment-table::-webkit-scrollbar-thumb,
+.stock-table::-webkit-scrollbar-thumb,
 .inbound-modal-table-wrap::-webkit-scrollbar-thumb,
 .schedule-table::-webkit-scrollbar-thumb {
   background: rgba(26, 202, 242, 0.55);
@@ -506,4 +663,325 @@
 .inbound-modal-table-wrap::-webkit-scrollbar-track,
 .schedule-table::-webkit-scrollbar-track {
   background: transparent;
+}
+
+
+/* =========================
+   布局间距（滨海可视化统一 15px）
+   - 标题栏 ↔ 指标行
+   - 指标卡之间
+   - 指标行 ↔ 六宫格
+   - 六宫格卡片之间（列间/行间）
+   ========================= */
+.dashboard-row,
+.main-content,
+.column,
+.column-wrapper {
+  gap: 15px !important;
+}
+
+.dashboard-container .dash-header,
+.dashboard-container .fui-header {
+  margin-bottom: 15px !important;
+}
+
+.dashboard-container .top-indicators {
+  gap: 15px !important;
+  margin-bottom: 15px !important;
+}
+
+.dashboard-container .dashboard-row,
+.dashboard-container .main-content,
+.dashboard-container .column,
+.dashboard-container .column-wrapper {
+  gap: 15px !important;
+}
+
+
+
+
+/* =========================
+   表格自动滚动（CSS）— 与质量大屏一致
+   表头固定；仅表体在 viewport 内滚动
+   结构：
+     .table-autoscroll
+       > .table-autoscroll-head   （固定表头，不滚）
+       > .table-autoscroll-viewport
+         > .table-autoscroll-track （双份 tbody，循环上滚）
+   ========================= */
+.table-autoscroll,
+.equipment-table.table-autoscroll {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden !important;
+  overflow-y: hidden !important;
+}
+
+/* 固定表头：不透明底，避免表体滚入时透出 */
+.table-autoscroll-head {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #0a2433 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.table-autoscroll-head table,
+.table-autoscroll-head .product-table-head {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.table-autoscroll-head th {
+  position: static !important;
+  background: rgba(0, 143, 184, 0.95) !important;
+  color: #75dff7 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 9px 4px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+  border-top: none !important;
+}
+
+/* 表体滚动视口 */
+.table-autoscroll-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 双份内容轨道 */
+.table-autoscroll-track {
+  will-change: transform;
+  animation: binhai-table-scroll 60s linear infinite;
+}
+
+.table-autoscroll:hover .table-autoscroll-track,
+.table-autoscroll:focus-within .table-autoscroll-track {
+  animation-play-state: paused;
+}
+
+@keyframes binhai-table-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* 轨道内表格：只放 tbody 行，不带头 */
+.table-autoscroll-track table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table-autoscroll-track thead {
+  display: none;
+}
+
+.table-autoscroll-track td {
+  background: rgba(5, 27, 37, 0.72) !important;
+  color: #cde7ee !important;
+  font-size: 12px !important;
+  padding: 9px 4px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
+}
+
+.table-autoscroll-track table:nth-of-type(odd) tbody tr:nth-child(odd) td,
+.table-autoscroll-track > table:first-child tbody tr:nth-child(odd) td {
+  background: rgba(5, 27, 37, 0.72) !important;
+}
+
+.table-autoscroll-track table tbody tr:nth-child(even) td {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.table-autoscroll-track table tbody tr:hover td {
+  background: rgba(0, 169, 215, 0.13) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-autoscroll-track {
+    animation: none;
+  }
+}
+
+/* =========================
+   覆盖全局 style.css 浅色表格
+   （.data-panel table 的 !important 浅灰底）
+   ========================= */
+.dashboard-container .data-panel table,
+.dashboard-container .data-panel table tbody td,
+.dashboard-container .data-panel table thead th {
+  border-color: transparent !important;
+}
+
+.dashboard-container .data-panel table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(0, 143, 184, 0.28) !important;
+  color: #75dff7 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 9px 4px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44) !important;
+}
+
+.dashboard-container .data-panel table tbody td {
+  background: rgba(5, 27, 37, 0.72) !important;
+  color: #cde7ee !important;
+  font-size: 12px !important;
+  padding: 9px 4px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:nth-child(even) td,
+.dashboard-container .data-panel table tbody tr:nth-child(even) {
+  background: rgba(7, 36, 48, 0.78) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:nth-child(odd) td,
+.dashboard-container .data-panel table tbody tr:nth-child(odd) {
+  background: rgba(5, 27, 37, 0.72) !important;
+}
+
+.dashboard-container .data-panel table tbody tr:hover td,
+.dashboard-container .data-panel table tbody tr:hover {
+  background: rgba(0, 169, 215, 0.13) !important;
+}
+
+.dashboard-container .data-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+
+/* =========================
+   质量大屏 product-table（面板滚动表基准）
+   从 QualityDashboard 抽出，供各屏复用
+   ========================= */
+.product-table-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(0, 190, 235, 0.22);
+  border-radius: 2px;
+}
+
+.product-table-head {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 1.2fr 0.9fr 0.9fr;
+  flex-shrink: 0;
+  background: rgba(0, 143, 184, 0.95);
+  border-bottom: 1px solid rgba(0, 192, 235, 0.44);
+}
+
+.product-table-head span {
+  padding: 9px 4px;
+  color: #75dff7;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.product-table-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.product-table-track {
+  will-change: transform;
+  animation: product-table-scroll 60s linear infinite;
+}
+
+.product-table-wrap:hover .product-table-track {
+  animation-play-state: paused;
+}
+
+@keyframes product-table-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.product-table-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 1.2fr 0.9fr 0.9fr;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 154, 197, 0.16);
+  background: rgba(5, 27, 37, 0.72);
+}
+
+.product-table-row:nth-child(even) {
+  background: rgba(7, 36, 48, 0.78);
+}
+
+.product-table-row:hover {
+  background: rgba(0, 169, 215, 0.13);
+}
+
+.product-table-row span {
+  padding: 9px 4px;
+  color: #cde7ee;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-table-row .rate {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.product-table-row .rate.inner { color: #31d7ff; }
+.product-table-row .rate.repair { color: #ffd52a; }
+
+@media (prefers-reduced-motion: reduce) {
+  .product-table-track { animation: none; }
+}
+
+/* 制芯 stock-thead */
+.stock-thead th {
+  background: rgba(0, 143, 184, 0.95) !important;
+  color: #75dff7 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 9px 4px !important;
+  text-align: center !important;
+}
+
+/* 自动滚动表：表头/表体等宽对齐 */
+.table-autoscroll-head table,
+.table-autoscroll-track table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.table-autoscroll-head th,
+.table-autoscroll-track td {
+  box-sizing: border-box;
 }

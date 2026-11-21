@@ -549,22 +549,44 @@ const panels = computed(() => [
         @mouseenter="onStockEnter"
         @mouseleave="onStockLeave"
       >
-        <table class="stock-table">
-          <thead class="stock-thead">
-            <tr>
-              <th>砂芯名称</th>
-              <th>数量（颗）</th>
-              <th>芯架数</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in stockList" :key="`${item.coreName}-${index}`">
-              <td>{{ item.coreName }}</td>
-              <td class="stock-count">{{ item.count }}</td>
-              <td class="stock-rack">{{ item.rackCount }}</td>
-            </tr>
-          </tbody>
-        </table>
+        
+        <div class="table-autoscroll-head">
+          <table class="stock-table">
+            <colgroup><col style="width:33.34%"><col style="width:33.33%"><col style="width:33.33%"></colgroup>
+            <thead class="stock-thead">
+                                    <tr>
+                                      <th>砂芯名称</th>
+                                      <th>数量（颗）</th>
+                                      <th>芯架数</th>
+                                    </tr>
+                                  </thead>
+          </table>
+        </div>
+        <div class="table-autoscroll-viewport">
+          <div class="table-autoscroll-track">
+            <table class="stock-table">
+            <colgroup><col style="width:33.34%"><col style="width:33.33%"><col style="width:33.33%"></colgroup>
+              <tbody>
+                                      <tr v-for="(item, index) in stockList" :key="`${item.coreName}-${index}`">
+                                        <td>{{ item.coreName }}</td>
+                                        <td class="stock-count">{{ item.count }}</td>
+                                        <td class="stock-rack">{{ item.rackCount }}</td>
+                                      </tr>
+                                    </tbody>
+            </table>
+            <table class="stock-table" aria-hidden="true">
+            <colgroup><col style="width:33.34%"><col style="width:33.33%"><col style="width:33.33%"></colgroup>
+            <colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup>
+              <tbody>
+                                      <tr v-for="(item, index) in stockList" :key="`${item.coreName}-${index}`">
+                                        <td>{{ item.coreName }}</td>
+                                        <td class="stock-count">{{ item.count }}</td>
+                                        <td class="stock-rack">{{ item.rackCount }}</td>
+                                      </tr>
+                                    </tbody>
+            </table>
+          </div>
+        </div>      
       </div>
     </template>
   </LineDashboardShell>
@@ -729,15 +751,7 @@ const panels = computed(() => [
 }
 
 /* 砂芯库存：表格自动滚动，表头吸顶 */
-.stock-scroll {
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(26, 202, 242, 0.55) transparent;
-}
+.stock-scroll { flex: 1; min-height: 0; height: 100%; overflow: hidden !important; display: flex; flex-direction: column; }
 
 .stock-scroll::-webkit-scrollbar {
   width: 6px;
@@ -754,39 +768,6 @@ const panels = computed(() => [
 
 .stock-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(26, 202, 242, 0.7);
-}
-
-.stock-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.stock-thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 10px 12px;
-  text-align: left;
-  color: #dff8ff;
-  font-weight: 600;
-  letter-spacing: 1px;
-  background: linear-gradient(180deg, rgba(10, 48, 64, 0.98), rgba(8, 37, 50, 0.96));
-  border-bottom: 1px solid rgba(0, 190, 235, 0.45);
-}
-
-.stock-table tbody td {
-  padding: 10px 12px;
-  color: #c5e4ee;
-  border-bottom: 1px solid rgba(0, 166, 216, 0.16);
-}
-
-.stock-table tbody tr:nth-child(even) td {
-  background: rgba(0, 166, 216, 0.05);
-}
-
-.stock-table tbody tr:hover td {
-  background: rgba(0, 190, 236, 0.12);
 }
 
 .stock-count {

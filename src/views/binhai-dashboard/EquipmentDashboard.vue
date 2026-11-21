@@ -779,39 +779,65 @@ const downtimeAnalysisOption = computed(() =>
               </button>
             </div>
           </div>
-          <div class="equipment-table equipment-table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>设备编号</th>
-                  <th>设备名称</th>
-                  <th>运行时长</th>
-                  <th>可动率</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(row, index) in equipmentStatsRows"
-                  :key="`${row.code}-${index}`"
-                >
-                  <td>{{ row.code }}</td>
-                  <td>{{ row.name }}</td>
-                  <td>{{ row.runtime }}</td>
-                  <td>
-                    <span
-                      class="availability-rate"
-                      :class="{
-                        'availability-high': parseFloat(row.availability) >= 95,
-                        'availability-mid': parseFloat(row.availability) >= 90 && parseFloat(row.availability) < 95,
-                        'availability-low': parseFloat(row.availability) < 90
-                      }"
-                    >{{ row.availability }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <div class="equipment-table equipment-table-scroll table-autoscroll">
+            <div class="table-autoscroll-head">
+                            <table>
+              <colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead>
+                                            <tr>
+                                              <th>设备编号</th>
+                                              <th>设备名称</th>
+                                              <th>运行时长</th>
+                                              <th>可动率</th>
+                                            </tr>
+                                          </thead></table>
+            </div>
+            <div class="table-autoscroll-viewport">
+              <div class="table-autoscroll-track">
+                                <table>
+              <colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><tbody>
+                                              <tr
+                                                v-for="(row, index) in equipmentStatsRows"
+                                                :key="`${row.code}-${index}`"
+                                              >
+                                                <td>{{ row.code }}</td>
+                                                <td>{{ row.name }}</td>
+                                                <td>{{ row.runtime }}</td>
+                                                <td>
+                                                  <span
+                                                    class="availability-rate"
+                                                    :class="{
+                                                      'availability-high': parseFloat(row.availability) >= 95,
+                                                      'availability-mid': parseFloat(row.availability) >= 90 && parseFloat(row.availability) < 95,
+                                                      'availability-low': parseFloat(row.availability) < 90
+                                                    }"
+                                                  >{{ row.availability }}</span>
+                                                </td>
+                                              </tr>
+                                            </tbody></table>
+                                <table aria-hidden="true">
+              <colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><tbody>
+                                              <tr
+                                                v-for="(row, index) in equipmentStatsRows"
+                                                :key="`${row.code}-${index}`"
+                                              >
+                                                <td>{{ row.code }}</td>
+                                                <td>{{ row.name }}</td>
+                                                <td>{{ row.runtime }}</td>
+                                                <td>
+                                                  <span
+                                                    class="availability-rate"
+                                                    :class="{
+                                                      'availability-high': parseFloat(row.availability) >= 95,
+                                                      'availability-mid': parseFloat(row.availability) >= 90 && parseFloat(row.availability) < 95,
+                                                      'availability-low': parseFloat(row.availability) < 90
+                                                    }"
+                                                  >{{ row.availability }}</span>
+                                                </td>
+                                              </tr>
+                                            </tbody></table>
+              </div>
+            </div>
+          </div>        </div>
 
         <!-- 设备异常处理明细 -->
         <div class="data-panel">
@@ -831,31 +857,47 @@ const downtimeAnalysisOption = computed(() =>
             </div>
             <h3 class="panel-title">设备异常处理明细</h3>
           </div>
-          <div class="equipment-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>部门车间</th>
-                  <th>设备名称</th>
-                  <th>异常类型</th>
-                  <th>处理人</th>
-                  <th>异常时长</th>
-                  <th>最近异常时间</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in sortedAbnormalRows" :key="`${row.device}-${index}`">
-                  <td>{{ row.dept }}</td>
-                  <td>{{ row.device }}</td>
-                  <td><span class="abnormal-issue">{{ row.issue }}</span></td>
-                  <td>{{ row.handler }}</td>
-                  <td><span class="abnormal-rate">{{ row.duration }}</span></td>
-                  <td>{{ row.time }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <div class="equipment-table table-autoscroll">
+            <div class="table-autoscroll-head">
+                            <table>
+              <colgroup><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"></colgroup><thead>
+                                            <tr>
+                                              <th>部门车间</th>
+                                              <th>设备名称</th>
+                                              <th>异常类型</th>
+                                              <th>处理人</th>
+                                              <th>异常时长</th>
+                                              <th>最近异常时间</th>
+                                            </tr>
+                                          </thead></table>
+            </div>
+            <div class="table-autoscroll-viewport">
+              <div class="table-autoscroll-track">
+                                <table>
+              <colgroup><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"></colgroup><tbody>
+                                              <tr v-for="(row, index) in sortedAbnormalRows" :key="`${row.device}-${index}`">
+                                                <td>{{ row.dept }}</td>
+                                                <td>{{ row.device }}</td>
+                                                <td><span class="abnormal-issue">{{ row.issue }}</span></td>
+                                                <td>{{ row.handler }}</td>
+                                                <td><span class="abnormal-rate">{{ row.duration }}</span></td>
+                                                <td>{{ row.time }}</td>
+                                              </tr>
+                                            </tbody></table>
+                                <table aria-hidden="true">
+              <colgroup><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"><col style="width:16.67%"></colgroup><tbody>
+                                              <tr v-for="(row, index) in sortedAbnormalRows" :key="`${row.device}-${index}`">
+                                                <td>{{ row.dept }}</td>
+                                                <td>{{ row.device }}</td>
+                                                <td><span class="abnormal-issue">{{ row.issue }}</span></td>
+                                                <td>{{ row.handler }}</td>
+                                                <td><span class="abnormal-rate">{{ row.duration }}</span></td>
+                                                <td>{{ row.time }}</td>
+                                              </tr>
+                                            </tbody></table>
+              </div>
+            </div>
+          </div>        </div>
       </div>
     </div>
   </div>
@@ -863,11 +905,7 @@ const downtimeAnalysisOption = computed(() =>
 
 <style src="./dashboard-common.css"></style>
 <style scoped>
-.equipment-table {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
+.equipment-table { flex: 1; min-height: 0; overflow: hidden !important; }
 .equipment-table-scroll {
   max-height: 280px;
   overscroll-behavior: contain;
@@ -902,7 +940,7 @@ const downtimeAnalysisOption = computed(() =>
 .main-content {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 15px;
   height: auto;
   min-height: calc(100vh - 310px);
 }
@@ -910,7 +948,7 @@ const downtimeAnalysisOption = computed(() =>
 .column {
   display: grid;
   grid-template-rows: 360px 360px;
-  gap: 16px;
+  gap: 15px;
   min-width: 0;
   min-height: 0;
 }
@@ -1037,8 +1075,15 @@ const downtimeAnalysisOption = computed(() =>
 .dashboard-container .data-panel .corner-tl,
 .dashboard-container .data-panel .corner-tr,
 .dashboard-container .data-panel .corner-bl,
-.dashboard-container .data-panel .corner-br,
-.dashboard-container .kpi-card .corner-bl,
+.dashboard-container .data-panel .corner-br {
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-color: #1bd5ff !important;
+  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
+  z-index: 10 !important;
+}
+
 .corner-tl {
   top: 0;
   left: 0;

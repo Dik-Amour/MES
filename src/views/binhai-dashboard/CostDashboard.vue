@@ -665,28 +665,50 @@ const processOption = createCostPieOption(processCostData, 'process')
             </div>
             <h3 class="panel-title">考核指标对比</h3>
           </div>
-          <div class="equipment-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>考核项目</th>
-                  <th>目标</th>
-                  <th>实际</th>
-                  <th>占比</th>
-                  <th>同比</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in assessmentRows" :key="row.item">
-                  <td>{{ row.item }}</td>
-                  <td>{{ row.target }}</td>
-                  <td>{{ row.actual }}</td>
-                  <td :class="row.ratioTone === 'green' ? 'text-green' : 'text-red'">{{ row.ratio }}</td>
-                  <td :class="row.yoyTone === 'green' ? 'text-green' : 'text-red'">{{ row.yoy }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <div class="equipment-table table-autoscroll">
+              <div class="table-autoscroll-head">
+                <table>
+                  <colgroup><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup>
+                                    <thead>
+                                  <tr>
+                                    <th>考核项目</th>
+                                    <th>目标</th>
+                                    <th>实际</th>
+                                    <th>占比</th>
+                                    <th>同比</th>
+                                  </tr>
+                                </thead>
+                </table>
+              </div>
+              <div class="table-autoscroll-viewport">
+                <div class="table-autoscroll-track">
+                  <table>
+                    <colgroup><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup>
+                                        <tbody>
+                                    <tr v-for="row in assessmentRows" :key="row.item">
+                                      <td>{{ row.item }}</td>
+                                      <td>{{ row.target }}</td>
+                                      <td>{{ row.actual }}</td>
+                                      <td :class="row.ratioTone === 'green' ? 'text-green' : 'text-red'">{{ row.ratio }}</td>
+                                      <td :class="row.yoyTone === 'green' ? 'text-green' : 'text-red'">{{ row.yoy }}</td>
+                                    </tr>
+                                  </tbody>
+                  </table>
+                  <table aria-hidden="true">
+                    <colgroup><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup>
+                                        <tbody>
+                                    <tr v-for="row in assessmentRows" :key="row.item">
+                                      <td>{{ row.item }}</td>
+                                      <td>{{ row.target }}</td>
+                                      <td>{{ row.actual }}</td>
+                                      <td :class="row.ratioTone === 'green' ? 'text-green' : 'text-red'">{{ row.ratio }}</td>
+                                      <td :class="row.yoyTone === 'green' ? 'text-green' : 'text-red'">{{ row.yoy }}</td>
+                                    </tr>
+                                  </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
         </div>
       </div>
 
@@ -818,11 +840,7 @@ const processOption = createCostPieOption(processCostData, 'process')
 <style src="./dashboard-common.css"></style>
 <style scoped>
 /* 表格视觉：dashboard-common.css；此处仅布局 */
-.equipment-table {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
+.equipment-table { flex: 1; min-height: 0; overflow: hidden !important; }
 
 
 
@@ -844,61 +862,6 @@ const processOption = createCostPieOption(processCostData, 'process')
   background-size: auto, auto, 32px 32px, 32px 32px;
   box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.46);
   font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
-}
-
-/* KPI 指标区域样式 */
-.kpi-section {
-  margin-bottom: 16px;
-}
-
-.kpi-grid-container {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-/* KPI 卡片：沿用生产可视化大屏指标卡 */
-.kpi-card {
-  position: relative;
-  min-height: 100px;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow: hidden;
-  color: #dff8ff;
-  background-color: #082532;
-  background-image:
-    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%);
-  border: 1px solid rgba(0, 190, 235, 0.56);
-  border-radius: 3px;
-  box-shadow:
-    inset 0 0 22px rgba(0, 154, 201, 0.09),
-    0 0 10px rgba(0, 0, 0, 0.24);
-  box-sizing: border-box;
-}
-
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 58%;
-  height: 2px;
-  background: linear-gradient(90deg, #26d9ff, transparent);
-  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82);
-}
-
-.kpi-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 34%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86));
 }
 
 .corner-bl {
@@ -925,64 +888,11 @@ const processOption = createCostPieOption(processCostData, 'process')
   filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75));
 }
 
-.kpi-icon {
-  position: relative;
-  z-index: 1;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #40e3ff;
-  background: rgba(0, 176, 220, 0.14);
-  border: 1px solid rgba(35, 211, 255, 0.48);
-  box-shadow: inset 0 0 16px rgba(35, 211, 255, 0.16);
-}
-
-.kpi-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.kpi-content {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  min-width: 0;
-}
-
-.kpi-title {
-  color: #a9c9d4;
-  font-size: 12px;
-  margin-bottom: 6px;
-  line-height: 1.2;
-  letter-spacing: 1px;
-}
-
-.kpi-value {
-  color: #ffd91a;
-  font-size: 22px;
-  font-weight: 800;
-  font-family: 'DIN Alternate', 'Source Han Sans CN', sans-serif;
-  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36);
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.kpi-unit {
-  color: #a7cad5;
-  font-size: 13px;
-  margin-left: 2px;
-}
-
 /* 主内容区域 */
 .main-content {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 15px;
   min-height: calc(100vh - 320px);
 }
 
@@ -990,7 +900,7 @@ const processOption = createCostPieOption(processCostData, 'process')
   display: grid;
   /* 与人员大屏一致：上下两行各 360px */
   grid-template-rows: 360px 360px;
-  gap: 16px;
+  gap: 15px;
   min-width: 0;
   min-height: 0;
 }
@@ -1226,14 +1136,9 @@ const processOption = createCostPieOption(processCostData, 'process')
 
 
 @media (max-width: 1400px) {
-  .kpi-grid-container {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(4, minmax(0, 1fr));
-  }
-
   .main-content {
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+    gap: 15px;
   }
 }
 
@@ -1317,21 +1222,6 @@ const processOption = createCostPieOption(processCostData, 'process')
 }
 
 .dashboard-container .data-panel .panel-icon,
-.dashboard-container .kpi-card .kpi-icon {
-  display: flex !important;
-  width: 28px !important;
-  height: 28px !important;
-  margin-right: 9px !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-shrink: 0 !important;
-  color: #40e3ff !important;
-  background: rgba(0, 176, 220, 0.14) !important;
-  border: 1px solid rgba(35, 211, 255, 0.48) !important;
-  border-radius: 2px !important;
-  box-shadow: inset 0 0 10px rgba(35, 211, 255, 0.12) !important;
-}
-
 .dashboard-container .data-panel .panel-title {
   display: inline-block !important;
   margin: 0 !important;
@@ -1365,47 +1255,10 @@ const processOption = createCostPieOption(processCostData, 'process')
 .dashboard-container .data-panel .corner-bl,
 .dashboard-container .data-panel .corner-br,
 .dashboard-container .kpi-card .corner-bl,
-.dashboard-container .kpi-card .corner-br {
-  display: block !important;
-  width: 14px !important;
-  height: 14px !important;
-  z-index: 10 !important;
-  border-color: #1bd5ff !important;
-  filter: drop-shadow(0 0 4px rgba(27, 213, 255, 0.75)) !important;
-}
-
 .dashboard-container .data-panel .corner-tl,
-.dashboard-container .kpi-card .corner-tl {
-  top: 0 !important;
-  left: 0 !important;
-  border-top: 2px solid #1bd5ff !important;
-  border-left: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .data-panel .corner-tr,
-.dashboard-container .kpi-card .corner-tr {
-  top: 0 !important;
-  right: 0 !important;
-  border-top: 2px solid #1bd5ff !important;
-  border-right: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .data-panel .corner-bl,
-.dashboard-container .kpi-card .corner-bl {
-  bottom: 0 !important;
-  left: 0 !important;
-  border-bottom: 2px solid #1bd5ff !important;
-  border-left: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .data-panel .corner-br,
-.dashboard-container .kpi-card .corner-br {
-  bottom: 0 !important;
-  right: 0 !important;
-  border-bottom: 2px solid #1bd5ff !important;
-  border-right: 2px solid #1bd5ff !important;
-}
-
 .dashboard-container .tab-buttons {
   display: flex !important;
   margin-left: auto !important;
@@ -1498,90 +1351,7 @@ const processOption = createCostPieOption(processCostData, 'process')
 .dashboard-container .kpi-grid-container,
 .dashboard-container .column,
 .dashboard-container .column-wrapper {
-  gap: 16px !important;
-}
-
-.dashboard-container .kpi-card {
-  position: relative !important;
-  min-height: 100px !important;
-  padding: 12px 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  overflow: hidden !important;
-  color: #dff8ff !important;
-  background: #082532 !important;
-  background-color: #082532 !important;
-  background-image:
-    linear-gradient(135deg, rgba(13, 63, 82, 0.98), rgba(6, 31, 42, 0.98)),
-    linear-gradient(90deg, rgba(0, 196, 240, 0.1), transparent 58%) !important;
-  border: 1px solid rgba(0, 190, 235, 0.56) !important;
-  border-left: 1px solid rgba(0, 190, 235, 0.56) !important;
-  border-radius: 3px !important;
-  box-shadow:
-    inset 0 0 22px rgba(0, 154, 201, 0.09),
-    0 0 10px rgba(0, 0, 0, 0.24) !important;
-}
-
-.dashboard-container .kpi-card::before {
-  content: '' !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 58% !important;
-  height: 2px !important;
-  background: linear-gradient(90deg, #26d9ff, transparent) !important;
-  box-shadow: 0 0 8px rgba(38, 217, 255, 0.82) !important;
-  z-index: 2 !important;
-}
-
-.dashboard-container .kpi-card::after {
-  content: '' !important;
-  position: absolute !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 34% !important;
-  height: 1px !important;
-  background: linear-gradient(90deg, transparent, rgba(38, 217, 255, 0.86)) !important;
-  z-index: 2 !important;
-}
-
-.dashboard-container .kpi-icon {
-  position: relative !important;
-  z-index: 1 !important;
-  width: 44px !important;
-  height: 44px !important;
-  flex: 0 0 44px !important;
-  border-radius: 50% !important;
-  color: #40e3ff !important;
-  background: rgba(0, 176, 220, 0.14) !important;
-  border: 1px solid rgba(35, 211, 255, 0.48) !important;
-  box-shadow: inset 0 0 16px rgba(35, 211, 255, 0.16) !important;
-}
-
-.dashboard-container .kpi-content {
-  position: relative !important;
-  z-index: 1 !important;
-  flex: 1 !important;
-  min-width: 0 !important;
-}
-
-.dashboard-container .kpi-title {
-  color: #a9c9d4 !important;
-  font-size: 12px !important;
-  margin-bottom: 6px !important;
-  letter-spacing: 1px !important;
-}
-
-.dashboard-container .kpi-value {
-  color: #ffd91a !important;
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  text-shadow: 0 0 12px rgba(255, 217, 26, 0.36) !important;
-}
-
-.dashboard-container .kpi-unit {
-  color: #a7cad5 !important;
+  gap: 15px !important;
 }
 
 .dashboard-container .unit-hint {
@@ -1594,7 +1364,7 @@ const processOption = createCostPieOption(processCostData, 'process')
 
 
 .dashboard-container .main-content {
-  gap: 16px !important;
+  gap: 15px !important;
 }
 
 </style>

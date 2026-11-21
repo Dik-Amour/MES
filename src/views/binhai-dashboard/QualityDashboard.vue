@@ -1273,8 +1273,8 @@ function handleDefectChartClick(payload: unknown) {
 .dashboard-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px !important;
-  margin-bottom: 14px;
+  gap: 15px !important;
+  margin-bottom: 15px;
 }
 
 .dashboard-row.dashboard-grid-2x3 {
@@ -1284,7 +1284,7 @@ function handleDefectChartClick(payload: unknown) {
 
 .dashboard-row.two-columns {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 15px;
 }
 
 .dashboard-row.wide-columns {
@@ -1849,7 +1849,7 @@ function handleDefectChartClick(payload: unknown) {
 
 .product-table-track {
   will-change: transform;
-  animation: product-table-scroll 28s linear infinite;
+  animation: product-table-scroll 60s linear infinite;
 }
 
 .product-table-wrap:hover .product-table-track {
