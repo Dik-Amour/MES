@@ -1,7 +1,7 @@
 <template>
   <div class="safety-dashboard">
     <!-- 顶部标题栏 -->
-    <DashboardHeader title="材料成型中心工业园区安全环保大屏" :show-weather="false" variant="fui" />
+    <DashboardHeader title="材料成型中心运营大屏" :show-weather="false" variant="fui"  show-nav />
 
     <div class="safety-grid">
       <!-- 左列 -->
@@ -1117,10 +1117,12 @@ onBeforeUnmount(() => {
 })
 </script>
 
+<style src="./dashboard-common.css"></style>
+
 <style scoped>
 .safety-dashboard {
   padding: 8px;
-  background: #fff;
+  background: #f0f2f5;
   min-height: calc(100vh - 90px);
   overflow-x: auto;
 }
@@ -1243,7 +1245,7 @@ onBeforeUnmount(() => {
 }
 
 .chart-card {
-  background: #f2f2f2;
+  background: #fff;
   border-radius: 4px;
   padding: 8px;
   min-width: 0;

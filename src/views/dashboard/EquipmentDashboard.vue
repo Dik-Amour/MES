@@ -1,7 +1,7 @@
 <template>
   <div class="equipment-dashboard">
     <!-- 大屏标题 -->
-    <DashboardHeader title="材料成型中心工业园区设备监控大屏" :show-weather="false" variant="fui" />
+    <DashboardHeader title="材料成型中心运营大屏" :show-weather="false" variant="fui"  show-nav />
 
     <!-- 第一行：设备指标总览（等宽 KPI 带） -->
     <div class="kpi-panel">
@@ -1142,11 +1142,13 @@ onBeforeUnmount(() => {
 })
 </script>
 
+<style src="./dashboard-common.css"></style>
+
 <style scoped>
 .equipment-dashboard {
   --eq-block-h: 340px;
   padding: 8px;
-  background: #fff;
+  background: #f0f2f5;
   min-height: calc(100vh - 90px);
   min-width: 1180px;
 }
@@ -1265,7 +1267,7 @@ onBeforeUnmount(() => {
 /* 第三行重点设备概况：固定高度，内容超出内部滚动（结构与第二行卡片一致） */
 .equipment-panel {
   height: var(--eq-block-h);
-  background: #f2f2f2;
+  background: #fff;
   border-radius: 4px;
   padding: 8px;
   box-sizing: border-box;

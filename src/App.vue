@@ -88,12 +88,12 @@
               <FundOutlined />
             </template>
             <template #title>寒亭可视化</template>
-            <a-menu-item key="/dashboard/plant">厂区可视化大屏</a-menu-item>
-            <a-menu-item key="/dashboard/production">生产可视化大屏</a-menu-item>
-            <a-menu-item key="/dashboard/equipment">设备可视化大屏</a-menu-item>
-            <a-menu-item key="/dashboard/quality">质量可视化大屏</a-menu-item>
-            <a-menu-item key="/dashboard/personnel">人员可视化大屏</a-menu-item>
-            <a-menu-item key="/dashboard/safety">安环可视化大屏</a-menu-item>
+            <a-menu-item key="/dashboard/plant">首页</a-menu-item>
+            <a-menu-item key="/dashboard/production">生产</a-menu-item>
+            <a-menu-item key="/dashboard/equipment">设备</a-menu-item>
+            <a-menu-item key="/dashboard/quality">质量</a-menu-item>
+            <a-menu-item key="/dashboard/personnel">人力</a-menu-item>
+            <a-menu-item key="/dashboard/safety">安环</a-menu-item>
             <a-menu-item key="/dashboard/virtual-line">设备弹框可视化</a-menu-item>
             <a-menu-item key="/dashboard/plant-virtual-line">厂区虚拟产线可视化大屏</a-menu-item>
             <a-menu-item key="/dashboard/plant-virtual-kw">造型三线KW可视化</a-menu-item>

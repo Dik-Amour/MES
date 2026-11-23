@@ -1,7 +1,7 @@
 <template>
   <div class="personnel-dashboard">
     <!-- 大屏标题 -->
-    <DashboardHeader title="材料成型中心工业园区人员管理大屏" :show-weather="false" variant="fui" />
+    <DashboardHeader title="材料成型中心运营大屏" :show-weather="false" variant="fui"  show-nav />
 
     <div class="personnel-grid">
       <!-- 第一行 -->
@@ -352,10 +352,12 @@ onBeforeUnmount(() => {
 })
 </script>
 
+<style src="./dashboard-common.css"></style>
+
 <style scoped>
 .personnel-dashboard {
   padding: 8px;
-  background: #fff;
+  background: #f0f2f5;
   min-height: calc(100vh - 90px);
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="quality-dashboard">
     <!-- 大屏标题 -->
-    <DashboardHeader title="材料成型中心工业园区质量监管大屏" :show-weather="false" variant="fui" />
+    <DashboardHeader title="材料成型中心运营大屏" :show-weather="false" variant="fui"  show-nav />
 
     <!-- 数据指标（单独一行） -->
     <div class="kpi-row">
@@ -529,10 +529,12 @@ onBeforeUnmount(() => {
 })
 </script>
 
+<style src="./dashboard-common.css"></style>
+
 <style scoped>
 .quality-dashboard {
   padding: 8px;
-  background: #fff;
+  background: #f0f2f5;
   min-height: calc(100vh - 90px);
   min-width: 1180px;
 }
@@ -547,7 +549,7 @@ onBeforeUnmount(() => {
 }
 
 .kpi-box {
-  background: #f7f9fc;
+  background: #fff;
   border: 1px solid #e8ecf0;
   border-left: 3px solid #4472c4;
   border-radius: 4px;
@@ -601,7 +603,7 @@ onBeforeUnmount(() => {
 }
 
 .verify-box {
-  background: #f7f9fc;
+  background: #fff;
   border: 1px solid #e8ecf0;
   border-left: 3px solid #4472c4;
   border-radius: 4px;

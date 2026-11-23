@@ -1,16 +1,32 @@
 <template>
   <div class="production-dashboard">
     <!-- 大屏标题 -->
-    <DashboardHeader title="材料成型中心工业园区生产运营大屏" :show-weather="false" variant="fui" />
+    <DashboardHeader title="材料成型中心运营大屏" :show-weather="false" variant="fui" show-nav />
+
+    <!-- 指标行（120px） -->
+    <div class="prod-metrics">
+      <div class="prod-metric-card" v-for="m in topMetrics" :key="m.label">
+        <div class="prod-metric-content">
+          <div class="prod-metric-label">{{ m.label }}</div>
+          <div class="prod-metric-value">
+            {{ m.value }}<span v-if="m.unit" class="prod-metric-unit">{{ m.unit }}</span>
+          </div>
+          <div v-if="m.sub" class="prod-metric-sub">{{ m.sub }}</div>
+        </div>
+      </div>
+    </div>
 
     <div class="dashboard-grid">
       <!-- 左列 -->
       <div class="col">
         <div class="chart-card">
           <div class="chart-header">
-            <span class="chart-title">产线出入库统计</span>
+            <span class="chart-title">产线生产分析</span>
+            <select v-model="planLine" class="series-select">
+              <option v-for="name in planLineOptions" :key="name" :value="name">{{ name }}</option>
+            </select>
           </div>
-          <div ref="lineInOutChartRef" class="chart-body"></div>
+          <div ref="planOutputChartRef" class="chart-body"></div>
         </div>
 
         <div class="chart-card">
@@ -23,6 +39,19 @@
           </div>
           <div ref="factoryChartRef" class="chart-body"></div>
         </div>
+      </div>
+
+      <!-- 中列：第二行为产线吨位占比（第二行第二列） -->
+      <div class="col center-col">
+        <div class="chart-card annual-card">
+          <div class="chart-header">
+            <span class="chart-title">年度生产统计</span>
+            <select v-model="annualLine" class="series-select">
+              <option v-for="name in planLineOptions" :key="name" :value="name">{{ name }}</option>
+            </select>
+          </div>
+          <div ref="annualChartRef" class="chart-body annual-body"></div>
+        </div>
 
         <div class="chart-card">
           <div class="chart-header">
@@ -33,58 +62,6 @@
             </div>
           </div>
           <div ref="tonnageChartRef" class="chart-body"></div>
-        </div>
-      </div>
-
-      <!-- 中列 -->
-      <div class="col center-col">
-        <div class="center-stats">
-          <div class="stat-block">
-            <div class="stat-title">当月出产</div>
-            <div class="stat-value">731.2<span class="unit">吨</span></div>
-            <div class="stat-sub">同比：4.5%　环比：-2.3%</div>
-          </div>
-          <div class="stat-block">
-            <div class="stat-title">当月入库</div>
-            <div class="stat-value">731.2<span class="unit">吨</span></div>
-            <div class="stat-sub">同比：3.8%　环比：1.6%</div>
-          </div>
-        </div>
-
-        <div class="center-middle">
-          <div class="stat-block big">
-            <div class="stat-title">年度出产</div>
-            <div class="stat-value">339,200<span class="unit">吨</span></div>
-          </div>
-          <div class="casting-img-wrap">
-            <img :src="castingImg" class="casting-img" alt="铸件图" draggable="false" />
-          </div>
-          <div class="stat-block big">
-            <div class="stat-title">年度入库</div>
-            <div class="stat-value">339,200<span class="unit">吨</span></div>
-          </div>
-        </div>
-
-        <div class="center-stats">
-          <div class="stat-block">
-            <div class="stat-title">在制品数</div>
-            <div class="stat-value">339,200<span class="unit">件</span></div>
-          </div>
-          <div class="stat-block">
-            <div class="stat-title">成品数</div>
-            <div class="stat-value">339,200<span class="unit">件</span></div>
-          </div>
-        </div>
-
-        <div class="chart-card annual-card">
-          <div class="chart-header">
-            <span class="chart-title">年度统计</span>
-            <div class="mini-tabs">
-              <button :class="{ active: annualMode === 'prod' }" @click="annualMode = 'prod'">年度出产</button>
-              <button :class="{ active: annualMode === 'in' }" @click="annualMode = 'in'">年度入库</button>
-            </div>
-          </div>
-          <div ref="annualChartRef" class="chart-body annual-body"></div>
         </div>
       </div>
 
@@ -115,66 +92,29 @@
       </div>
     </div>
 
-    <!-- 产线出入库详情弹框 -->
-    <div v-if="lineModalVisible" class="p-modal-mask" @click.self="lineModalVisible = false">
-      <div class="p-modal">
-        <div class="p-modal-header">
-          <span class="p-modal-title">{{ lineModalName }}出入库吨位</span>
-          <button class="p-modal-close" @click="lineModalVisible = false">✕</button>
-        </div>
-        <table class="p-modal-table">
-          <thead>
-            <tr>
-              <th>产线</th><th>出产（吨）</th><th>入库（吨）</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="r in lineModalRows" :key="r.line">
-              <td>{{ r.line }}</td>
-              <td>{{ r.prod }}</td>
-              <td>{{ r.inbound }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 年度统计 - 月份厂区详情弹框 -->
-    <div v-if="annualModalVisible" class="p-modal-mask" @click.self="annualModalVisible = false">
-      <div class="p-modal">
-        <div class="p-modal-header">
-          <span class="p-modal-title">{{ annualModalMonth }}{{ annualMode === 'prod' ? '出产' : '入库' }}数据</span>
-          <button class="p-modal-close" @click="annualModalVisible = false">✕</button>
-        </div>
-        <table class="p-modal-table">
-          <thead>
-            <tr>
-              <th>月份</th>
-              <th v-for="f in factorySplit" :key="f.name">{{ f.name }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="r in annualModalRows" :key="r.label">
-              <td>{{ r.label }}</td>
-              <td v-for="(v, i) in r.values" :key="i">{{ v }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <!-- 弹框已随产线出入库/年度统计合并移除 -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
 import DashboardHeader from './DashboardHeader.vue'
-import castingImg from '@/assets/image/发动机.png'
 
 const seriesOptions = ['WP12', 'WP13']
 
+/** 指标行：原中间区 6 项指标 */
+const topMetrics = [
+  { label: '当月出产', value: '731.2', unit: '吨', sub: '同比：4.5%　环比：-2.3%' },
+  { label: '当月入库', value: '731.2', unit: '吨', sub: '同比：3.8%　环比：1.6%' },
+  { label: '年度出产', value: '339,200', unit: '吨', sub: '' },
+  { label: '年度入库', value: '339,200', unit: '吨', sub: '' },
+  { label: '在制品数', value: '339,200', unit: '件', sub: '' },
+  { label: '成品数', value: '339,200', unit: '件', sub: '' }
+]
+
 // ========== 图表实例与DOM ==========
-const lineInOutChartRef = ref<HTMLElement>()
+const planOutputChartRef = ref<HTMLElement>()
 const factoryChartRef = ref<HTMLElement>()
 const tonnageChartRef = ref<HTMLElement>()
 const annualChartRef = ref<HTMLElement>()
@@ -186,7 +126,55 @@ const charts: Record<string, echarts.ECharts> = {}
 // ========== 状态 ==========
 const factoryMode = ref<'month' | 'year'>('month')
 const tonnageMode = ref<'prod' | 'in'>('prod')
-const annualMode = ref<'prod' | 'in'>('prod')
+/** 年度出产统计：产线下拉 */
+const annualLine = ref('')
+
+// 计划&出产&投料分析：产线下拉（与首页生产分析一致）
+const planLineOptions = [
+  '造型一线大件',
+  '造型一线中件',
+  '造型二线大件',
+  '造型二线中件',
+  '造型三线KW',
+  '造型三线HWS',
+  '造型四线大件（安丘）',
+  '造型四线中件（安丘）'
+]
+const planLine = ref(planLineOptions[0])
+annualLine.value = planLineOptions[0]
+
+/** 近7天标签（MM-DD，含今天） */
+const planDays = (() => {
+  const now = new Date()
+  const labels: string[] = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i)
+    labels.push(
+      `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    )
+  }
+  return labels
+})()
+
+/** 按产线名生成近7天 计划 / 出产 / 投料 mock */
+function buildPlanOutputSeries(line: string) {
+  let seed = 0
+  for (let i = 0; i < line.length; i++) seed = (seed * 31 + line.charCodeAt(i)) >>> 0
+  const plan: number[] = []
+  const output: number[] = []
+  const feed: number[] = []
+  for (let day = 0; day < 7; day++) {
+    const base = 70 + ((seed >> (day * 3)) % 40)
+    const p = base + (day % 3) * 5
+    const o = Math.round(p * (0.82 + ((seed + day * 17) % 18) / 100))
+    const f = Math.round(o * (1.05 + ((seed + day * 11) % 12) / 100))
+    plan.push(p)
+    output.push(o)
+    feed.push(f)
+  }
+  return { plan, output, feed }
+}
+
 const lineDetailModes = reactive<Record<string, string>>({
   'line1': 'line1-large',
   'line2': 'line2-large',
@@ -217,63 +205,20 @@ const lineDetailConfigs = [
 // ========== 模拟数据 ==========
 const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
 
-// 产线出入库统计
-const lineInOutData = {
-  lines: ['造型一线', '造型二线', '造型三线', '造型四线'],
-  prod: [100, 140, 230, 100],
-  in: [150, 100, 205, 145]
-}
-
-// 各产线下的子产线（出产/入库之和等于该产线总量）
-const lineSubData: Record<string, { line: string; prod: number; inbound: number }[]> = {
-  '造型一线': [
-    { line: '造型一线大件', prod: 55, inbound: 85 },
-    { line: '造型一线中件', prod: 45, inbound: 65 }
-  ],
-  '造型二线': [
-    { line: '造型二线大件', prod: 78, inbound: 56 },
-    { line: '造型二线中件', prod: 62, inbound: 44 }
-  ],
-  '造型三线': [
-    { line: '造型三线KW', prod: 120, inbound: 110 },
-    { line: '造型三线HWS', prod: 110, inbound: 95 }
-  ],
-  '造型四线': [
-    { line: '造型四线大件', prod: 58, inbound: 80 },
-    { line: '造型四线中件', prod: 42, inbound: 65 }
-  ]
-}
-
-// 产线出入库详情弹框
-const lineModalVisible = ref(false)
-const lineModalName = ref('')
-const lineModalRows = computed(() => lineSubData[lineModalName.value] ?? [])
-
-function openLineModal(lineName: string) {
-  lineModalName.value = lineName
-  lineModalVisible.value = true
-}
-
-// 年度统计 - 月份厂区明细弹框
-const factorySplit: { name: string; ratio: number }[] = [
-  { name: '安丘厂区', ratio: 0.56 },
-  { name: '寒亭厂区', ratio: 0.44 }
-]
-const annualModalVisible = ref(false)
-const annualModalMonth = ref('')
-const annualModalRows = computed(() => {
-  const mIdx = months.indexOf(annualModalMonth.value)
-  if (mIdx < 0) return []
-  const src = annualMode.value === 'prod' ? annualData.prod : annualData.in
-  return annualData.years.map((y, yIdx) => ({
-    label: `${y}年${annualModalMonth.value}`,
-    values: factorySplit.map(f => Math.round(src[yIdx][mIdx] * f.ratio))
-  }))
-})
-
-function openAnnualModal(monthLabel: string) {
-  annualModalMonth.value = monthLabel
-  annualModalVisible.value = true
+/** 年度出产统计：按产线生成近12月 出产 / 入库 mock */
+function buildAnnualInOut(line: string) {
+  let seed = 0
+  for (let i = 0; i < line.length; i++) seed = (seed * 31 + line.charCodeAt(i)) >>> 0
+  const prod: number[] = []
+  const inbound: number[] = []
+  for (let m = 0; m < 12; m++) {
+    const base = 100 + ((seed >> (m * 2)) % 80)
+    const p = base + (m % 4) * 8
+    const inboundV = Math.round(p * (0.88 + ((seed + m * 13) % 20) / 100))
+    prod.push(p)
+    inbound.push(inboundV)
+  }
+  return { prod, inbound }
 }
 
 // 厂区出入库统计
@@ -305,21 +250,6 @@ const tonnageData = {
   ]
 }
 
-// 年度统计（3年 x 12月）
-const annualData = {
-  years: ['2024', '2025', '2026'],
-  prod: [
-    [100, 130, 230, 100, 152, 152, 155, 140, 230, 100, 120, 140],
-    [130, 200, 210, 140, 190, 165, 190, 175, 210, 105, 145, 145],
-    [155, 235, 240, 210, 218, 185, 210, 190, 225, 160, 155, 100]
-  ],
-  in: [
-    [90, 120, 210, 95, 140, 140, 145, 130, 210, 95, 110, 130],
-    [120, 180, 195, 130, 175, 152, 175, 160, 195, 98, 132, 132],
-    [145, 215, 225, 195, 205, 172, 198, 178, 212, 148, 142, 95]
-  ]
-}
-
 // 各产线生产详情（月度曲线，2025/2026两年）
 const genLineData = (seed: number) => {
   const base2025 = [150, 158, 235, 160, 150, 165, 155, 168, 172, 190, 178, 150]
@@ -346,31 +276,103 @@ const TON_UNIT = '吨'
 const tons = (v: any) => `${v ?? ''} ${TON_UNIT}`
 const axisNameStyle = { color: '#666', fontSize: 10 }
 
-function renderLineInOut() {
-  charts.lineInOut?.setOption({
-    tooltip: { trigger: 'axis', valueFormatter: tons },
-    legend: {
-      data: ['出产', '入库'], top: 0, right: 0,
-      textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9
+/** 产线生产分析：近7天分组柱 + 计划达成率折线（纵轴单位：件） */
+function renderPlanOutput() {
+  const d = buildPlanOutputSeries(planLine.value)
+  const rate = d.plan.map((p, i) => (p ? Math.round((d.output[i] / p) * 1000) / 10 : 0))
+  charts.planOutput?.setOption({
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: any) => {
+        const lines = [`${params[0].axisValue}<br/>`]
+        params.forEach((p: any) => {
+          if (p.seriesName === '计划达成率') {
+            lines.push(`${p.marker} ${p.seriesName}: ${p.value}%<br/>`)
+          } else {
+            lines.push(`${p.marker} ${p.seriesName}: ${p.value} 件<br/>`)
+          }
+        })
+        return lines.join('')
+      }
     },
-    grid: { left: 48, right: 14, top: 30, bottom: 24 },
-    xAxis: { type: 'category', data: lineInOutData.lines, ...baseAxis, splitLine: { show: false } },
-    yAxis: { type: 'value', name: TON_UNIT, nameTextStyle: axisNameStyle, ...baseAxis },
-    series: [
+    legend: {
+      data: ['计划数', '出产数', '投料数', '计划达成率'],
+      top: 0,
+      left: 'center',
+      textStyle: { color: '#666', fontSize: 10 },
+      itemWidth: 14,
+      itemHeight: 9
+    },
+    grid: { left: 46, right: 44, top: 36, bottom: 24 },
+    xAxis: {
+      type: 'category',
+      data: planDays,
+      ...baseAxis,
+      splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, fontSize: 10 }
+    },
+    yAxis: [
       {
-        name: '出产', type: 'bar', data: lineInOutData.prod, itemStyle: { color: '#4472c4' }, barWidth: 14,
-        label: { show: true, position: 'top', color: '#4472c4', fontSize: 9, formatter: (p: any) => tons(p.value) }
+        type: 'value',
+        name: '件',
+        nameTextStyle: axisNameStyle,
+        ...baseAxis
       },
       {
-        name: '入库', type: 'bar', data: lineInOutData.in, itemStyle: { color: '#3ba8a0' }, barWidth: 14,
-        label: { show: true, position: 'top', color: '#3ba8a0', fontSize: 9, formatter: (p: any) => tons(p.value) }
+        type: 'value',
+        min: 0,
+        max: 100,
+        ...baseAxis,
+        position: 'right',
+        splitLine: { show: false },
+        axisLabel: { ...baseAxis.axisLabel, formatter: '{value}%', fontSize: 10 },
+        name: '%',
+        nameTextStyle: axisNameStyle
+      }
+    ],
+    series: [
+      {
+        name: '计划数',
+        type: 'bar',
+        barWidth: 12,
+        barGap: '30%',
+        data: d.plan,
+        itemStyle: { color: '#7ec8f5' }
+      },
+      {
+        name: '出产数',
+        type: 'bar',
+        barWidth: 12,
+        data: d.output,
+        itemStyle: { color: '#18b6d8' }
+      },
+      {
+        name: '投料数',
+        type: 'bar',
+        barWidth: 12,
+        data: d.feed,
+        itemStyle: { color: '#7ed99a' }
+      },
+      {
+        name: '计划达成率',
+        type: 'line',
+        yAxisIndex: 1,
+        data: rate,
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 5,
+        lineStyle: { width: 2, color: '#ffb020' },
+        itemStyle: { color: '#ffb020' },
+        label: {
+          show: true,
+          position: 'top',
+          color: '#c90',
+          fontSize: 9,
+          formatter: '{c}%'
+        }
       }
     ]
   }, { notMerge: true })
-  charts.lineInOut?.off('click')
-  charts.lineInOut?.on('click', (params: any) => {
-    if (params.name) openLineModal(params.name)
-  })
 }
 
 function renderFactory() {
@@ -397,7 +399,7 @@ function renderTonnage() {
     tooltip: { trigger: 'item', formatter: (p: any) => `${p.name}: ${p.value} ${TON_UNIT} (${p.percent}%)` },
     series: [
       {
-        type: 'pie', radius: '65%', center: ['50%', '50%'],
+        type: 'pie', radius: ['45%', '65%'], center: ['50%', '50%'],
         data: tonnageData[tonnageMode.value].map(item => ({ ...item, itemStyle: { color: colorMap[item.name] } })),
         label: { color: '#666', fontSize: 11, formatter: (p: any) => `${p.name}\n${p.value}${TON_UNIT}` },
         labelLine: { length: 8, length2: 8 }
@@ -406,24 +408,46 @@ function renderTonnage() {
   }, { notMerge: true })
 }
 
+/** 年度出产统计：近12月 出产/入库 分组柱（吨） */
 function renderAnnual() {
-  const d = annualData[annualMode.value]
+  const d = buildAnnualInOut(annualLine.value)
   charts.annual?.setOption({
     tooltip: { trigger: 'axis', valueFormatter: tons },
-    legend: { data: annualData.years, top: 0, textStyle: { color: '#666', fontSize: 11 }, itemWidth: 14, itemHeight: 9 },
-    grid: { left: 46, right: 14, top: 30, bottom: 24 },
-    xAxis: { type: 'category', data: months, ...baseAxis, splitLine: { show: false } },
+    legend: {
+      data: ['出产', '入库'],
+      top: 0,
+      left: 'center',
+      textStyle: { color: '#666', fontSize: 11 },
+      itemWidth: 14,
+      itemHeight: 9
+    },
+    grid: { left: 46, right: 14, top: 34, bottom: 24 },
+    xAxis: {
+      type: 'category',
+      data: months,
+      ...baseAxis,
+      splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, fontSize: 10 }
+    },
     yAxis: { type: 'value', name: TON_UNIT, nameTextStyle: axisNameStyle, ...baseAxis },
-    series: annualData.years.map((y, i) => ({
-      name: y, type: 'bar', data: d[i], barWidth: 8,
-      itemStyle: { color: ['#2f3542', '#747d8c', '#a4b0be'][i] },
-      label: { show: true, position: 'top', color: '#999', fontSize: 9 }
-    }))
+    series: [
+      {
+        name: '出产',
+        type: 'bar',
+        barWidth: 14,
+        barGap: '30%',
+        data: d.prod,
+        itemStyle: { color: '#4472c4' }
+      },
+      {
+        name: '入库',
+        type: 'bar',
+        barWidth: 14,
+        data: d.inbound,
+        itemStyle: { color: '#3ba8a0' }
+      }
+    ]
   }, { notMerge: true })
-  charts.annual?.off('click')
-  charts.annual?.on('click', (params: any) => {
-    if (params.name) openAnnualModal(params.name)
-  })
 }
 
 function renderLineDetail(key: string) {
@@ -467,7 +491,7 @@ const initChart = (el: HTMLElement | undefined, key: string) => {
 }
 
 const renderAll = () => {
-  renderLineInOut()
+  renderPlanOutput()
   renderFactory()
   renderTonnage()
   renderAnnual()
@@ -476,7 +500,7 @@ const renderAll = () => {
 
 onMounted(async () => {
   await nextTick()
-  initChart(lineInOutChartRef.value, 'lineInOut')
+  initChart(planOutputChartRef.value, 'planOutput')
   initChart(factoryChartRef.value, 'factory')
   initChart(tonnageChartRef.value, 'tonnage')
   initChart(annualChartRef.value, 'annual')
@@ -492,7 +516,8 @@ const handleResize = () => {
 
 watch([factoryMode], renderFactory)
 watch([tonnageMode], renderTonnage)
-watch([annualMode], renderAnnual)
+watch(annualLine, renderAnnual)
+watch(planLine, renderPlanOutput)
 watch([lineDetailModes, lineDetailSeries], () => {
   lineDetailConfigs.forEach(cfg => renderLineDetail(cfg.key))
 }, { deep: true })
@@ -503,96 +528,122 @@ onBeforeUnmount(() => {
 })
 </script>
 
+<style src="./dashboard-common.css"></style>
+
 <style scoped>
 .production-dashboard {
   padding: 8px;
-  background: #fff;
+  background: #f0f2f5;
   min-height: calc(100vh - 90px);
+  min-width: 1180px;
 }
 
+/* 与首页一致：三列等宽，模块间距 10px */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 27% 46% 27%;
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  /* 默认 stretch：右列 absolute 滚动需要跟随最高列 */
 }
 
-/* 产线出入库详情弹框 */
-.p-modal-mask {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 1000;
+/* 顶部指标行：高度 120px（与首页一致） */
+.prod-metrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.prod-metric-card {
+  height: 120px;
+  min-height: 120px;
+  max-height: 120px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.p-modal {
+  padding: 12px 14px;
   background: #fff;
-  border-radius: 6px;
-  width: 560px;
-  max-width: 92vw;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e8ecf0;
+  border-left: 3px solid #4472c4;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
-.p-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 18px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.p-modal-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-}
-
-.p-modal-close {
-  border: none;
-  background: none;
-  font-size: 18px;
-  color: #999;
-  cursor: pointer;
-  padding: 2px 6px;
-  line-height: 1;
-}
-
-.p-modal-close:hover {
-  color: #333;
-}
-
-.p-modal-table {
+.prod-metric-content {
+  min-width: 0;
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
 }
 
-.p-modal-table th,
-.p-modal-table td {
-  padding: 10px 12px;
-  text-align: center;
-  border-bottom: 1px solid #f0f0f0;
+.prod-metric-label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.p-modal-table th {
-  background: #fafafa;
-  font-weight: 600;
-  color: #333;
-}
-
-.p-modal-table tbody tr:last-child td {
-  border-bottom: none;
-  font-weight: 600;
+.prod-metric-value {
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
   color: #1a1a1a;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prod-metric-unit {
+  margin-left: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+}
+
+.prod-metric-sub {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1400px) {
+  .prod-metric-value {
+    font-size: 18px;
+  }
 }
 
 .col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 与首页一致：模块卡固定 360px，内部图表撑满 */
+.dashboard-grid .chart-card {
+  height: 360px;
+  min-height: 360px;
+  max-height: 360px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dashboard-grid .chart-card .chart-header {
+  flex-shrink: 0;
+}
+
+.dashboard-grid .chart-card .chart-body {
+  flex: 1;
+  min-height: 0;
+  height: auto;
 }
 
 /* 右侧生产详情列：高度跟随其他列，内容超出时内部滚动 */
@@ -610,7 +661,7 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   padding-right: 4px;
   scrollbar-width: thin;
   scrollbar-color: #b8b8b8 #f2f2f2;
@@ -638,7 +689,7 @@ onBeforeUnmount(() => {
 }
 
 .center-col {
-  gap: 12px;
+  gap: 10px;
 }
 .chart-header {
   margin-bottom: 4px;
@@ -647,94 +698,22 @@ onBeforeUnmount(() => {
 .chart-header.sub {
   margin-top: 2px;
 }
+
+/* 图表高度由 .dashboard-grid .chart-card 统一控制（360px 内 flex 撑满） */
 .chart-body {
-  height: 200px;
+  height: auto;
 }
 
 .annual-body {
-  height: 210px;
+  height: auto;
 }
 
 .line-body {
-  height: 175px;
-}
-
-/* 中间统计区 */
-.center-stats {
-  display: flex;
-  justify-content: space-around;
-  gap: 12px;
-}
-
-.stat-block {
-  text-align: center;
-}
-
-.stat-block.big {
-  white-space: nowrap;
-}
-
-.stat-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  font-size: 30px;
-  font-weight: 700;
-  color: #222;
-}
-
-.stat-value .unit {
-  font-size: 14px;
-  font-weight: 400;
-  color: #666;
-  margin-left: 4px;
-}
-
-.stat-sub {
-  font-size: 11px;
-  color: #999;
-  margin-top: 2px;
-}
-
-.stat-block.big .stat-value {
-  font-size: 34px;
-}
-
-.center-middle {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 12px;
-  min-height: 220px;
-}
-
-.stat-block.big {
-  white-space: nowrap;
-  text-align: center;
-}
-
-.casting-img-wrap {
-  width: 160px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.casting-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 4px;
-  display: block;
+  height: auto;
 }
 
 .annual-card {
-  flex: 1;
+  /* 高度与首页模块一致：360px，不再拉伸撑满列 */
+  height: 360px;
 }
 </style>
