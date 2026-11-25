@@ -103,6 +103,9 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/core-production/body-line-storage': { title: '机体线砂芯库', path: '/core-production/body-line-storage', icon: InboxOutlined },
     '/core-production/inbound-record': { title: '砂芯立库入库记录', path: '/core-production/inbound-record', icon: InboxOutlined },
     '/core-production/outbound-record': { title: '砂芯立库出库记录', path: '/core-production/outbound-record', icon: InboxOutlined },
+    '/core-production/marking-record': { title: '机体线组芯刻号', path: '/core-production/marking-record', icon: InboxOutlined },
+    '/core-production/material-mapping': { title: '物料映射', path: '/core-production/material-mapping', icon: InboxOutlined },
+    '/core-production/port-device-mapping': { title: '上料口设备映射', path: '/core-production/port-device-mapping', icon: InboxOutlined },
     // 可视化路径
     '/dashboard': { title: '寒亭可视化', path: '/dashboard/plant', icon: InboxOutlined },
     '/dashboard/production': { title: '生产', path: '/dashboard/production', icon: InboxOutlined },
@@ -117,9 +120,10 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     // 现场管理路径
     '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
     '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },
-    // 大屏数据管理路径
-    '/screen-data': { title: '大屏数据管理', path: '/screen-data/equipment', icon: InboxOutlined },
+    // 寒亭大屏数据管理路径
+    '/screen-data': { title: '寒亭大屏数据管理', path: '/screen-data/equipment', icon: InboxOutlined },
     '/screen-data/equipment': { title: '设备数据导入', path: '/screen-data/equipment', icon: InboxOutlined },
+    '/screen-data/cost': { title: '成本导入', path: '/screen-data/cost', icon: InboxOutlined },
     // 工艺管理路径
     '/craft': { title: '工艺管理', path: '/craft/common-sand-core', icon: ToolOutlined },
     '/craft/common-sand-core': { title: '通用砂芯配置', path: '/craft/common-sand-core', icon: ToolOutlined },
@@ -170,7 +174,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     items.push(pathMap['/site'])
   }
 
-  // 添加大屏数据管理父级菜单
+  // 添加寒亭大屏数据管理父级菜单
   if (route.path.startsWith('/screen-data')) {
     items.push(pathMap['/screen-data'])
   }

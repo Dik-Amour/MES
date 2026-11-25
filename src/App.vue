@@ -119,8 +119,9 @@
             <template #icon>
               <DatabaseOutlined />
             </template>
-            <template #title>大屏数据管理</template>
+            <template #title>寒亭大屏数据管理</template>
             <a-menu-item key="/screen-data/equipment">设备数据导入</a-menu-item>
+            <a-menu-item key="/screen-data/cost">成本导入</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="andon">
@@ -178,6 +179,8 @@
             <a-menu-item key="/core-production/inbound-record">砂芯立库入库记录</a-menu-item>
             <a-menu-item key="/core-production/outbound-record">砂芯立库出库记录</a-menu-item>
             <a-menu-item key="/core-production/marking-record">机体线组芯刻号</a-menu-item>
+            <a-menu-item key="/core-production/material-mapping">物料映射</a-menu-item>
+            <a-menu-item key="/core-production/port-device-mapping">上料口设备映射</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="site">

@@ -562,7 +562,7 @@ const deviceItems = [
   { label: '净值/原值', unit: '亿元', value: '5.02/26.85' },
   { label: '设备可动率', unit: '%', value: '71.37' },
   { label: 'MTBF', unit: '小时', value: '7744.04' },
-  { label: 'MTTR', unit: '小时', value: '33' }
+  { label: 'MTTR', unit: '分钟', value: '33' }
 ]
 
 /** 顶部两行指标卡：年度出产/入库 + 厂区指标 + 设备中心 */
@@ -639,14 +639,14 @@ function renderProduction() {
       formatter: (params: any) => {
         const lines = [`${params[0].axisValue}<br/>`]
         params.forEach((p: any) => {
-          const unit = p.seriesName === '出产达成率' ? '%' : ''
+          const unit = p.seriesName === '计划完成率' ? '%' : ''
           lines.push(`${p.marker} ${p.seriesName}: ${p.value}${unit}<br/>`)
         })
         return lines.join('')
       }
     },
     legend: {
-      data: ['计划数', '出产数', '细清数', '出产达成率'],
+      data: ['计划数', '出产数', '细清数', '计划完成率'],
       top: 0,
       textStyle: { color: '#666', fontSize: 10 },
       itemWidth: 14,
@@ -696,7 +696,7 @@ function renderProduction() {
         itemStyle: { color: '#7ed99a' }
       },
       {
-        name: '出产达成率',
+        name: '计划完成率',
         type: 'line',
         yAxisIndex: 1,
         data: rate,

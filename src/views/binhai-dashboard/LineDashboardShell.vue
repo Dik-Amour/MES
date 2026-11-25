@@ -11,6 +11,8 @@ interface ShellIndicator {
   value: string
   unit: string
   tone?: 'output' | 'inbound'
+  /** true 时卡片可点击（如计划数打开明细弹框），缺省不可点 */
+  clickable?: boolean
 }
 
 /** 六宫格面板 tab 项 */
@@ -62,6 +64,8 @@ const emit = defineEmits<{
   subChange: [payload: { title: string; key: string }]
   /** 面板内 ECharts 点击（如日期节点）透传给页面 */
   chartClick: [payload: { title: string; params: unknown }]
+  /** 可点击指标卡被点击（如计划数打开计划详情） */
+  indicatorClick: [payload: { label: string; value: string; unit: string }]
 }>()
 
 defineSlots<{
@@ -106,7 +110,14 @@ const columns = computed(() => {
         v-for="item in indicators"
         :key="item.label"
         class="top-indicator-card"
-        :class="`tone-${item.tone ?? 'output'}`"
+        :class="[
+          `tone-${item.tone ?? 'output'}`,
+          { 'is-clickable': item.clickable }
+        ]"
+        :role="item.clickable ? 'button' : undefined"
+        :tabindex="item.clickable ? 0 : undefined"
+        @click="item.clickable && emit('indicatorClick', { label: item.label, value: item.value, unit: item.unit })"
+        @keydown.enter="item.clickable && emit('indicatorClick', { label: item.label, value: item.value, unit: item.unit })"
       >
         <div class="top-indicator-content">
           <div class="top-indicator-label">{{ item.label }}</div>
@@ -139,7 +150,21 @@ const columns = computed(() => {
               </svg>
             </div>
             <h3 class="panel-title">{{ panel.title }}</h3>
-            <div v-if="panel.mode !== 'select' && panel.tabs?.length" class="tab-buttons">
+            <!-- select 形态：下拉直接放标题栏右侧 -->
+            <div v-if="panel.mode === 'select' && panel.tabs?.length" class="panel-header-actions">
+              <a-select
+                class="panel-select"
+                :value="panel.activeKey"
+                size="small"
+                :dropdown-match-select-width="false"
+                @update:value="(value: string) => emit('tabChange', { title: panel.title, key: value })"
+              >
+                <a-select-option v-for="tab in panel.tabs" :key="tab.key" :value="tab.key">
+                  {{ tab.label }}
+                </a-select-option>
+              </a-select>
+            </div>
+            <div v-else-if="panel.tabs?.length" class="tab-buttons">
               <button
                 v-for="tab in panel.tabs"
                 :key="tab.key"
@@ -153,25 +178,9 @@ const columns = computed(() => {
             </div>
           </div>
 
-          <!-- 内容区工具条：下拉放这里，不与 tab 争头部一行 -->
-          <div
-            v-if="(panel.mode === 'select' && panel.tabs?.length) || panel.subTabs?.length"
-            class="panel-toolbar"
-          >
+          <!-- 内容区工具条：仅保留次级下拉（如成本项） -->
+          <div v-if="panel.subTabs?.length" class="panel-toolbar">
             <a-select
-              v-if="panel.mode === 'select' && panel.tabs?.length"
-              class="panel-select"
-              :value="panel.activeKey"
-              size="small"
-              :dropdown-match-select-width="false"
-              @update:value="(value: string) => emit('tabChange', { title: panel.title, key: value })"
-            >
-              <a-select-option v-for="tab in panel.tabs" :key="tab.key" :value="tab.key">
-                {{ tab.label }}
-              </a-select-option>
-            </a-select>
-            <a-select
-              v-if="panel.subTabs?.length"
               class="panel-select"
               :value="panel.subActiveKey"
               size="small"
@@ -216,6 +225,26 @@ const columns = computed(() => {
 <style scoped src="./dashboard-theme.css"></style>
 
 <style scoped>
+/* 可点击指标卡（如计划数 → 明细弹框） */
+.top-indicator-card.is-clickable {
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.top-indicator-card.is-clickable:hover {
+  border-color: rgba(67, 229, 255, 0.9) !important;
+  box-shadow:
+    0 0 12px rgba(32, 207, 255, 0.28),
+    inset 0 0 12px rgba(0, 166, 216, 0.1);
+}
+
+.top-indicator-card.is-clickable:active {
+  transform: translateY(1px);
+}
+
 /* 骨架占位：图表接入前的提示 */
 .shell-placeholder {
   display: flex;
@@ -243,7 +272,15 @@ const columns = computed(() => {
   min-height: 0;
 }
 
-/* 内容区工具条：下拉右对齐贴在图表上方 */
+/* 标题栏右侧动作区（select 形态下拉） */
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* 内容区工具条：次级下拉右对齐贴在图表上方 */
 .panel-toolbar {
   display: flex;
   justify-content: flex-end;

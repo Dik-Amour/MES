@@ -21,15 +21,54 @@ function selectTeam(name: TeamName) {
   activeTeam.value = name
 }
 
-/** 指标栏：6 项指标（数值为 mock，各班组内容一致） */
+/** 指标栏：6 项指标（数值为 mock，各班组内容一致）；计划数可点击打开计划详情 */
 const indicators = [
-  { label: '计划数', value: '128', unit: '箱', tone: 'output' as const },
+  { label: '计划数', value: '128', unit: '箱', tone: 'output' as const, clickable: true },
   { label: '造型数', value: '116', unit: '箱', tone: 'inbound' as const },
-  { label: '浇筑数', value: '108', unit: '箱', tone: 'output' as const },
-  { label: '转运数', value: '104', unit: '箱', tone: 'output' as const },
-  { label: '出产吨位', value: '98.6', unit: '吨', tone: 'inbound' as const },
-  { label: '下芯数', value: '86', unit: '件', tone: 'inbound' as const }
+  { label: '下芯数', value: '86', unit: '箱', tone: 'inbound' as const },
+  { label: '合箱数', value: '82', unit: '箱', tone: 'output' as const },
+  { label: '待浇筑数', value: '14', unit: '箱', tone: 'inbound' as const },
+  { label: '浇筑数', value: '108', unit: '箱', tone: 'output' as const }
 ]
+
+/** 计划详情：点击顶部「计划数」打开（各班组共用 mock；计划箱数合计 = 128） */
+interface PlanDetailRow {
+  line: string
+  productSeries: string
+  blankNo: string
+  blankName: string
+  type: string
+  planPieces: number
+  planBoxes: number
+}
+
+const planDetailRows: PlanDetailRow[] = [
+  { line: '机体线', productSeries: '机体系列', blankNo: '1002380677R', blankName: '气缸盖毛坯', type: '普通类', planPieces: 48, planBoxes: 6 },
+  { line: '机体线', productSeries: '机体系列', blankNo: '1000000244R', blankName: '主轴承盖', type: '参数变更类', planPieces: 80, planBoxes: 10 },
+  { line: '大机线', productSeries: '大机系列', blankNo: '1002381102R', blankName: '气缸体毛坯', type: '普通类', planPieces: 64, planBoxes: 8 },
+  { line: '曲轴线', productSeries: '曲轴系列', blankNo: '1001560088R', blankName: '曲轴箱盖', type: '验证类', planPieces: 96, planBoxes: 12 },
+  { line: '新产品线', productSeries: '新产品系列', blankNo: '1004420015R', blankName: '新产品壳体', type: '临脱+验证', planPieces: 40, planBoxes: 5 },
+  { line: '机体线', productSeries: '机体系列', blankNo: '1002380901R', blankName: '气缸盖毛坯', type: '普通类', planPieces: 72, planBoxes: 9 },
+  { line: '机体线', productSeries: '机体系列', blankNo: '1000000311R', blankName: '主轴承盖', type: '挑选类', planPieces: 120, planBoxes: 15 },
+  { line: '曲轴线', productSeries: '曲轴系列', blankNo: '1001560120R', blankName: '连杆盖', type: '普通类', planPieces: 88, planBoxes: 11 },
+  { line: '新产品线', productSeries: '新产品系列', blankNo: '1004420040R', blankName: '支架毛坯', type: '参数变更类', planPieces: 48, planBoxes: 6 },
+  { line: '大机线', productSeries: '大机系列', blankNo: '1002381205R', blankName: '气缸体毛坯', type: '验证类', planPieces: 96, planBoxes: 12 },
+  { line: '机体线', productSeries: '机体系列', blankNo: '1000000455R', blankName: '轴承座', type: '普通类', planPieces: 72, planBoxes: 9 },
+  { line: '曲轴线', productSeries: '曲轴系列', blankNo: '1001560177R', blankName: '飞轮壳', type: '临脱+验证', planPieces: 32, planBoxes: 4 },
+  { line: '新产品线', productSeries: '新产品系列', blankNo: '1004420062R', blankName: '端盖毛坯', type: '挑选类', planPieces: 64, planBoxes: 8 },
+  { line: '机体线', productSeries: '机体系列', blankNo: '1002381310R', blankName: '气缸盖毛坯', type: '普通类', planPieces: 112, planBoxes: 13 }
+]
+
+const planDetailOpen = ref(false)
+
+function openPlanDetail(payload: { label: string }) {
+  if (payload.label !== '计划数') return
+  planDetailOpen.value = true
+}
+
+function closePlanDetail() {
+  planDetailOpen.value = false
+}
 
 /** 任务列表 mock（各班组共用同一套数据） */
 interface TaskCardItem {
@@ -529,6 +568,7 @@ const panels = computed(() => [
     :indicators="indicators"
     :panels="panels"
     @tab-change="handleTabChange"
+    @indicator-click="openPlanDetail"
   >
     <template #headerTeamsLeft>
       <button
@@ -669,6 +709,80 @@ const panels = computed(() => [
       </div>
     </template>
   </LineDashboardShell>
+
+  <!-- 计划数 → 计划详情弹框 -->
+  <Teleport to="body">
+    <div
+      v-if="planDetailOpen"
+      class="plan-modal-mask"
+      @click.self="closePlanDetail"
+    >
+      <div class="plan-modal" role="dialog" aria-modal="true" aria-label="计划详情">
+        <div class="plan-modal-corner tl"></div>
+        <div class="plan-modal-corner tr"></div>
+        <div class="plan-modal-corner bl"></div>
+        <div class="plan-modal-corner br"></div>
+
+        <button
+          type="button"
+          class="plan-modal-close"
+          aria-label="关闭"
+          @click="closePlanDetail"
+        >
+          ×
+        </button>
+
+        <div class="plan-modal-header">
+          <h3 class="plan-modal-title">计划详情</h3>
+        </div>
+
+        <div class="plan-modal-body">
+          <div class="plan-modal-meta">
+            <span>当前指标：计划数 128 箱</span>
+            <span>共 {{ planDetailRows.length }} 条计划记录</span>
+          </div>
+
+          <div class="plan-modal-table-wrap">
+            <table class="inbound-modal-table">
+              <thead>
+                <tr>
+                  <th>产线</th>
+                  <th>产品系列</th>
+                  <th>毛坯件号</th>
+                  <th>毛坯名称</th>
+                  <th>类型</th>
+                  <th>计划件数（件）</th>
+                  <th>计划箱数（箱）</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in planDetailRows" :key="`${row.blankNo}-${row.line}`">
+                  <td>{{ row.line }}</td>
+                  <td>{{ row.productSeries }}</td>
+                  <td>{{ row.blankNo }}</td>
+                  <td>{{ row.blankName }}</td>
+                  <td>{{ row.type }}</td>
+                  <td class="num">{{ row.planPieces }}</td>
+                  <td class="num">{{ row.planBoxes }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5">合计</td>
+                  <td class="num">
+                    {{ planDetailRows.reduce((sum, row) => sum + row.planPieces, 0) }}
+                  </td>
+                  <td class="num">
+                    {{ planDetailRows.reduce((sum, row) => sum + row.planBoxes, 0) }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style src="./dashboard-common.css"></style>
@@ -899,6 +1013,198 @@ const panels = computed(() => [
 
 .trace-pour {
   color: #20cfff;
+}
+
+/* 计划详情弹框：FUI 暗色（Teleport 到 body，样式需全局） */
+</style>
+
+<style>
+.plan-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  background: rgba(2, 12, 18, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.plan-modal {
+  position: relative;
+  width: min(960px, 94vw);
+  max-height: min(86vh, 780px);
+  display: flex;
+  flex-direction: column;
+  color: #dff8ff;
+  background:
+    linear-gradient(180deg, rgba(8, 48, 72, 0.96), rgba(4, 24, 36, 0.98)),
+    radial-gradient(ellipse at 50% 0%, rgba(0, 180, 230, 0.18), transparent 55%);
+  border: 1px solid rgba(0, 210, 255, 0.75);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px rgba(0, 120, 180, 0.25),
+    0 0 28px rgba(0, 190, 255, 0.28),
+    inset 0 0 40px rgba(0, 100, 150, 0.12);
+}
+
+.plan-modal::before,
+.plan-modal::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  pointer-events: none;
+}
+
+.plan-modal::before {
+  top: 0;
+  background: linear-gradient(90deg, transparent, #18d2ff, transparent);
+  box-shadow: 0 0 10px rgba(24, 210, 255, 0.85);
+}
+
+.plan-modal::after {
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, #18d2ff, transparent);
+  opacity: 0.55;
+}
+
+.plan-modal-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  border-color: #43e5ff;
+  border-style: solid;
+  z-index: 1;
+}
+
+.plan-modal-corner.tl {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.plan-modal-corner.tr {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+}
+
+.plan-modal-corner.bl {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px;
+}
+
+.plan-modal-corner.br {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.plan-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(0, 200, 240, 0.45);
+  border-radius: 2px;
+  background: rgba(0, 80, 120, 0.35);
+  color: #dff8ff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.plan-modal-close:hover {
+  background: rgba(0, 160, 210, 0.4);
+  border-color: #43e5ff;
+}
+
+.plan-modal-header {
+  flex: 0 0 auto;
+  padding: 16px 48px 12px 20px;
+  border-bottom: 1px solid rgba(0, 190, 235, 0.28);
+}
+
+.plan-modal-title {
+  margin: 0;
+  color: #f4fdff;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.plan-modal-title::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 2px;
+  margin-top: 8px;
+  background: linear-gradient(90deg, #26d9ff, transparent);
+  box-shadow: 0 0 8px rgba(38, 217, 255, 0.55);
+}
+
+.plan-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 18px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 202, 242, 0.55) transparent;
+}
+
+.plan-modal-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.plan-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(26, 202, 242, 0.45);
+  border-radius: 3px;
+}
+
+.plan-modal-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #a9c9d4;
+  font-size: 12px;
+}
+
+.plan-modal-table-wrap {
+  overflow: auto;
+  border: 1px solid rgba(0, 190, 235, 0.22);
+  border-radius: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 202, 242, 0.55) transparent;
+}
+
+.plan-modal-table-wrap::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.plan-modal-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(26, 202, 242, 0.45);
+  border-radius: 3px;
+}
+
+.plan-modal .inbound-modal-table tfoot td {
+  background: rgba(0, 143, 184, 0.22) !important;
+  color: #f4fdff !important;
+  font-weight: 700 !important;
+  border-top: 1px solid rgba(0, 200, 240, 0.35) !important;
 }
 </style>
 

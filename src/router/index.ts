@@ -309,12 +309,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/binhai-dashboard/CoreTeamDashboard.vue'),
     meta: { requiresAuth: true, title: '制芯班组可视化' }
   },
-  // 大屏数据管理路由
+  // 寒亭大屏数据管理路由
   {
     path: '/screen-data/equipment',
     name: 'EquipmentDataImport',
     component: () => import('@/views/screen-data/EquipmentDataImport.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: '设备数据导入' }
+  },
+  {
+    path: '/screen-data/cost',
+    name: 'CostDataImport',
+    component: () => import('@/views/screen-data/CostDataImport.vue'),
+    meta: { requiresAuth: true, title: '成本导入' }
   },
   // PDA操作路由
   {
@@ -438,6 +444,18 @@ const routes: RouteRecordRaw[] = [
     name: 'CoreMarkingRecord',
     component: () => import('@/views/core-production/CoreMarkingRecord.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/core-production/material-mapping',
+    name: 'CoreMaterialMapping',
+    component: () => import('@/views/core-production/MaterialMapping.vue'),
+    meta: { requiresAuth: true, title: '物料映射' }
+  },
+  {
+    path: '/core-production/port-device-mapping',
+    name: 'CorePortDeviceMapping',
+    component: () => import('@/views/core-production/PortDeviceMapping.vue'),
+    meta: { requiresAuth: true, title: '上料口设备映射' }
   },
   // 现场管理路由
   {

@@ -12,14 +12,14 @@ const indicators = [
   { label: '制芯计划完成率', value: '95.8', unit: '%', tone: 'inbound' },
   { label: '造型生产效率', value: '92.3', unit: '%', tone: 'output' },
   { label: '制芯生产效率', value: '91.6', unit: '%', tone: 'inbound' },
+  { label: '出产吨位', value: '1286', unit: '吨', tone: 'output' },
   { label: '设备可动率', value: '94.2', unit: '%', tone: 'inbound' },
   { label: 'MTBF', value: '48.6', unit: '小时', tone: 'output' },
   { label: 'MTTR', value: '1.8', unit: '小时', tone: 'inbound' },
   { label: '主要生产设备故障停机率', value: '2.4', unit: '%', tone: 'output' },
   { label: '综合废品率', value: '1.2', unit: '%', tone: 'inbound' },
   { label: '吨均废品损失', value: '38.5', unit: '元/吨', tone: 'output' },
-  { label: '铸件焊补率', value: '3.6', unit: '%', tone: 'inbound' },
-  { label: '废芯率', value: '1.8', unit: '%', tone: 'output' }
+  { label: '铸件焊补率', value: '3.6', unit: '%', tone: 'inbound' }
 ]
 
 /* =========================
@@ -39,7 +39,7 @@ const axisNameStyle = { color: '#a9c9d4', fontSize: 10 }
 const COLOR_INBOUND = '#4ee6a6'
 
 /* =========================
-   1. 产线产出分析：近一周计划 / 实际产量（分组柱，按产品 tab 切换）
+   1. 产线产出分析：近一周计划 / 浇注数（分组柱）+ 造型计划完成率（右轴折线），按产品 tab 切换
    ========================= */
 const seriesTabs = [
   { key: 'newProduct', label: '新产品' },
@@ -49,7 +49,7 @@ const seriesTabs = [
 ]
 const activeSeriesKey = ref('newProduct')
 
-/** 各产品分组的日计划吨位基数 */
+/** 各产品分组的日计划箱数基数 */
 const seriesPlanBase: Record<string, number> = {
   newProduct: 96,
   largeMachine: 118,
@@ -62,24 +62,29 @@ const dailyCategories = Array.from({ length: 7 }, (_, index) =>
   todayStart.subtract(6 - index, 'day').format('MM-DD')
 )
 
-/** 按产品 + 日期确定性生成近一周计划 / 实际吨位，刷新不跳变 */
-function mockSeriesWeek(seriesKey: string): { plan: number[]; actual: number[] } {
+/** 按产品 + 日期确定性生成近一周计划 / 浇注箱数及造型计划完成率，刷新不跳变 */
+function mockSeriesWeek(
+  seriesKey: string
+): { plan: number[]; cast: number[]; completion: number[] } {
   const base = seriesPlanBase[seriesKey] ?? 100
   const plan: number[] = []
-  const actual: number[] = []
+  const cast: number[] = []
+  const completion: number[] = []
   for (let offset = 6; offset >= 0; offset--) {
     const date = todayStart.subtract(offset, 'day')
     const seed = date.year() + date.month() * 31 + date.date() + seriesKey.length * 17
     const planValue = base + ((seed * 13) % 21) - 10
     const rate = 0.88 + ((seed * 7) % 19) / 100
+    const castValue = Math.round(planValue * rate)
     plan.push(planValue)
-    actual.push(Math.round(planValue * rate))
+    cast.push(castValue)
+    completion.push(Math.round((castValue / planValue) * 1000) / 10)
   }
-  return { plan, actual }
+  return { plan, cast, completion }
 }
 
 function createProductionAnalysisOption(seriesKey: string): EChartsOption {
-  const { plan, actual } = mockSeriesWeek(seriesKey)
+  const { plan, cast, completion } = mockSeriesWeek(seriesKey)
 
   return {
     tooltip: {
@@ -90,19 +95,22 @@ function createProductionAnalysisOption(seriesKey: string): EChartsOption {
         const list = Array.isArray(params) ? params : [params]
         if (!list.length) return ''
         const body = list
-          .map((item: any) => `${item.marker} ${item.seriesName}: ${item.value} 吨`)
+          .map((item: any) => {
+            const unit = item.seriesName === '造型计划完成率' ? '%' : '箱'
+            return `${item.marker} ${item.seriesName}: ${item.value} ${unit}`
+          })
           .join('<br/>')
         return `${list[0]?.axisValue ?? ''}<br/>${body}`
       }
     },
     legend: {
-      data: ['计划数', '实际数'],
+      data: ['计划数', '浇注数', '造型计划完成率'],
       textStyle: { color: '#a9c9d4', fontSize: 11 },
       top: 5,
       itemWidth: 14,
       itemHeight: 8
     },
-    grid: { left: '3%', right: '4%', bottom: '3%', top: '18%', containLabel: true },
+    grid: { left: '3%', right: '5%', bottom: '3%', top: '18%', containLabel: true },
     xAxis: {
       type: 'category',
       data: dailyCategories,
@@ -110,15 +118,28 @@ function createProductionAnalysisOption(seriesKey: string): EChartsOption {
       axisLine,
       axisTick: { show: false }
     },
-    yAxis: {
-      type: 'value',
-      name: '吨',
-      nameTextStyle: axisNameStyle,
-      axisLabel,
-      splitLine,
-      axisLine: { show: false },
-      axisTick: { show: false }
-    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '箱',
+        nameTextStyle: axisNameStyle,
+        axisLabel,
+        splitLine,
+        axisLine: { show: false },
+        axisTick: { show: false }
+      },
+      {
+        type: 'value',
+        name: '%',
+        nameTextStyle: axisNameStyle,
+        axisLabel: { ...axisLabel, formatter: '{value}%' },
+        splitLine: { show: false },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        min: 0,
+        max: 100
+      }
+    ],
     series: [
       {
         name: '计划数',
@@ -129,12 +150,30 @@ function createProductionAnalysisOption(seriesKey: string): EChartsOption {
         label: { show: true, position: 'top', color: '#a9c9d4', fontSize: 9 }
       },
       {
-        name: '实际数',
+        name: '浇注数',
         type: 'bar',
-        data: actual,
+        data: cast,
         barWidth: '28%',
         itemStyle: { color: COLOR_INBOUND, borderRadius: [3, 3, 0, 0] },
         label: { show: true, position: 'top', color: '#dff8ff', fontSize: 9 }
+      },
+      {
+        name: '造型计划完成率',
+        type: 'line',
+        yAxisIndex: 1,
+        data: completion,
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 7,
+        lineStyle: { color: '#ffd52a', width: 2 },
+        itemStyle: { color: '#ffd52a', borderColor: '#061821', borderWidth: 2 },
+        label: {
+          show: true,
+          position: 'top',
+          color: '#ffd52a',
+          fontSize: 9,
+          formatter: '{c}%'
+        }
       }
     ]
   }
@@ -244,14 +283,14 @@ function createProductionStatsOption(unitKey: 'tons' | 'units'): EChartsOption {
 const productionStatsOption = computed(() => createProductionStatsOption(activeStatsKey.value))
 
 /* =========================
-   3. 质量分析：月度质量率（折线，返工 / 返修 / 废品率 tab 切换）
+   3. 质量分析：月度质量率（折线，废品率 / 返修率 / 返工率 tab 切换）
    ========================= */
 const qualityTabs = [
-  { key: 'rework', label: '返工率' },
+  { key: 'scrap', label: '废品率' },
   { key: 'repair', label: '返修率' },
-  { key: 'scrap', label: '废品率' }
+  { key: 'rework', label: '返工率' }
 ]
-const activeQualityKey = ref<'rework' | 'repair' | 'scrap'>('rework')
+const activeQualityKey = ref<'scrap' | 'repair' | 'rework'>('scrap')
 
 /** 各质量指标的月度数据（%），12 个月 */
 const qualityRates: Record<'rework' | 'repair' | 'scrap', { color: string; data: number[] }> = {
@@ -737,7 +776,7 @@ function handleTabChange(payload: { title: string; key: string }) {
   } else if (payload.title === '生产统计') {
     activeStatsKey.value = payload.key as 'tons' | 'units'
   } else if (payload.title === '质量分析') {
-    activeQualityKey.value = payload.key as 'rework' | 'repair' | 'scrap'
+    activeQualityKey.value = payload.key as 'scrap' | 'repair' | 'rework'
   } else if (payload.title === '设备分析') {
     activeEquipmentKey.value = payload.key as 'mttr' | 'mtbf' | 'availability' | 'downtime'
   } else if (payload.title === '成本分析') {
