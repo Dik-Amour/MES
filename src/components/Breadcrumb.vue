@@ -128,6 +128,9 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     // 工艺管理路径
     '/craft': { title: '工艺管理', path: '/craft/common-sand-core', icon: ToolOutlined },
     '/craft/common-sand-core': { title: '通用砂芯配置', path: '/craft/common-sand-core', icon: ToolOutlined },
+    // 工装管理路径
+    '/tooling': { title: '工装管理', path: '/tooling/inspection-template', icon: ToolOutlined },
+    '/tooling/inspection-template': { title: '工装点检模板', path: '/tooling/inspection-template', icon: ToolOutlined },
   }
 
   const matched = route.matched.filter(item => item.path !== '/')
@@ -183,6 +186,11 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
   // 添加工艺管理父级菜单
   if (route.path.startsWith('/craft')) {
     items.push(pathMap['/craft'])
+  }
+
+  // 添加工装管理父级菜单
+  if (route.path.startsWith('/tooling')) {
+    items.push(pathMap['/tooling'])
   }
 
   // 添加匹配的路由

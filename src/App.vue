@@ -200,6 +200,14 @@
             <a-menu-item key="/craft/common-sand-core">通用砂芯配置</a-menu-item>
           </a-sub-menu>
 
+          <a-sub-menu key="tooling">
+            <template #icon>
+              <ToolOutlined />
+            </template>
+            <template #title>工装管理</template>
+            <a-menu-item key="/tooling/inspection-template">工装点检模板</a-menu-item>
+          </a-sub-menu>
+
           <a-sub-menu key="user">
             <template #icon>
               <UserOutlined />
@@ -351,6 +359,7 @@ const parentKeyMap: Array<[string, string]> = [
   ['/core-production', 'core-production'],
   ['/site', 'site'],
   ['/craft', 'craft'],
+  ['/tooling', 'tooling'],
   ['/users', 'user'],
   ['/settings', 'system'],
   ['/security', 'system'],

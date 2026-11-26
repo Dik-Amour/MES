@@ -477,6 +477,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/craft/CommonSandCoreConfig.vue'),
     meta: { requiresAuth: true, title: '通用砂芯配置' }
   },
+  // 工装管理路由
+  {
+    path: '/tooling/inspection-template',
+    name: 'ToolingInspectionTemplate',
+    component: () => import('@/views/tooling/ToolingInspectionTemplate.vue'),
+    meta: { requiresAuth: true, title: '工装点检模板' }
+  },
   // 用户管理路由
   {
     path: '/users',
