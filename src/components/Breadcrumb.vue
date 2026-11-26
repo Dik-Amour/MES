@@ -120,10 +120,11 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     // 现场管理路径
     '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
     '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },
-    // 寒亭大屏数据管理路径
-    '/screen-data': { title: '寒亭大屏数据管理', path: '/screen-data/equipment', icon: InboxOutlined },
+    // 大屏指标数据管理路径
+    '/screen-data': { title: '大屏指标数据管理', path: '/screen-data/equipment', icon: InboxOutlined },
     '/screen-data/equipment': { title: '设备数据导入', path: '/screen-data/equipment', icon: InboxOutlined },
     '/screen-data/cost': { title: '成本导入', path: '/screen-data/cost', icon: InboxOutlined },
+    '/screen-data/external-scrap-report': { title: '外部废品率报表', path: '/screen-data/external-scrap-report', icon: InboxOutlined },
     // 工艺管理路径
     '/craft': { title: '工艺管理', path: '/craft/common-sand-core', icon: ToolOutlined },
     '/craft/common-sand-core': { title: '通用砂芯配置', path: '/craft/common-sand-core', icon: ToolOutlined },
@@ -174,7 +175,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     items.push(pathMap['/site'])
   }
 
-  // 添加寒亭大屏数据管理父级菜单
+  // 添加大屏指标数据管理父级菜单
   if (route.path.startsWith('/screen-data')) {
     items.push(pathMap['/screen-data'])
   }

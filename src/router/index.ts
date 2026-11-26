@@ -309,7 +309,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/binhai-dashboard/CoreTeamDashboard.vue'),
     meta: { requiresAuth: true, title: '制芯班组可视化' }
   },
-  // 寒亭大屏数据管理路由
+  // 大屏指标数据管理路由
   {
     path: '/screen-data/equipment',
     name: 'EquipmentDataImport',
@@ -321,6 +321,12 @@ const routes: RouteRecordRaw[] = [
     name: 'CostDataImport',
     component: () => import('@/views/screen-data/CostDataImport.vue'),
     meta: { requiresAuth: true, title: '成本导入' }
+  },
+  {
+    path: '/screen-data/external-scrap-report',
+    name: 'ExternalScrapRateReport',
+    component: () => import('@/views/screen-data/ExternalScrapRateReport.vue'),
+    meta: { requiresAuth: true, title: '外部废品率报表' }
   },
   // PDA操作路由
   {
