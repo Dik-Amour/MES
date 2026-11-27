@@ -18,11 +18,16 @@
       <div class="chart-card">
         <div class="chart-header">
           <span class="chart-title">铸件综合废品率</span>
-          <select v-model="scrapScope" class="series-select">
-            <option value="factory">厂区统计</option>
-            <option value="line">产线统计</option>
-            <option value="material">材质统计</option>
-          </select>
+          <div class="mini-tabs">
+            <button
+              :class="{ active: scrapScope === 'line' }"
+              @click="scrapScope = 'line'"
+            >产线</button>
+            <button
+              :class="{ active: scrapScope === 'material' }"
+              @click="scrapScope = 'material'"
+            >材质</button>
+          </div>
         </div>
         <div ref="scrapChartRef" class="chart-body"></div>
       </div>
@@ -159,7 +164,8 @@ const kpiItems = [
 ]
 
 // ========== 状态 ==========
-const scrapScope = ref('factory')
+type ScrapScope = 'line' | 'material'
+const scrapScope = ref<ScrapScope>('line')
 const productScrapType = ref('comprehensive')
 const lossScope = ref('factory')
 const repairLine = ref('造型一线大件')
@@ -169,7 +175,7 @@ const repairLineOptions = [
   '造型一线大件', '造型一线中件', '造型二线大件', '造型二线中件', '造型三线HWS', '造型三线KW'
 ]
 
-// 材质选项
+// 材质选项（吨均废品损失等仍用；铸件综合废品率材质 Tab 另用 scrapMaterialOptions）
 const materialOptions = ['HT250', 'HT300', 'RuT450', 'QT600', '合金铸铁']
 
 // ========== 模拟数据 ==========
@@ -203,32 +209,57 @@ const groupedBarOption = (x: string[], data: number[][], unitFormatter = false) 
   }))
 })
 
-// 铸件综合废品率（厂区 / 产线 / 材质）
-const scrapData: Record<string, number[][]> = {
-  factory: [
-    [1.0, 1.9, 1.5],
-    [1.2, 1.7, 1.5],
-    [1.25, 1.6, 1.4]
-  ],
+// 铸件综合废品率（产线 / 材质；厂区在首页已覆盖，本模块不再做厂区统计）
+const scrapMaterialOptions = ['球铁', '灰铁', '蠕铁']
+
+const scrapData: Record<ScrapScope, number[][]> = {
   line: [
     [1.1, 1.6, 1.3, 1.8, 1.5, 1.2],
     [1.3, 1.8, 1.5, 1.6, 1.4, 1.3],
     [1.2, 1.5, 1.4, 1.5, 1.6, 1.2]
   ],
   material: [
-    [1.05, 1.32, 1.48, 1.18, 1.62],
-    [1.18, 1.45, 1.62, 1.28, 1.75],
-    [1.12, 1.38, 1.55, 1.22, 1.68]
+    [1.12, 1.35, 1.48],
+    [1.25, 1.42, 1.55],
+    [1.18, 1.38, 1.5]
   ]
 }
-const scrapX: Record<string, string[]> = {
-  factory: ['安丘厂区', '寒亭厂区', '材料成型中心'],
+const scrapX: Record<ScrapScope, string[]> = {
   line: ['造型一线大件', '造型一线中件', '造型二线大件', '造型二线中件', '造型三线HWS', '造型三线KW'],
-  material: materialOptions
+  material: scrapMaterialOptions
 }
 
+/** 横向分组柱：y 轴为维度类目，x 轴为废品率(%)，按年分组 */
 function renderScrap() {
-  charts.scrap?.setOption(groupedBarOption(scrapX[scrapScope.value], scrapData[scrapScope.value], true), { notMerge: true })
+  const x = scrapX[scrapScope.value]
+  const data = scrapData[scrapScope.value]
+  charts.scrap?.setOption({
+    tooltip: {
+      trigger: 'axis',
+      valueFormatter: (v: any) => v + '%'
+    },
+    legend: legend3,
+    grid: { left: 100, right: 36, top: 30, bottom: 26 },
+    xAxis: {
+      type: 'value',
+      ...baseAxis,
+      axisLabel: { ...baseAxis.axisLabel, formatter: '{value}%' }
+    },
+    yAxis: {
+      type: 'category',
+      data: x,
+      ...baseAxis,
+      splitLine: { show: false },
+      axisLabel: { ...baseAxis.axisLabel, interval: 0, fontSize: 10 }
+    },
+    series: years3.map((y, i) => ({
+      name: y,
+      type: 'bar',
+      data: data[i],
+      barWidth: 10,
+      itemStyle: { color: colors3[i] }
+    }))
+  }, { notMerge: true })
 }
 
 // 主要产品废品率（综合 / 外部 / 内部）

@@ -396,10 +396,10 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/pda/test-virtual-storage',
-    name: 'TestVirtualStorage',
-    component: () => import('@/views/pda/TestVirtualStorage.vue'),
-    meta: { requiresAuth: true }
+    path: '/pda/tooling-machine-inspection',
+    name: 'ToolingMachineInspection',
+    component: () => import('@/views/pda/ToolingMachineInspection.vue'),
+    meta: { requiresAuth: true, title: '工装上机点检' }
   },
   // 制芯计划路由
   {
@@ -483,6 +483,12 @@ const routes: RouteRecordRaw[] = [
     name: 'ToolingInspectionTemplate',
     component: () => import('@/views/tooling/ToolingInspectionTemplate.vue'),
     meta: { requiresAuth: true, title: '工装点检模板' }
+  },
+  {
+    path: '/tooling/inspection-record',
+    name: 'ToolingInspectionRecord',
+    component: () => import('@/views/tooling/ToolingInspectionRecord.vue'),
+    meta: { requiresAuth: true, title: '工装点检记录' }
   },
   // 用户管理路由
   {

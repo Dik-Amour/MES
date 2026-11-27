@@ -97,7 +97,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/pda/manual-transfer': { title: '人工流转', path: '/pda/manual-transfer', icon: CalendarOutlined },
     '/pda/exception-handling': { title: '异常上下料', path: '/pda/exception-handling', icon: CalendarOutlined },
     '/pda/assembly-marking': { title: '组芯刻号', path: '/pda/assembly-marking', icon: CalendarOutlined },
-    '/pda/test-virtual-storage': { title: '虚拟库测试', path: '/pda/test-virtual-storage', icon: CalendarOutlined },
+    '/pda/tooling-machine-inspection': { title: '工装上机点检', path: '/pda/tooling-machine-inspection', icon: CalendarOutlined },
     // 制芯生产管理路径
     '/core-production': { title: '制芯生产管理', path: '/core-production/body-line-storage', icon: InboxOutlined },
     '/core-production/body-line-storage': { title: '机体线砂芯库', path: '/core-production/body-line-storage', icon: InboxOutlined },
@@ -131,6 +131,7 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     // 工装管理路径
     '/tooling': { title: '工装管理', path: '/tooling/inspection-template', icon: ToolOutlined },
     '/tooling/inspection-template': { title: '工装点检模板', path: '/tooling/inspection-template', icon: ToolOutlined },
+    '/tooling/inspection-record': { title: '工装点检记录', path: '/tooling/inspection-record', icon: ToolOutlined },
   }
 
   const matched = route.matched.filter(item => item.path !== '/')

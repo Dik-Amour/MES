@@ -3,22 +3,14 @@
     <!-- 大屏标题 -->
     <DashboardHeader title="材料成型中心运营大屏" :show-weather="false" variant="fui"  show-nav />
 
-    <!-- 第一行：设备指标总览（等宽 KPI 带） -->
-    <div class="kpi-panel">
-      <div class="kpi-box">
-        <div class="kpi-grid">
-          <div
-            v-for="(k, i) in kpiItems"
-            :key="k.label"
-            class="kpi-item"
-            :class="{ 'group-start': isGroupStart(i) }"
-          >
-            <div class="kpi-label">{{ k.label }}</div>
-            <div class="kpi-value">{{ k.value }}<span class="unit">{{ k.unit }}</span></div>
+    <!-- 第一行：设备指标总览（与生产大屏一致的指标卡片，两行） -->
+    <div class="eq-metrics">
+      <div class="eq-metric-card" v-for="m in kpiItems" :key="m.label">
+        <div class="eq-metric-content">
+          <div class="eq-metric-label">{{ m.label }}</div>
+          <div class="eq-metric-value">
+            {{ m.value }}<span v-if="m.unit" class="eq-metric-unit">{{ m.unit }}</span>
           </div>
-        </div>
-        <div class="kpi-groups">
-          <span v-for="g in kpiGroups" :key="g.name" :style="{ gridColumn: `span ${g.count}` }">{{ g.name }}</span>
         </div>
       </div>
     </div>
@@ -29,7 +21,7 @@
         <div class="chart-header">
           <span class="chart-title">吨均设备维修费用分析</span>
           <select v-model="repairTrendMode" class="series-select">
-            <option v-for="t in repairTrendTabs" :key="t.key" :value="t.key">{{ t.label }}</option>
+            <option v-for="t in repairCostTabs" :key="t.key" :value="t.key">{{ t.label }}</option>
           </select>
         </div>
         <div ref="repairTrendChartRef" class="chart-body"></div>
@@ -339,31 +331,21 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
 import DashboardHeader from './DashboardHeader.vue'
 
-// ========== 第一行：KPI 指标 ==========
+// ========== 第一行：KPI 指标（与生产大屏一致的指标卡片，两行） ==========
 const kpiItems = [
-  { label: '吨均设备维修费用', value: '125.8', unit: '元/吨', group: '运维成本' },
-  { label: '大修费用', value: '1,850', unit: '万元', group: '运维成本' },
-  { label: '备件库存金额', value: '3,260', unit: '万元', group: '运维成本' },
-  { label: '设备数量', value: '1,248', unit: '台/套', group: '设备资产' },
-  { label: '主要生产设备', value: '856', unit: '台/套', group: '设备资产' },
-  { label: '净值/原值（亿元）', value: '2.85/3.42', unit: '', group: '设备资产' },
-  { label: 'MTTR', value: '68.5', unit: '分钟', group: '运行指标' },
-  { label: 'MTBF', value: '5,280', unit: '小时', group: '运行指标' },
-  { label: '可动率', value: '98.5', unit: '%', group: '运行指标' },
-  { label: 'OEE', value: '65.2', unit: '%', group: '运行指标' }
+  { label: '吨均设备维修费用', value: '125.8', unit: '元/吨' },
+  { label: '大修费用', value: '1,850', unit: '万元' },
+  { label: '备件库存金额', value: '3,260', unit: '万元' },
+  { label: '设备数量', value: '1,248', unit: '台/套' },
+  { label: '机器人数量', value: '400', unit: '台/套' },
+  { label: '主要生产设备', value: '856', unit: '台/套' },
+  { label: '净值', value: '2.85', unit: '亿元' },
+  { label: '原值', value: '3.42', unit: '亿元' },
+  { label: 'MTTR', value: '68.5', unit: '分钟' },
+  { label: 'MTBF', value: '5,280', unit: '小时' },
+  { label: '可动率', value: '98.5', unit: '%' },
+  { label: 'OEE', value: '65.2', unit: '%' }
 ]
-
-const isGroupStart = (i: number) => i > 0 && kpiItems[i].group !== kpiItems[i - 1].group
-
-const kpiGroups = computed(() => {
-  const list: { name: string; count: number }[] = []
-  kpiItems.forEach(k => {
-    const last = list[list.length - 1]
-    if (last && last.name === k.group) last.count += 1
-    else list.push({ name: k.group, count: 1 })
-  })
-  return list
-})
 
 // ========== 机器人 / 熔炼设备：设备状态汇总 ==========
 type StatusRow = { name: string; count: number; ratio: string }
@@ -586,6 +568,12 @@ const repairTrendTabs = [
   { key: 'factory-year', label: '分厂年度趋势' },
   { key: 'factory-month', label: '分厂月度趋势' },
   { key: 'line-month', label: '产线月度趋势' }
+]
+/** 吨均设备维修费用分析：选项文案不带“趋势” */
+const repairCostTabs = [
+  { key: 'factory-year', label: '分厂年度' },
+  { key: 'factory-month', label: '分厂月度' },
+  { key: 'line-month', label: '产线月度' }
 ]
 const rateTabs = [
   { key: 'factory-year', label: '分厂年度' },
@@ -1155,89 +1143,87 @@ onBeforeUnmount(() => {
 .chart-header .chart-title {
   margin-bottom: 0;
 }
-/* 第一行：KPI 指标带 */
-.kpi-panel {
-  margin-bottom: 8px;
-}
-
-.kpi-box {
-  background: #fff;
-  border-radius: 4px;
-  padding: 12px 0 8px;
-}
-
-.kpi-grid {
+/* 第一行：指标卡片（与生产大屏 prod-metric-* 一致，6 列 × 2 行） */
+.eq-metrics {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.kpi-item {
+.eq-metric-card {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  min-height: 120px;
+  max-height: 120px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #e8ecf0;
+  border-left: 3px solid #4472c4;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.eq-metric-content {
+  position: relative;
+  z-index: 1;
   min-width: 0;
-  text-align: center;
-  padding: 0 8px;
+  width: 100%;
 }
 
-.kpi-item.group-start {
-  border-left: 1px solid #ececec;
-}
-
-.kpi-label {
+.eq-metric-label {
+  margin-bottom: 6px;
+  color: #888;
   font-size: 12px;
-  color: #666;
-  margin-bottom: 8px;
+  letter-spacing: 0.2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.kpi-value {
-  font-size: 24px;
+.eq-metric-value {
+  color: #1a1a1a;
+  font-family: 'DIN Alternate', 'Bahnschrift', 'Segoe UI', sans-serif;
+  font-size: 22px;
   font-weight: 700;
-  color: #222;
   line-height: 1.1;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  letter-spacing: -0.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.kpi-value .unit {
+.eq-metric-unit {
+  margin-left: 4px;
+  color: #888;
   font-size: 12px;
-  font-weight: 400;
-  color: #999;
-  margin-left: 3px;
-  letter-spacing: 0;
+  font-weight: 500;
 }
 
-.kpi-groups {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  margin-top: 10px;
-  padding-top: 7px;
-  border-top: 1px dashed #ececec;
-}
-
-.kpi-groups span {
-  text-align: center;
-  font-size: 11px;
-  color: #a0a0a0;
-  letter-spacing: 1px;
-}
-
-/* 字号随容器宽度自适应，避免窄屏下数值被截断 */
+/* 字号随卡片宽度自适应，避免窄屏下数值被截断 */
 @supports (font-size: 1cqw) {
-  .kpi-box {
+  .eq-metric-card {
     container-type: inline-size;
   }
 
-  .kpi-value {
-    font-size: clamp(16px, 1.7cqw, 26px);
+  .eq-metric-value {
+    font-size: clamp(16px, 1.7cqw, 22px);
   }
 
-  .kpi-label {
+  .eq-metric-label {
     font-size: clamp(10px, 0.9cqw, 12px);
   }
+}
 
-  .kpi-groups span {
-    font-size: clamp(10px, 0.82cqw, 11px);
+@media (max-width: 1400px) {
+  .eq-metric-value {
+    font-size: 18px;
   }
 }
 

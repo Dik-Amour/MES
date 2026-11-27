@@ -158,7 +158,7 @@
             <a-menu-item key="/pda/manual-transfer">人工流转</a-menu-item>
             <a-menu-item key="/pda/exception-handling">异常上下料</a-menu-item>
             <a-menu-item key="/pda/assembly-marking">组芯刻号</a-menu-item>
-            <a-menu-item key="/pda/test-virtual-storage">虚拟库测试</a-menu-item>
+            <a-menu-item key="/pda/tooling-machine-inspection">工装上机点检</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="core-making">
@@ -206,6 +206,7 @@
             </template>
             <template #title>工装管理</template>
             <a-menu-item key="/tooling/inspection-template">工装点检模板</a-menu-item>
+            <a-menu-item key="/tooling/inspection-record">工装点检记录</a-menu-item>
           </a-sub-menu>
 
           <a-sub-menu key="user">
@@ -291,6 +292,11 @@
           <!-- 面包屑导航 -->
           <Breadcrumb v-if="!route.path.startsWith('/binhai-dashboard')" />
 
+          <!-- 全局查询条：组织切换（业务页统一；大屏不显示） -->
+          <GlobalQueryBar
+            v-if="!route.path.startsWith('/binhai-dashboard') && !route.path.startsWith('/dashboard')"
+          />
+
           <!-- 路由页面 -->
           <router-view />
         </a-layout-content>
@@ -328,6 +334,7 @@ import {
 import { useUserStore } from '@/stores/user'
 import { useTheme } from '@/composables/useTheme'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import GlobalQueryBar from '@/components/GlobalQueryBar.vue'
 
 // 设置Ant Design Vue中文本地化
 const locale = zhCN

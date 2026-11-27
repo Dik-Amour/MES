@@ -1,0 +1,44 @@
+- generic [ref=e5]:
+  - generic [ref=e6]:
+    - img "user" [ref=e9]
+    - heading "MES管理系统" [level=1] [ref=e12]
+    - paragraph [ref=e13]: 现代化制造执行系统
+  - generic [ref=e14]:
+    - generic [ref=e16]:
+      - generic "用户名" [ref=e18]: "* 用户名"
+      - generic [ref=e22]:
+        - img "user" [ref=e24]
+        - textbox "* 用户名" [ref=e27]:
+          - /placeholder: 请输入用户名
+    - generic [ref=e29]:
+      - generic "密码" [ref=e31]: "* 密码"
+      - generic [ref=e35]:
+        - img "lock" [ref=e37]
+        - textbox "* 密码" [ref=e40]:
+          - /placeholder: 请输入密码
+        - img "eye-invisible" [ref=e42] [cursor=pointer]
+    - generic [ref=e51] [cursor=pointer]:
+      - checkbox "记住我" [ref=e53]
+      - generic [ref=e55]: 记住我
+    - button "登 录" [ref=e61] [cursor=pointer]
+  - alert [ref=e64]:
+    - img "info-circle" [ref=e65]
+    - generic [ref=e70]:
+      - generic [ref=e71]: 演示账号
+      - generic [ref=e72]:
+        - text: 账号：admin
+        - generic [ref=e73] [cursor=pointer]: 复制
+      - generic [ref=e74]:
+        - text: 密码：123456
+        - generic [ref=e75] [cursor=pointer]: 复制
+      - button "一键填入" [ref=e76] [cursor=pointer]
+  - generic [ref=e78]:
+    - separator [ref=e79]:
+      - generic [ref=e80]: 其他登录方式
+    - generic [ref=e81]:
+      - button [ref=e83] [cursor=pointer]:
+        - img "wechat" [ref=e84]
+      - button [ref=e88] [cursor=pointer]:
+        - img "qq" [ref=e89]
+      - button [ref=e93] [cursor=pointer]:
+        - img "dingding" [ref=e94]

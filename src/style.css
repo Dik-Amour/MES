@@ -607,3 +607,40 @@ body {
   font-size: 16px;
   border-radius: 8px;
 }
+
+/* =========================================================
+   全局查询条（面包屑下方 · 组织切换）
+   业务页统一展示；样式集中在此处管理
+   ========================================================= */
+.global-query-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #2b6de5 0%, #3d8bf5 100%);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  color: #fff;
+}
+
+.global-query-bar__title {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.global-query-bar__org {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.global-query-bar__org-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.global-query-bar__org-select {
+  width: 200px;
+}

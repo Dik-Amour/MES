@@ -568,19 +568,22 @@ const deviceItems = [
 /** 顶部两行指标卡：年度出产/入库 + 厂区指标 + 设备中心 */
 const topMetrics = computed(() => {
   const prod = prodData[prodYear.value]
-  const plant = indicatorGroups.flat().map(it => ({
-    label: it.label,
-    value: it.value,
-    unit: ''
-  }))
+  // 单位统一挂在指标名上（与设备中心一致），不跟在数值后
+  const plant = indicatorGroups.flat().map(it => {
+    const value = String(it.value)
+    if (value.endsWith('%')) {
+      return { label: `${it.label}（%）`, value: value.slice(0, -1), unit: '' }
+    }
+    return { label: it.label, value, unit: '' }
+  })
   const device = deviceItems.map(d => ({
     label: d.unit ? `${d.label}（${d.unit}）` : d.label,
     value: d.value,
     unit: ''
   }))
   return [
-    { label: '年度出产', value: String(prod.output), unit: '吨' },
-    { label: '年度入库', value: String(prod.inbound), unit: '吨' },
+    { label: '年度出产（吨）', value: String(prod.output), unit: '' },
+    { label: '年度入库（吨）', value: String(prod.inbound), unit: '' },
     ...plant,
     ...device
   ]
@@ -1101,7 +1104,7 @@ onBeforeUnmount(() => {
 .plant-metric-label {
   margin-bottom: 6px;
   color: #888;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.2px;
   white-space: nowrap;
   overflow: hidden;

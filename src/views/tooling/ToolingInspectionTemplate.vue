@@ -147,9 +147,6 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="适用产线">
-          <a-input v-model:value="formData.productionLine" placeholder="请输入适用产线" />
-        </a-form-item>
         <a-form-item label="备注">
           <a-textarea
             v-model:value="formData.remark"
@@ -204,7 +201,7 @@
           :columns="itemColumns"
           :data-source="editingItems"
           :pagination="false"
-          :scroll="{ x: 820, y: 320 }"
+          :scroll="{ x: 900, y: 320 }"
           row-key="itemId"
           size="small"
           bordered
@@ -212,14 +209,6 @@
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'seq'">
               {{ editingItems.findIndex(i => i.itemId === (record as InspectionItem).itemId) + 1 }}
-            </template>
-            <template v-else-if="column.key === 'checkMethod'">
-              {{ (record as InspectionItem).checkMethod }}
-            </template>
-            <template v-else-if="column.key === 'isKey'">
-              <a-tag :color="(record as InspectionItem).isKey ? 'red' : 'default'">
-                {{ (record as InspectionItem).isKey ? '关键项' : '一般项' }}
-              </a-tag>
             </template>
             <template v-else-if="column.key === 'action'">
               <a-space :size="4">
@@ -264,41 +253,41 @@
         :label-col="{ span: 5 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-item label="点检项名称" required>
+        <a-form-item label="标准号" required>
           <a-input
-            v-model:value="itemFormData.itemName"
-            placeholder="如：定位销磨损、夹紧力、外观裂纹"
+            v-model:value="itemFormData.standardNo"
+            placeholder="请输入标准号"
             :maxlength="50"
           />
         </a-form-item>
-        <a-form-item label="点检方法" required>
-          <a-select v-model:value="itemFormData.checkMethod" placeholder="请选择点检方法">
-            <a-select-option v-for="m in checkMethodOptions" :key="m" :value="m">
-              {{ m }}
-            </a-select-option>
-          </a-select>
+        <a-form-item label="点检部位" required>
+          <a-input
+            v-model:value="itemFormData.checkPart"
+            placeholder="请输入点检部位，如：定位销、型腔"
+            :maxlength="50"
+          />
         </a-form-item>
-        <a-form-item label="判定标准" required>
+        <a-form-item label="点检内容" required>
+          <a-input
+            v-model:value="itemFormData.checkContent"
+            placeholder="请输入点检内容"
+            :maxlength="100"
+          />
+        </a-form-item>
+        <a-form-item label="点检标准" required>
           <a-textarea
             v-model:value="itemFormData.checkStandard"
-            placeholder="请输入合格判定标准，如：磨损量 ≤ 0.5mm"
+            placeholder="请输入点检标准，如：磨损量 ≤ 0.5mm"
             :rows="3"
             :maxlength="200"
           />
         </a-form-item>
-        <a-form-item label="是否关键项">
-          <a-switch
-            v-model:checked="itemFormData.isKey"
-            checked-children="是"
-            un-checked-children="否"
-          />
-        </a-form-item>
-        <a-form-item label="备注">
-          <a-input
-            v-model:value="itemFormData.remark"
-            placeholder="选填"
-            :maxlength="100"
-          />
+        <a-form-item label="点检方式" required>
+          <a-select v-model:value="itemFormData.checkMethod" placeholder="请选择点检方式">
+            <a-select-option v-for="m in checkMethodOptions" :key="m" :value="m">
+              {{ m }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -406,6 +395,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { message } from 'ant-design-vue'
 import {
   SearchOutlined,
@@ -414,6 +404,7 @@ import {
   EditOutlined,
   DeleteOutlined
 } from '@ant-design/icons-vue'
+import { useToolingStore, type ToolingLibraryItem as ToolingRecord } from '@/stores/tooling'
 
 interface ToolingInspectionTemplate {
   id: string
@@ -431,24 +422,23 @@ interface ToolingInspectionTemplate {
 
 interface InspectionItem {
   itemId: string
-  itemName: string
-  checkMethod: string
+  standardNo: string
+  checkPart: string
+  checkContent: string
   checkStandard: string
-  isKey: boolean
-  remark: string
-}
-
-interface ToolingRecord {
-  toolingId: string
-  toolingModel: string
-  toolingName: string
-  toolingType: string
-  productionLine: string
-  status: 'enabled' | 'disabled'
+  checkMethod: string
 }
 
 const toolingTypeOptions = ['夹具', '模具', '检具', '刀具', '辅具', '其他']
 const checkMethodOptions = ['目视', '手感', '测量', '试装', '功能测试', '其他']
+
+const toolingStore = useToolingStore()
+const {
+  templates: dataList,
+  inspectionItemsMap,
+  toolingLibrary,
+  toolingAssocMap
+} = storeToRefs(toolingStore)
 
 const loading = ref(false)
 const selectedRowKeys = ref<string[]>([])
@@ -471,122 +461,6 @@ const columns = [
   { title: '操作', key: 'action', width: 160, fixed: 'right' as const }
 ]
 
-// 框架阶段：本地示例数据，后续可替换为接口
-const dataList = ref<ToolingInspectionTemplate[]>([
-  {
-    id: '1',
-    templateCode: 'TMP-JJ-001',
-    templateName: '造型夹具班前点检模板',
-    toolingType: '夹具',
-    productionLine: '造型一线',
-    relatedTooling: 'JJ-ZX-01 造型定位夹具',
-    itemCount: 3,
-    status: 'enabled',
-    remark: '',
-    createTime: '2026-01-05 09:00',
-    creator: 'admin'
-  },
-  {
-    id: '2',
-    templateCode: 'TMP-MJ-001',
-    templateName: '清理模具周点检模板',
-    toolingType: '模具',
-    productionLine: '清理线',
-    relatedTooling: 'MJ-QL-01 清理整形模',
-    itemCount: 2,
-    status: 'enabled',
-    remark: '',
-    createTime: '2026-01-08 14:30',
-    creator: 'admin'
-  },
-  {
-    id: '3',
-    templateCode: 'TMP-JJ-002',
-    templateName: '制芯夹具月点检模板',
-    toolingType: '夹具',
-    productionLine: '制芯线',
-    relatedTooling: 'JJ-ZX-02 制芯定位夹具',
-    itemCount: 0,
-    status: 'disabled',
-    remark: '停用，待修订',
-    createTime: '2026-01-12 10:15',
-    creator: 'admin'
-  }
-])
-
-// 点检项本地存储：templateId -> items
-const inspectionItemsMap = ref<Record<string, InspectionItem[]>>({
-  '1': [
-    {
-      itemId: '1-1',
-      itemName: '定位销磨损检查',
-      checkMethod: '测量',
-      checkStandard: '磨损量 ≤ 0.5mm，否则更换',
-      isKey: true,
-      remark: ''
-    },
-    {
-      itemId: '1-2',
-      itemName: '夹紧机构动作检查',
-      checkMethod: '功能测试',
-      checkStandard: '夹紧/松开动作顺畅，无卡滞',
-      isKey: true,
-      remark: ''
-    },
-    {
-      itemId: '1-3',
-      itemName: '夹具表面外观检查',
-      checkMethod: '目视',
-      checkStandard: '无裂纹、无严重碰伤、无残留砂料',
-      isKey: false,
-      remark: ''
-    }
-  ],
-  '2': [
-    {
-      itemId: '2-1',
-      itemName: '模具型腔裂纹检查',
-      checkMethod: '目视',
-      checkStandard: '型腔、分型面无裂纹',
-      isKey: true,
-      remark: ''
-    },
-    {
-      itemId: '2-2',
-      itemName: '顶出机构间隙检查',
-      checkMethod: '测量',
-      checkStandard: '顶杆间隙 ≤ 0.2mm',
-      isKey: false,
-      remark: ''
-    }
-  ],
-  '3': []
-})
-
-// ========== 工装台账与关联关系 ==========
-// 工装台账示例
-const toolingLibrary = ref<ToolingRecord[]>([
-  { toolingId: 'T001', toolingModel: 'JJ-ZX-01', toolingName: '造型定位夹具', toolingType: '夹具', productionLine: '造型一线', status: 'enabled' },
-  { toolingId: 'T002', toolingModel: 'JJ-ZX-02', toolingName: '造型侧压夹具', toolingType: '夹具', productionLine: '造型一线', status: 'enabled' },
-  { toolingId: 'T003', toolingModel: 'JJ-ZX-03', toolingName: '造型顶紧夹具', toolingType: '夹具', productionLine: '造型二线', status: 'enabled' },
-  { toolingId: 'T004', toolingModel: 'MJ-QL-01', toolingName: '清理整形模', toolingType: '模具', productionLine: '清理线', status: 'enabled' },
-  { toolingId: 'T005', toolingModel: 'MJ-QL-02', toolingName: '清理去毛刺模', toolingType: '模具', productionLine: '清理线', status: 'enabled' },
-  { toolingId: 'T006', toolingModel: 'MJ-ZX-01', toolingName: '制芯芯盒模具', toolingType: '模具', productionLine: '制芯线', status: 'enabled' },
-  { toolingId: 'T007', toolingModel: 'JJ-ZX-04', toolingName: '制芯定位夹具', toolingType: '夹具', productionLine: '制芯线', status: 'enabled' },
-  { toolingId: 'T008', toolingModel: 'JJ-ZX-05', toolingName: '制芯夹紧夹具', toolingType: '夹具', productionLine: '制芯线', status: 'enabled' },
-  { toolingId: 'T009', toolingModel: 'JJ-QT-01', toolingName: '通用定位检具', toolingType: '检具', productionLine: '质检站', status: 'enabled' },
-  { toolingId: 'T010', toolingModel: 'DJ-RZ-01', toolingName: '热处理装料辅具', toolingType: '辅具', productionLine: '热处理', status: 'enabled' },
-  { toolingId: 'T011', toolingModel: 'JJ-ZX-06', toolingName: '造型翻转夹具', toolingType: '夹具', productionLine: '造型二线', status: 'enabled' },
-  { toolingId: 'T012', toolingModel: 'MJ-QL-03', toolingName: '清理打磨模', toolingType: '模具', productionLine: '清理线', status: 'disabled' }
-])
-
-// 一对一关联：toolingId -> templateId（一件工装只能挂一个模板）
-const toolingAssocMap = ref<Record<string, string>>({
-  T001: '1',
-  T004: '2',
-  T007: '3'
-})
-
 const getAssocTemplateId = (toolingId: string): string | undefined =>
   toolingAssocMap.value[toolingId]
 
@@ -596,18 +470,9 @@ const getAssocTemplateName = (toolingId: string): string => {
   return dataList.value.find(t => t.id === tid)?.templateName || tid
 }
 
-/** 按关联关系刷新模板列表的「关联工装」展示文案 */
 const refreshTemplateRelatedTooling = () => {
-  dataList.value = dataList.value.map(t => {
-    const names = toolingLibrary.value
-      .filter(tg => toolingAssocMap.value[tg.toolingId] === t.id)
-      .map(tg => `${tg.toolingModel} ${tg.toolingName}`)
-    return { ...t, relatedTooling: names.join('，') }
-  })
+  toolingStore.refreshTemplateRelatedTooling()
 }
-
-// 初始化关联展示
-refreshTemplateRelatedTooling()
 
 const pagination = reactive({
   current: 1,
@@ -646,7 +511,6 @@ const defaultForm = () => ({
   templateCode: '',
   templateName: '',
   toolingType: undefined as string | undefined,
-  productionLine: '',
   statusChecked: true,
   remark: ''
 })
@@ -702,7 +566,6 @@ const handleEditRecord = (record: ToolingInspectionTemplate) => {
     templateCode: record.templateCode,
     templateName: record.templateName,
     toolingType: record.toolingType,
-    productionLine: record.productionLine,
     statusChecked: record.status === 'enabled',
     remark: record.remark
   })
@@ -721,11 +584,11 @@ const editingItems = ref<InspectionItem[]>([])
 
 const itemColumns = [
   { title: '序号', key: 'seq', width: 60 },
-  { title: '点检项名称', dataIndex: 'itemName', key: 'itemName', width: 180 },
-  { title: '点检方法', dataIndex: 'checkMethod', key: 'checkMethod', width: 100 },
-  { title: '判定标准', dataIndex: 'checkStandard', key: 'checkStandard', width: 240 },
-  { title: '是否关键项', key: 'isKey', width: 100 },
-  { title: '备注', dataIndex: 'remark', key: 'remark', width: 120 },
+  { title: '标准号', dataIndex: 'standardNo', key: 'standardNo', width: 130 },
+  { title: '点检部位', dataIndex: 'checkPart', key: 'checkPart', width: 140 },
+  { title: '点检内容', dataIndex: 'checkContent', key: 'checkContent', width: 180 },
+  { title: '点检标准', dataIndex: 'checkStandard', key: 'checkStandard', width: 240 },
+  { title: '点检方式', dataIndex: 'checkMethod', key: 'checkMethod', width: 110 },
   { title: '操作', key: 'action', width: 110, fixed: 'right' as const }
 ]
 
@@ -734,11 +597,11 @@ const itemFormSaving = ref(false)
 
 const defaultItemForm = () => ({
   itemId: '',
-  itemName: '',
-  checkMethod: undefined as string | undefined,
+  standardNo: '',
+  checkPart: '',
+  checkContent: '',
   checkStandard: '',
-  isKey: false,
-  remark: ''
+  checkMethod: undefined as string | undefined
 })
 
 const itemFormData = reactive(defaultItemForm())
@@ -765,11 +628,11 @@ const handleAddItem = () => {
 const handleEditItem = (record: InspectionItem) => {
   Object.assign(itemFormData, {
     itemId: record.itemId,
-    itemName: record.itemName,
-    checkMethod: record.checkMethod,
+    standardNo: record.standardNo,
+    checkPart: record.checkPart,
+    checkContent: record.checkContent,
     checkStandard: record.checkStandard,
-    isKey: record.isKey,
-    remark: record.remark
+    checkMethod: record.checkMethod
   })
   itemFormVisible.value = true
 }
@@ -779,8 +642,8 @@ const handleDeleteItem = (record: InspectionItem) => {
 }
 
 const handleSaveItemForm = () => {
-  if (!itemFormData.itemName || !itemFormData.checkMethod || !itemFormData.checkStandard) {
-    message.warning('请填写点检项名称、点检方法和判定标准')
+  if (!itemFormData.standardNo || !itemFormData.checkPart || !itemFormData.checkContent || !itemFormData.checkStandard || !itemFormData.checkMethod) {
+    message.warning('请填写标准号、点检部位、点检内容、点检标准和点检方式')
     return
   }
   itemFormSaving.value = true
@@ -790,11 +653,11 @@ const handleSaveItemForm = () => {
       if (idx >= 0) {
         editingItems.value[idx] = {
           itemId: itemFormData.itemId,
-          itemName: itemFormData.itemName,
-          checkMethod: itemFormData.checkMethod || '',
+          standardNo: itemFormData.standardNo,
+          checkPart: itemFormData.checkPart,
+          checkContent: itemFormData.checkContent,
           checkStandard: itemFormData.checkStandard,
-          isKey: itemFormData.isKey,
-          remark: itemFormData.remark
+          checkMethod: itemFormData.checkMethod || ''
         }
       }
       message.success('修改点检项成功')
@@ -802,11 +665,11 @@ const handleSaveItemForm = () => {
       const prefix = itemsTemplate.value?.id || 'new'
       editingItems.value.push({
         itemId: `${prefix}-${Date.now()}`,
-        itemName: itemFormData.itemName,
-        checkMethod: itemFormData.checkMethod || '',
+        standardNo: itemFormData.standardNo,
+        checkPart: itemFormData.checkPart,
+        checkContent: itemFormData.checkContent,
         checkStandard: itemFormData.checkStandard,
-        isKey: itemFormData.isKey,
-        remark: itemFormData.remark
+        checkMethod: itemFormData.checkMethod || ''
       })
       message.success('新增点检项成功')
     }
@@ -820,14 +683,7 @@ const handleSaveItems = () => {
   itemsSaving.value = true
   setTimeout(() => {
     const tid = itemsTemplate.value!.id
-    inspectionItemsMap.value[tid] = editingItems.value.map(i => ({ ...i }))
-    const idx = dataList.value.findIndex(r => r.id === tid)
-    if (idx >= 0) {
-      dataList.value[idx] = {
-        ...dataList.value[idx],
-        itemCount: editingItems.value.length
-      }
-    }
+    toolingStore.saveInspectionItems(tid, editingItems.value)
     itemsSaving.value = false
     message.success('点检项已保存')
     handleItemsModalClose()
@@ -935,18 +791,7 @@ const handleSaveRelate = () => {
   const templateId = relateTemplate.value.id
   relateSaving.value = true
   setTimeout(() => {
-    // 1) 先解除当前模板名下所有关联
-    Object.keys(toolingAssocMap.value).forEach(tid => {
-      if (toolingAssocMap.value[tid] === templateId) {
-        delete toolingAssocMap.value[tid]
-      }
-    })
-    // 2) 写入当前勾选（互斥已在 UI 层拦截）
-    relateSelectedKeys.value.forEach(tid => {
-      toolingAssocMap.value[tid] = templateId
-    })
-    // 3) 刷新模板列表展示
-    refreshTemplateRelatedTooling()
+    toolingStore.saveToolingRelation(templateId, [...relateSelectedKeys.value])
     relateSaving.value = false
     message.success(
       relateSelectedKeys.value.length
@@ -961,13 +806,7 @@ const handleDelete = () => {
   const ids = [...selectedRowKeys.value]
   dataList.value = dataList.value.filter(r => !ids.includes(r.id))
   ids.forEach(id => {
-    delete inspectionItemsMap.value[id]
-    // 解除该模板名下的工装关联
-    Object.keys(toolingAssocMap.value).forEach(tid => {
-      if (toolingAssocMap.value[tid] === id) {
-        delete toolingAssocMap.value[tid]
-      }
-    })
+    toolingStore.removeTemplateCascade(id)
   })
   selectedRowKeys.value = []
   message.success('删除成功')
@@ -989,7 +828,6 @@ const handleSave = () => {
           templateCode: formData.templateCode,
           templateName: formData.templateName,
           toolingType: formData.toolingType || '',
-          productionLine: formData.productionLine,
           status,
           remark: formData.remark
         }
@@ -1001,7 +839,7 @@ const handleSave = () => {
         templateCode: formData.templateCode,
         templateName: formData.templateName,
         toolingType: formData.toolingType || '',
-        productionLine: formData.productionLine,
+        productionLine: '',
         itemCount: 0,
         relatedTooling: '',
         status,
@@ -1011,7 +849,7 @@ const handleSave = () => {
       })
       // 新模板初始化空点检项列表
       const newId = dataList.value[0].id
-      inspectionItemsMap.value[newId] = []
+      toolingStore.saveInspectionItems(newId, [])
       message.success('新增成功')
       pagination.current = 1
     }
