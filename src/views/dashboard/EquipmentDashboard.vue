@@ -31,7 +31,7 @@
         <div class="chart-header">
           <span class="chart-title">备件库存金额</span>
           <select v-model="spareMode" class="series-select">
-            <option v-for="t in repairTrendTabs" :key="t.key" :value="t.key">{{ t.label }}</option>
+            <option v-for="t in repairCostTabs" :key="t.key" :value="t.key">{{ t.label }}</option>
           </select>
         </div>
         <div ref="spareChartRef" class="chart-body"></div>
@@ -564,12 +564,7 @@ const rateMode = ref('factory-year')
 const activeEquipmentType = ref('机器人')
 const brandMode = ref('type-brand')
 
-const repairTrendTabs = [
-  { key: 'factory-year', label: '分厂年度趋势' },
-  { key: 'factory-month', label: '分厂月度趋势' },
-  { key: 'line-month', label: '产线月度趋势' }
-]
-/** 吨均设备维修费用分析：选项文案不带“趋势” */
+/** 吨均设备维修费用分析 / 备件库存金额：选项文案不带“趋势” */
 const repairCostTabs = [
   { key: 'factory-year', label: '分厂年度' },
   { key: 'factory-month', label: '分厂月度' },

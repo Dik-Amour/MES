@@ -1093,6 +1093,9 @@ onMounted(async () => {
   renderAll()
   startTimers()
   window.addEventListener('resize', handleResize)
+  // 等高布局生效后再 resize，避免图表按固定高初始化
+  requestAnimationFrame(() => handleResize())
+  setTimeout(handleResize, 200)
 })
 
 watch([dangerMode], renderDanger)
@@ -1236,12 +1239,42 @@ onBeforeUnmount(() => {
   grid-template-columns: 28% 44% 28%;
   gap: 8px;
   min-width: 0;
+  /* 拉齐三列总高，便于行内模块等高 */
+  min-height: calc(100vh - 100px);
 }
 
 .col {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 0;
+}
+
+/* 列内模块等分高度：三行小模块一致，第三行不再偏矮 */
+.col > .chart-card {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.col > .chart-card .chart-body {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 120px;
+}
+
+.col > .chart-card .table-wrapper,
+.col > .chart-card .device-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* 中列：厂区图约两行高，实时报警与侧列第三行对齐等高 */
+.col > .plant-card {
+  flex: 2 1 0;
+  min-height: 0;
 }
 
 .chart-card {
@@ -1322,6 +1355,14 @@ onBeforeUnmount(() => {
 
 .chart-body {
   height: 185px;
+  flex-shrink: 0;
+}
+
+/* 列内拉伸时图表体跟随卡片增高（覆盖默认固定高） */
+.col > .chart-card .chart-body {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 120px;
 }
 
 /* 轮播卡片 */
@@ -1364,11 +1405,11 @@ onBeforeUnmount(() => {
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* 厂区图 */
+/* 厂区图：高度由 .col > .plant-card 的 flex 控制 */
 .plant-card {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .plant-header {
@@ -1382,7 +1423,7 @@ onBeforeUnmount(() => {
 .plant-viewport {
   position: relative;
   flex: 1;
-  min-height: 320px;
+  min-height: 240px;
   border: 1px solid #e0e0e0;
   background: #f5f5f5;
   overflow: hidden;

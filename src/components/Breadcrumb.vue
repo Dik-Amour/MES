@@ -121,8 +121,10 @@ const breadcrumbItems = computed<BreadcrumbItem[]>(() => {
     '/site': { title: '现场管理', path: '/site/safety-inspection', icon: CalendarOutlined },
     '/site/safety-inspection': { title: '安全巡检', path: '/site/safety-inspection', icon: CalendarOutlined },
     // 大屏指标数据管理路径
-    '/screen-data': { title: '大屏指标数据管理', path: '/screen-data/equipment', icon: InboxOutlined },
+    '/screen-data': { title: '大屏指标数据管理', path: '/screen-data/repair-cost', icon: InboxOutlined },
     '/screen-data/equipment': { title: '设备数据导入', path: '/screen-data/equipment', icon: InboxOutlined },
+    '/screen-data/repair-cost': { title: '吨均设备维修费用', path: '/screen-data/repair-cost', icon: InboxOutlined },
+    '/screen-data/spare-part': { title: '备件库存金额', path: '/screen-data/spare-part', icon: InboxOutlined },
     '/screen-data/cost': { title: '成本导入', path: '/screen-data/cost', icon: InboxOutlined },
     '/screen-data/external-scrap-report': { title: '外部废品率报表', path: '/screen-data/external-scrap-report', icon: InboxOutlined },
     // 工艺管理路径

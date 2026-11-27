@@ -317,6 +317,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, title: '设备数据导入' }
   },
   {
+    path: '/screen-data/repair-cost',
+    name: 'RepairCostDataImport',
+    component: () => import('@/views/screen-data/RepairCostDataImport.vue'),
+    meta: { requiresAuth: true, title: '吨均设备维修费用' }
+  },
+  {
+    path: '/screen-data/spare-part',
+    name: 'SparePartDataImport',
+    component: () => import('@/views/screen-data/SparePartDataImport.vue'),
+    meta: { requiresAuth: true, title: '备件库存金额' }
+  },
+  {
     path: '/screen-data/cost',
     name: 'CostDataImport',
     component: () => import('@/views/screen-data/CostDataImport.vue'),

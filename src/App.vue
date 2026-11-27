@@ -120,7 +120,8 @@
               <DatabaseOutlined />
             </template>
             <template #title>大屏指标数据管理</template>
-            <a-menu-item key="/screen-data/equipment">设备数据导入</a-menu-item>
+            <a-menu-item key="/screen-data/repair-cost">吨均设备维修费用</a-menu-item>
+            <a-menu-item key="/screen-data/spare-part">备件库存金额</a-menu-item>
             <a-menu-item key="/screen-data/cost">成本导入</a-menu-item>
             <a-menu-item key="/screen-data/external-scrap-report">外部废品率报表</a-menu-item>
           </a-sub-menu>
